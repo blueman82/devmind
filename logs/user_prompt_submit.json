@@ -246,5 +246,29 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "yes do that now, commit after every change update the plan too, if we need to rollback we can just traverse git history"
+  },
+  {
+    "session_id": "4100019a-b145-4197-bddb-f24b7617bff2",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/4100019a-b145-4197-bddb-f24b7617bff2.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "did you test mcp tool? Restart it and invoke it"
+  },
+  {
+    "session_id": "4100019a-b145-4197-bddb-f24b7617bff2",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/4100019a-b145-4197-bddb-f24b7617bff2.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "  \u23bf \u00a0Error: MCP tool \"get_conversation_context\" response (57024 tokens) exceeds maximum allowed tokens (25000). Please use\n     pagination, filtering, or limit parameters to reduce the response size.\n\ndidn't we work on resolving that or not yet? Answer only. "
+  },
+  {
+    "session_id": "4100019a-b145-4197-bddb-f24b7617bff2",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/4100019a-b145-4197-bddb-f24b7617bff2.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "fix it"
   }
 ]

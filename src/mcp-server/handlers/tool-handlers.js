@@ -172,15 +172,30 @@ export class ToolHandlers {
         context.file_references = Array.from(allFileRefs);
       }
 
-      // Show filtered messages
-      const messagesText = pageMessages.map((msg, index) => {
-        const globalIndex = (pagination.current_page - 1) * pagination.page_size + index + 1;
+      // Build response respecting token limits
+      let responseText = JSON.stringify(context, null, 2);
+      let currentTokens = MessageUtils.estimateTokens(responseText);
+      
+      // Add messages within token limit
+      const messageTexts = [];
+      for (let i = 0; i < pageMessages.length; i++) {
+        const msg = pageMessages[i];
+        const globalIndex = (pagination.current_page - 1) * pagination.page_size + i + 1;
         const role = msg.role || msg.type || 'unknown';
         const timestamp = new Date(msg.timestamp).toLocaleString();
         const textContent = MessageUtils.formatMessage(msg, summary_mode);
         
-        return `[${globalIndex}] ${role.toUpperCase()} (${timestamp}):\n${textContent}`;
-      }).join('\n\n---\n\n');
+        const messageText = `[${globalIndex}] ${role.toUpperCase()} (${timestamp}):\n${textContent}`;
+        const messageTokens = MessageUtils.estimateTokens(messageText);
+        
+        // Check if adding this message would exceed token limit
+        if (currentTokens + messageTokens + 500 > max_tokens) { // 500 buffer for formatting
+          break;
+        }
+        
+        messageTexts.push(messageText);
+        currentTokens += messageTokens;
+      }
 
       // Add filtering summary if filters were applied
       let filterSummary = '';
@@ -193,10 +208,21 @@ export class ToolHandlers {
         filterSummary = `\n\nFilters Applied: ${appliedFilters.join(', ')}\nOriginal message count: ${conversation.messageCount}, After filtering: ${filteredMessages.length}`;
       }
 
+      const finalResponse = responseText + '\n\nMessages:\n' + messageTexts.join('\n\n---\n\n') + filterSummary;
+      const finalTokens = MessageUtils.estimateTokens(finalResponse);
+      
+      // Add token usage info to context
+      context.token_usage = {
+        estimated_tokens: finalTokens,
+        max_tokens: max_tokens,
+        messages_shown: messageTexts.length,
+        messages_in_page: pageMessages.length
+      };
+
       return {
         content: [{
           type: 'text', 
-          text: JSON.stringify(context, null, 2) + '\n\nMessages:\n' + messagesText + filterSummary
+          text: JSON.stringify(context, null, 2) + '\n\nMessages:\n' + messageTexts.join('\n\n---\n\n') + filterSummary
         }]
       };
 
