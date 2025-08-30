@@ -314,7 +314,10 @@ class AIMemoryMCPServer extends Server {
 ## Key Features
 
 ### 1. Conversation Indexing & Memory
-- **Real-time monitoring** of `~/.claude/projects/` directory
+- **Real-time monitoring** of `~/.claude/projects/` directory using fs.watch()
+- **Immediate indexing** - conversations indexed within seconds of creation/modification
+- **SQLite FTS5 database** - professional full-text search with stemming and ranking
+- **Hybrid search strategy** - SQLite FTS5 for indexed data, JSONL fallback for recent conversations
 - **JSONL parsing** with message extraction and categorization
 - **Topic extraction** from conversation content
 - **File reference tracking** from tool calls
@@ -381,10 +384,13 @@ class AIMemoryMCPServer extends Server {
 ### MCP Server
 - **Runtime**: Node.js 18+ for compatibility
 - **Protocol**: MCP (Model Context Protocol) compliance
-- **Database**: SQLite connection from Node.js
+- **Database**: SQLite with better-sqlite3 npm package for FTS5 support
+- **Real-time indexing**: fs.watch() for immediate conversation indexing
+- **Hybrid search**: SQLite FTS5 primary + JSONL fallback for recent changes
+- **Database location**: ~/.claude/ai-memory/conversations.db
 - **Git operations**: Simple-git or NodeGit library
-- **Error handling**: Robust error handling for file system operations
-- **Performance**: Efficient querying with proper indexing
+- **Error handling**: Robust error handling for file system operations and corrupted JSONL files
+- **Performance**: Efficient querying with proper indexing and real-time updates
 
 ### Security & Privacy
 - **Local-only operation** - No network connections or data uploads
