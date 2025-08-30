@@ -126,10 +126,19 @@ class ConversationParser {
     return conversations;
   }
 
-  // Simple search across conversations
-  searchConversations(query, timeframe = null) {
+  // Enhanced search across conversations with fuzzy and OR logic
+  searchConversations(query, timeframe = null, options = {}) {
+    const {
+      fuzzyThreshold = 0.6,  // Lower = more tolerant (0.0-1.0)
+      searchMode = 'mixed',  // 'fuzzy', 'exact', 'mixed'
+      logic = 'OR'          // 'OR', 'AND'
+    } = options;
+    
     const files = this.findConversationFiles();
     const results = [];
+    
+    // Parse query into terms
+    const queryTerms = this.parseQuery(query);
     
     for (const file of files) {
       try {
@@ -141,19 +150,22 @@ class ConversationParser {
           if (new Date(conversation.startTime) < cutoff) continue;
         }
         
-        // Search in text content
-        const hasMatch = conversation.messages.some(msg => {
-          const textContent = msg.content?.text?.join(' ') || '';
-          return textContent.toLowerCase().includes(query.toLowerCase());
+        // Enhanced search with fuzzy and OR logic
+        const searchResult = this.searchInConversation(conversation, queryTerms, {
+          fuzzyThreshold,
+          searchMode,
+          logic
         });
         
-        if (hasMatch) {
+        if (searchResult.hasMatch) {
           results.push({
             sessionId: conversation.sessionId,
             projectPath: conversation.projectPath,
             startTime: conversation.startTime,
             messageCount: conversation.messageCount,
-            preview: this.getConversationPreview(conversation)
+            preview: this.getConversationPreview(conversation),
+            relevanceScore: searchResult.score,
+            matchedTerms: searchResult.matchedTerms
           });
         }
         
@@ -162,7 +174,139 @@ class ConversationParser {
       }
     }
     
-    return results;
+    // Sort by relevance score (higher = more relevant)
+    return results.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+  }
+
+  // Parse query string into individual terms
+  parseQuery(query) {
+    // Handle quoted phrases and individual terms
+    const terms = [];
+    const regex = /"([^"]+)"|(\S+)/g;
+    let match;
+    
+    while ((match = regex.exec(query)) !== null) {
+      if (match[1]) {
+        // Quoted phrase
+        terms.push({ text: match[1], isPhrase: true });
+      } else if (match[2]) {
+        // Individual term
+        terms.push({ text: match[2], isPhrase: false });
+      }
+    }
+    
+    return terms;
+  }
+
+  // Search within a single conversation
+  searchInConversation(conversation, queryTerms, options) {
+    const { fuzzyThreshold, searchMode, logic } = options;
+    let totalScore = 0;
+    let matchedTerms = [];
+    let termMatches = [];
+    
+    // Combine all text content for searching
+    const fullText = conversation.messages
+      .map(msg => msg.content?.text?.join(' ') || '')
+      .join(' ')
+      .toLowerCase();
+    
+    // Check each query term
+    for (const term of queryTerms) {
+      const termText = term.text.toLowerCase();
+      const termScore = this.scoreTerm(fullText, termText, searchMode, fuzzyThreshold);
+      
+      termMatches.push({
+        term: term.text,
+        score: termScore,
+        matched: termScore > 0
+      });
+      
+      if (termScore > 0) {
+        totalScore += termScore;
+        matchedTerms.push(term.text);
+      }
+    }
+    
+    // Apply logic (OR vs AND)
+    const hasMatch = logic === 'OR' 
+      ? matchedTerms.length > 0  // At least one term matched
+      : matchedTerms.length === queryTerms.length;  // All terms matched
+    
+    return {
+      hasMatch,
+      score: totalScore / queryTerms.length, // Average score
+      matchedTerms,
+      termMatches
+    };
+  }
+
+  // Score a single term against text content
+  scoreTerm(text, term, searchMode, fuzzyThreshold) {
+    if (searchMode === 'exact') {
+      return text.includes(term) ? 1.0 : 0.0;
+    }
+    
+    if (searchMode === 'fuzzy') {
+      return this.fuzzyScore(text, term, fuzzyThreshold);
+    }
+    
+    // Mixed mode: try exact first, then fuzzy
+    if (text.includes(term)) {
+      return 1.0; // Perfect match
+    }
+    
+    return this.fuzzyScore(text, term, fuzzyThreshold);
+  }
+
+  // Simple fuzzy matching score using Levenshtein-like approach
+  fuzzyScore(text, term, threshold) {
+    // For efficiency, only check fuzzy on words near the term length
+    const words = text.split(/\s+/);
+    let bestScore = 0;
+    
+    for (const word of words) {
+      if (Math.abs(word.length - term.length) > term.length * 0.5) {
+        continue; // Skip words that are too different in length
+      }
+      
+      const similarity = this.stringSimilarity(word, term);
+      if (similarity > threshold) {
+        bestScore = Math.max(bestScore, similarity);
+      }
+    }
+    
+    return bestScore;
+  }
+
+  // Calculate string similarity (0.0 to 1.0)
+  stringSimilarity(str1, str2) {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    
+    if (len1 === 0) return len2 === 0 ? 1.0 : 0.0;
+    if (len2 === 0) return 0.0;
+    
+    // Use a simplified edit distance approach
+    const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
+    
+    for (let i = 0; i <= len1; i++) matrix[i][0] = i;
+    for (let j = 0; j <= len2; j++) matrix[0][j] = j;
+    
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,      // deletion
+          matrix[i][j - 1] + 1,      // insertion
+          matrix[i - 1][j - 1] + cost // substitution
+        );
+      }
+    }
+    
+    const maxLen = Math.max(len1, len2);
+    const editDistance = matrix[len1][len2];
+    return (maxLen - editDistance) / maxLen;
   }
 
   // Get conversation preview (first user message)

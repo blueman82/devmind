@@ -43,13 +43,13 @@ class AIMemoryMCPServer {
         tools: [
           {
             name: 'search_conversations',
-            description: 'Search across all Claude Code conversations using keywords or natural language',
+            description: 'Search across all Claude Code conversations using keywords or natural language with fuzzy matching and flexible logic',
             inputSchema: {
               type: 'object',
               properties: {
                 query: {
                   type: 'string',
-                  description: 'Search query - keywords or natural language'
+                  description: 'Search query - keywords or natural language. Use quotes for exact phrases.'
                 },
                 timeframe: {
                   type: 'string',
@@ -59,6 +59,25 @@ class AIMemoryMCPServer {
                   type: 'number',
                   description: 'Maximum number of results to return (default: 10)',
                   default: 10
+                },
+                search_mode: {
+                  type: 'string',
+                  enum: ['fuzzy', 'exact', 'mixed'],
+                  description: 'Search matching strategy: fuzzy (tolerant), exact (strict), mixed (exact + fuzzy fallback)',
+                  default: 'mixed'
+                },
+                fuzzy_threshold: {
+                  type: 'number',
+                  minimum: 0.0,
+                  maximum: 1.0,
+                  description: 'Fuzzy matching tolerance (0.0=very tolerant, 1.0=exact only, default: 0.6)',
+                  default: 0.6
+                },
+                logic: {
+                  type: 'string',
+                  enum: ['OR', 'AND'],
+                  description: 'Term combination logic: OR (any term matches), AND (all terms must match)',
+                  default: 'OR'
                 }
               },
               required: ['query']
@@ -163,10 +182,24 @@ class AIMemoryMCPServer {
   }
 
   async handleSearchConversations(args) {
-    const { query, timeframe, limit = 10 } = args;
+    const { 
+      query, 
+      timeframe, 
+      limit = 10,
+      search_mode = 'mixed',
+      fuzzy_threshold = 0.6,
+      logic = 'OR'
+    } = args;
     
     try {
-      const results = this.parser.searchConversations(query, timeframe);
+      // Enhanced search with new options
+      const searchOptions = {
+        searchMode: search_mode,
+        fuzzyThreshold: fuzzy_threshold,
+        logic: logic
+      };
+      
+      const results = this.parser.searchConversations(query, timeframe, searchOptions);
       const limitedResults = results.slice(0, limit);
       
       const formattedResults = limitedResults.map(result => ({
@@ -175,7 +208,9 @@ class AIMemoryMCPServer {
         projectPath: result.projectPath,
         startTime: result.startTime,
         messageCount: result.messageCount,
-        preview: result.preview
+        preview: result.preview,
+        relevanceScore: result.relevanceScore,
+        matchedTerms: result.matchedTerms
       }));
 
       return {
