@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 import { join, extname, basename } from 'path';
 import { homedir } from 'os';
 import DatabaseManager from '../database/database-manager.js';
-import { ConversationParser } from '../parser/conversation-parser.js';
+import ConversationParser from '../parser/conversation-parser.js';
 
 /**
  * FileWatcher - Real-time monitoring of Claude projects directory
