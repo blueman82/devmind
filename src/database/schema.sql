@@ -17,12 +17,14 @@ CREATE TABLE IF NOT EXISTS conversations (
     file_references TEXT, -- JSON array of file paths referenced
     topics TEXT, -- JSON array of extracted topics
     keywords TEXT, -- JSON array of keywords for search
-    total_tokens INTEGER DEFAULT 0,
-    INDEX(session_id),
-    INDEX(project_path),
-    INDEX(created_at),
-    INDEX(updated_at)
+    total_tokens INTEGER DEFAULT 0
 );
+
+-- Indexes for conversations table
+CREATE INDEX IF NOT EXISTS idx_conversations_session_id ON conversations(session_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_project_path ON conversations(project_path);
+CREATE INDEX IF NOT EXISTS idx_conversations_created_at ON conversations(created_at);
+CREATE INDEX IF NOT EXISTS idx_conversations_updated_at ON conversations(updated_at);
 
 -- Individual messages within conversations
 CREATE TABLE IF NOT EXISTS messages (
@@ -38,12 +40,14 @@ CREATE TABLE IF NOT EXISTS messages (
     tool_calls TEXT, -- JSON array of tool calls if applicable
     file_references TEXT, -- JSON array of files mentioned in this message
     tokens INTEGER DEFAULT 0,
-    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
-    INDEX(conversation_id),
-    INDEX(role),
-    INDEX(timestamp),
-    INDEX(content_type)
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
+
+-- Indexes for messages table
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_role ON messages(role);
+CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
+CREATE INDEX IF NOT EXISTS idx_messages_content_type ON messages(content_type);
 
 -- FTS5 virtual table for full-text search across message content
 CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(

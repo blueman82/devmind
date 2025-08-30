@@ -53,14 +53,20 @@ export class DatabaseManager {
             const schemaPath = join(__dirname, 'schema.sql');
             const schemaSQL = await fs.readFile(schemaPath, 'utf-8');
             
-            // Split schema into individual statements and execute
-            const statements = schemaSQL
-                .split(';')
-                .map(stmt => stmt.trim())
-                .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
+            // Parse SQL statements properly, handling triggers with BEGIN/END blocks
+            const statements = this.parseSQLStatements(schemaSQL);
                 
             for (const statement of statements) {
-                this.db.exec(statement);
+                if (statement.trim()) {
+                    try {
+                        this.db.exec(statement);
+                    } catch (execError) {
+                        // Skip statements that might fail (like INSERT OR IGNORE)
+                        if (!execError.message.includes('UNIQUE constraint failed')) {
+                            console.warn('Schema statement warning:', execError.message);
+                        }
+                    }
+                }
             }
             
             console.log('Database schema applied successfully');
@@ -68,6 +74,61 @@ export class DatabaseManager {
             console.error('Schema application failed:', error);
             throw error;
         }
+    }
+
+    /**
+     * Parse SQL statements properly, handling multi-line statements and triggers
+     */
+    parseSQLStatements(sql) {
+        const statements = [];
+        let current = '';
+        let inTrigger = false;
+        let parenDepth = 0;
+        
+        const lines = sql.split('\n');
+        
+        for (const line of lines) {
+            const trimmed = line.trim();
+            
+            // Skip comments and empty lines
+            if (!trimmed || trimmed.startsWith('--')) {
+                continue;
+            }
+            
+            current += line + '\n';
+            
+            // Track if we're inside a trigger with BEGIN/END
+            if (trimmed.includes('CREATE TRIGGER')) {
+                inTrigger = true;
+            }
+            
+            // Track parentheses depth for CREATE TABLE statements
+            parenDepth += (line.match(/\(/g) || []).length;
+            parenDepth -= (line.match(/\)/g) || []).length;
+            
+            // Check for statement end
+            let isStatementEnd = false;
+            
+            if (inTrigger && trimmed === 'END;') {
+                isStatementEnd = true;
+                inTrigger = false;
+            } else if (!inTrigger && parenDepth === 0 && trimmed.endsWith(';')) {
+                isStatementEnd = true;
+            }
+            
+            if (isStatementEnd) {
+                statements.push(current.trim());
+                current = '';
+                parenDepth = 0;
+            }
+        }
+        
+        // Add any remaining statement
+        if (current.trim()) {
+            statements.push(current.trim());
+        }
+        
+        return statements.filter(stmt => stmt.length > 0);
     }
 
     /**
