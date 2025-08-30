@@ -189,9 +189,43 @@ immediate_todos:
   - "✅ Organize work into proper src/ folder structure"
   - "✅ Complete MCP server tool implementations with enhanced features"
   - "✅ Test MCP integration with Claude Code"
-  - "Phase 2: Consider SQLite FTS5 implementation for advanced search"
-  - "Phase 2: Git integration for commit tracking and disaster recovery"
-  - "Phase 2: Swift macOS app (optional given MCP success)"
+
+## Phase 7: SQLite FTS5 Refactor (Planned)
+sqlite_implementation:
+  status: "PLANNED"
+  motivation: "Replace custom Levenshtein fuzzy search with professional FTS5 full-text search as originally specified in PRD"
+  prd_requirements:
+    database_schema:
+      - "SQLite with FTS5 extension for full-text search"
+      - "Virtual table: conversation_search USING fts5(content, topics, keywords, file_references)"
+      - "Proper indexing for fast search across large conversation datasets"
+    search_capabilities:
+      - "Full-text search with ranking and relevance scoring"
+      - "Boolean operators (AND, OR, NOT) with proper query parsing"
+      - "Phrase matching with quotes support"
+      - "Term proximity and highlighting"
+      - "Fuzzy matching through FTS5's built-in capabilities"
+  technical_advantages:
+    - "Professional search engine vs custom algorithm"
+    - "Better performance on large datasets (>10k conversations)"
+    - "Advanced query syntax support"
+    - "Proper ranking and relevance scoring"
+    - "Built-in stemming and tokenization"
+  implementation_tasks:
+    - "Add sqlite3 dependency with FTS5 support"
+    - "Create SQLite database schema from PRD"
+    - "Implement conversation indexing pipeline"
+    - "Migrate current JSONL parser to SQLite writer"
+    - "Replace search logic in MCP server with FTS5 queries"
+    - "Add proper database connection management"
+    - "Implement incremental indexing for new conversations"
+
+## Future Phases
+phase_2_roadmap:
+  - "Git integration for commit tracking and disaster recovery"
+  - "Swift macOS app with menu bar interface (optional given MCP success)"
+  - "Real-time file system monitoring for automatic indexing"
+  - "Cross-project solution discovery and recommendations"
 
 ## Technical Discoveries
 discoveries:
