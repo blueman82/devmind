@@ -1,0 +1,17 @@
+{
+  "name": "ai-memory-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for AI Memory App - provides conversation history and git restore functionality",
+  "main": "mcp-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node mcp-server.js",
+    "test": "node conversation-parser.js projects"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "keywords": ["mcp", "claude", "conversation", "git", "memory"],
+  "author": "AI Memory App",
+  "license": "MIT"
+}

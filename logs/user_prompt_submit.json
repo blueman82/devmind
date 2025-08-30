@@ -1,0 +1,42 @@
+[
+  {
+    "session_id": "df9c715e-dbc2-4a50-9bf7-2d449b84fc64",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/df9c715e-dbc2-4a50-9bf7-2d449b84fc64.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "draw up some mock designs for the app, concise, clean, beautiful, minimalist"
+  },
+  {
+    "session_id": "df9c715e-dbc2-4a50-9bf7-2d449b84fc64",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/df9c715e-dbc2-4a50-9bf7-2d449b84fc64.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I like it! for a first draft! copy it to pwd"
+  },
+  {
+    "session_id": "df9c715e-dbc2-4a50-9bf7-2d449b84fc64",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/df9c715e-dbc2-4a50-9bf7-2d449b84fc64.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "think, whats the most logical next step?"
+  },
+  {
+    "session_id": "df9c715e-dbc2-4a50-9bf7-2d449b84fc64",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/df9c715e-dbc2-4a50-9bf7-2d449b84fc64.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "yes that only."
+  },
+  {
+    "session_id": "df9c715e-dbc2-4a50-9bf7-2d449b84fc64",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/df9c715e-dbc2-4a50-9bf7-2d449b84fc64.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "yes a simple parser, not over-engineered, simple"
+  }
+]

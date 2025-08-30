@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Memory App - UI Mockups</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .mockup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .mockup {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .mockup:hover {
+            transform: translateY(-8px);
+        }
+        
+        .mockup-header {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .mockup-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+        
+        .mockup-subtitle {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .mockup-content {
+            padding: 0;
+        }
+        
+        /* Menu Bar Design */
+        .menubar {
+            background: #1e1e1e;
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin: 1.5rem;
+        }
+        
+        .menubar-item {
+            background: #2d2d2d;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            color: #e1e5e9;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: background 0.2s;
+        }
+        
+        .menubar-item:hover {
+            background: #3d3d3d;
+        }
+        
+        .menubar-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .icon {
+            width: 16px;
+            height: 16px;
+            background: #007acc;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+        
+        /* Main Window Design */
+        .main-window {
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .toolbar {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .search-box {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            background: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box:focus {
+            border-color: #007acc;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 200px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 1rem;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-item {
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #495057;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .sidebar-item:hover {
+            background: #e9ecef;
+        }
+        
+        .sidebar-item.active {
+            background: #007acc;
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .conversation-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .conversation-card:hover {
+            border-color: #007acc;
+        }
+        
+        .conversation-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .conversation-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+        
+        .conversation-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .conversation-project {
+            font-size: 0.75rem;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+        
+        .conversation-preview {
+            font-size: 0.85rem;
+            color: #495057;
+            line-height: 1.4;
+        }
+        
+        /* Restore Interface */
+        .restore-window {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .restore-header {
+            padding: 1.5rem;
+            background: #fff3cd;
+            border-bottom: 1px solid #ffeaa7;
+            text-align: center;
+        }
+        
+        .warning-icon {
+            width: 40px;
+            height: 40px;
+            background: #f39c12;
+            border-radius: 50%;
+            margin: 0 auto 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+        
+        .restore-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 0.25rem;
+        }
+        
+        .restore-subtitle {
+            font-size: 0.9rem;
+            color: #856404;
+        }
+        
+        .restore-list {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .restore-point {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .restore-point:hover {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .restore-point.selected {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .commit-icon {
+            width: 32px;
+            height: 32px;
+            background: #28a745;
+            border-radius: 6px;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .restore-info {
+            flex: 1;
+        }
+        
+        .restore-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+        
+        .restore-details {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .restore-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-left: 1rem;
+        }
+        
+        /* Settings Panel */
+        .settings-window {
+            height: 450px;
+            display: flex;
+        }
+        
+        .settings-sidebar {
+            width: 180px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 1rem 0;
+        }
+        
+        .settings-nav-item {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .settings-nav-item:hover {
+            background: #e9ecef;
+        }
+        
+        .settings-nav-item.active {
+            background: #007acc;
+            color: white;
+        }
+        
+        .settings-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .setting-group {
+            margin-bottom: 2rem;
+        }
+        
+        .setting-group-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            font-size: 0.9rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        .setting-description {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .toggle {
+            width: 44px;
+            height: 24px;
+            background: #ced4da;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .toggle.active {
+            background: #007acc;
+        }
+        
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+        
+        .toggle.active::after {
+            transform: translateX(20px);
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .footer-note p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-note .highlight {
+            color: #ffd700;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Memory App - UI Mockups</h1>
+        
+        <div class="mockup-grid">
+            <!-- Menu Bar Interface -->
+            <div class="mockup">
+                <div class="mockup-header">
+                    <div class="mockup-title">Menu Bar Interface</div>
+                    <div class="mockup-subtitle">Always-accessible dropdown from menu bar</div>
+                </div>
+                <div class="mockup-content">
+                    <div class="menubar">
+                        <div class="menubar-item">
+                            <div class="icon">🧠</div>
+                            <span>AI Memory</span>
+                            <div class="status-dot"></div>
+                        </div>
+                        <div class="menubar-item">
+                            <div class="icon">🔍</div>
+                            <span>Search Conversations</span>
+                        </div>
+                        <div class="menubar-item">
+                            <div class="icon">💾</div>
+                            <span>Recent Restore Points</span>
+                        </div>
+                        <div class="menubar-item">
+                            <div class="icon">📊</div>
+                            <span>Project Insights</span>
+                        </div>
+                        <div class="menubar-item">
+                            <div class="icon">⚙️</div>
+                            <span>Settings</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Window -->
+            <div class="mockup">
+                <div class="mockup-header">
+                    <div class="mockup-title">Main Window</div>
+                    <div class="mockup-subtitle">Conversation browser and search interface</div>
+                </div>
+                <div class="mockup-content">
+                    <div class="main-window">
+                        <div class="toolbar">
+                            <input type="text" class="search-box" placeholder="Search conversations, projects, or topics..." />
+                            <button class="filter-btn">Filters</button>
+                        </div>
+                        <div class="content-area">
+                            <div class="sidebar">
+                                <div class="sidebar-section">
+                                    <div class="sidebar-title">Projects</div>
+                                    <div class="sidebar-item active">my-webapp</div>
+                                    <div class="sidebar-item">api-server</div>
+                                    <div class="sidebar-item">mobile-app</div>
+                                </div>
+                                <div class="sidebar-section">
+                                    <div class="sidebar-title">Timeframe</div>
+                                    <div class="sidebar-item">Today</div>
+                                    <div class="sidebar-item">This Week</div>
+                                    <div class="sidebar-item">This Month</div>
+                                </div>
+                            </div>
+                            <div class="main-content">
+                                <div class="conversation-card">
+                                    <div class="conversation-meta">
+                                        <div class="conversation-title">Authentication Refactor Discussion</div>
+                                        <div class="conversation-time">2 hours ago</div>
+                                        <div class="conversation-project">my-webapp</div>
+                                    </div>
+                                    <div class="conversation-preview">
+                                        Discussed implementing OAuth2 with refresh tokens, reviewed current auth flow issues, and planned migration strategy...
+                                    </div>
+                                </div>
+                                <div class="conversation-card">
+                                    <div class="conversation-meta">
+                                        <div class="conversation-title">Bug Fix: Login Component</div>
+                                        <div class="conversation-time">Yesterday</div>
+                                        <div class="conversation-project">my-webapp</div>
+                                    </div>
+                                    <div class="conversation-preview">
+                                        Fixed null pointer exception in login validation, added error handling for edge cases, updated tests...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Restore Points Interface -->
+            <div class="mockup">
+                <div class="mockup-header">
+                    <div class="mockup-title">Restore Points</div>
+                    <div class="mockup-subtitle">Safe project state restoration</div>
+                </div>
+                <div class="mockup-content">
+                    <div class="restore-window">
+                        <div class="restore-header">
+                            <div class="warning-icon">⚡</div>
+                            <div class="restore-title">Choose Restore Point</div>
+                            <div class="restore-subtitle">Select a working state to restore your project</div>
+                        </div>
+                        <div class="restore-list">
+                            <div class="restore-point selected">
+                                <div class="commit-icon">✓</div>
+                                <div class="restore-info">
+                                    <div class="restore-label">Authentication Working</div>
+                                    <div class="restore-details">All tests passing • 3 files changed</div>
+                                </div>
+                                <div class="restore-time">2 hours ago</div>
+                            </div>
+                            <div class="restore-point">
+                                <div class="commit-icon">🔧</div>
+                                <div class="restore-info">
+                                    <div class="restore-label">Before OAuth Refactor</div>
+                                    <div class="restore-details">Manual backup • Clean working state</div>
+                                </div>
+                                <div class="restore-time">Yesterday</div>
+                            </div>
+                            <div class="restore-point">
+                                <div class="commit-icon">📝</div>
+                                <div class="restore-info">
+                                    <div class="restore-label">Login Component Complete</div>
+                                    <div class="restore-details">Feature branch merge • 12 files changed</div>
+                                </div>
+                                <div class="restore-time">3 days ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Panel -->
+            <div class="mockup">
+                <div class="mockup-header">
+                    <div class="mockup-title">Settings Panel</div>
+                    <div class="mockup-subtitle">App configuration and preferences</div>
+                </div>
+                <div class="mockup-content">
+                    <div class="settings-window">
+                        <div class="settings-sidebar">
+                            <div class="settings-nav-item active">General</div>
+                            <div class="settings-nav-item">Indexing</div>
+                            <div class="settings-nav-item">Git</div>
+                            <div class="settings-nav-item">Privacy</div>
+                            <div class="settings-nav-item">Advanced</div>
+                        </div>
+                        <div class="settings-content">
+                            <div class="setting-group">
+                                <div class="setting-group-title">Monitoring</div>
+                                <div class="setting-item">
+                                    <div>
+                                        <div class="setting-label">Auto-start with macOS</div>
+                                        <div class="setting-description">Start AI Memory when you log in</div>
+                                    </div>
+                                    <div class="toggle active"></div>
+                                </div>
+                                <div class="setting-item">
+                                    <div>
+                                        <div class="setting-label">Real-time indexing</div>
+                                        <div class="setting-description">Index conversations as they happen</div>
+                                    </div>
+                                    <div class="toggle active"></div>
+                                </div>
+                            </div>
+                            <div class="setting-group">
+                                <div class="setting-group-title">Restore Points</div>
+                                <div class="setting-item">
+                                    <div>
+                                        <div class="setting-label">Auto-create restore points</div>
+                                        <div class="setting-description">When tests pass or builds succeed</div>
+                                    </div>
+                                    <div class="toggle active"></div>
+                                </div>
+                                <div class="setting-item">
+                                    <div>
+                                        <div class="setting-label">Backup before restore</div>
+                                        <div class="setting-description">Always create backup branch</div>
+                                    </div>
+                                    <div class="toggle active"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-note">
+            <p><span class="highlight">Minimalist Design Philosophy:</span></p>
+            <p>Clean interfaces that stay out of your way while providing powerful functionality</p>
+            <p>Native macOS design patterns with modern touches and intuitive workflows</p>
+        </div>
+    </div>
+</body>
+</html>
