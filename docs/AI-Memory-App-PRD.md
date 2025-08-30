@@ -198,6 +198,9 @@ interface SearchConversationsArgs {
     timeframe?: string;
     content_types?: ('text' | 'tool_calls' | 'code' | 'errors')[];
     limit?: number;
+    search_mode?: 'fuzzy' | 'exact' | 'mixed'; // search matching strategy
+    fuzzy_threshold?: number; // 0.0-1.0, lower = more tolerant (default: 0.6)
+    logic?: 'OR' | 'AND'; // term combination logic (default: 'OR')
 }
 
 // Resume previous conversation
@@ -317,6 +320,9 @@ class AIMemoryMCPServer extends Server {
 - **File reference tracking** from tool calls
 - **Keyword indexing** for fast search
 - **Full-text search** across all conversations
+- **Fuzzy search tolerance** for typos and variations (configurable threshold)
+- **OR logic search** - finds conversations with ANY matching terms, not ALL
+- **Flexible query parsing** - supports natural language and mixed keyword/fuzzy queries
 
 ### 2. Git Integration & Restore
 - **Repository discovery** from conversation project paths
