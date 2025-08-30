@@ -214,8 +214,12 @@ code_refactoring:
       - "Can traverse git history for any rollback needs"
   testing_results:
     - "✅ Server starts successfully without errors"
-    - "✅ Maintains identical functionality"
+    - "✅ Maintains identical functionality"  
     - "✅ Module imports working correctly"
+    - "✅ All 4 MCP tools functional (search, context, list, similar)"
+    - "❌ Pagination bug found: get_conversation_context ignoring max_tokens"
+    - "✅ Pagination bug fixed: added token-aware response building"
+    - "⚠️ Fix requires MCP server restart to take effect"
 
 ## Phase 7: SQLite FTS5 Refactor (Planned)
 sqlite_implementation:
