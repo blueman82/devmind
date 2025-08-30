@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 // Simple JSONL conversation parser
 class ConversationParser {
@@ -225,7 +225,7 @@ class ConversationParser {
 }
 
 // CLI interface for testing
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const parser = new ConversationParser();
   const command = process.argv[2];
   
@@ -293,4 +293,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = ConversationParser;
+export default ConversationParser;

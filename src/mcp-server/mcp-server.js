@@ -8,7 +8,7 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import ConversationParser from './conversation-parser.js';
+import ConversationParser from '../parser/conversation-parser.js';
 
 class AIMemoryMCPServer {
   constructor() {
