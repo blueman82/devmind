@@ -158,5 +158,45 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "lets start with the Fuzzy search tolerance & OR logic, update the PRD update our progress work, make sure as well we have our safety branch and then a new branch to work on these changes. I can see it in the immediate_todos in the progress doc"
+  },
+  {
+    "session_id": "fb61893b-a25f-4de0-9cb5-6fce0320d344",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/fb61893b-a25f-4de0-9cb5-6fce0320d344.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "use thk"
+  },
+  {
+    "session_id": "4100019a-b145-4197-bddb-f24b7617bff2",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/4100019a-b145-4197-bddb-f24b7617bff2.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "what can you tell me about the langchain/langgraph implementation attempted implementaiton in Ketchup? What was it going to do?"
+  },
+  {
+    "session_id": "4100019a-b145-4197-bddb-f24b7617bff2",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/4100019a-b145-4197-bddb-f24b7617bff2.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "there were several refactoring work that happened, in the end it was abandoneed. Why though?"
+  },
+  {
+    "session_id": "4100019a-b145-4197-bddb-f24b7617bff2",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/4100019a-b145-4197-bddb-f24b7617bff2.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "how could we smartly introduce to larger conversastions\n```ai-memory - get_conversation_context (MCP)(session_id: \"eeaa1a0a-1d47-44d0-b3b6-e15a94786c8a\", include_project_files: true)\n  \u23bf \u00a0Error: MCP tool \"get_conversation_context\" response (57024 tokens) exceeds maximum allowed tokens (25000). Please use\n     pagination, filtering, or limit parameters to reduce the response size.```\n\npagination, filtering, limiting? I think we do limiting already but not sure on filtering and pagination."
+  },
+  {
+    "session_id": "4100019a-b145-4197-bddb-f24b7617bff2",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/4100019a-b145-4197-bddb-f24b7617bff2.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "yes"
   }
 ]

@@ -85,7 +85,7 @@ class AIMemoryMCPServer {
           },
           {
             name: 'get_conversation_context',
-            description: 'Retrieve full context from a specific conversation including messages and project info',
+            description: 'Retrieve context from a specific conversation with smart pagination, filtering, and limiting for large conversations',
             inputSchema: {
               type: 'object',
               properties: {
@@ -97,6 +97,53 @@ class AIMemoryMCPServer {
                   type: 'boolean',
                   description: 'Include file references from the conversation',
                   default: true
+                },
+                page: {
+                  type: 'number',
+                  description: 'Page number for pagination (default: 1)',
+                  default: 1,
+                  minimum: 1
+                },
+                page_size: {
+                  type: 'number',
+                  description: 'Number of messages per page (default: 50)',
+                  default: 50,
+                  minimum: 1,
+                  maximum: 200
+                },
+                content_types: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: ['user', 'assistant', 'tool_calls', 'tool_results']
+                  },
+                  description: 'Filter by message types (default: all types)'
+                },
+                summary_mode: {
+                  type: 'string',
+                  enum: ['full', 'condensed', 'key_points_only'],
+                  description: 'Level of detail in message content (default: full)',
+                  default: 'full'
+                },
+                max_tokens: {
+                  type: 'number',
+                  description: 'Maximum tokens to return (default: 20000)',
+                  default: 20000,
+                  minimum: 1000,
+                  maximum: 25000
+                },
+                exclude_long_messages: {
+                  type: 'boolean',
+                  description: 'Skip messages longer than 1000 characters',
+                  default: false
+                },
+                priority_messages: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: ['first', 'last', 'errors', 'important']
+                  },
+                  description: 'Include priority message types even when filtering'
                 }
               },
               required: ['session_id']
@@ -239,8 +286,164 @@ class AIMemoryMCPServer {
     }
   }
 
+  // Token estimation utility
+  estimateTokens(text) {
+    if (!text) return 0;
+    // Rough approximation: 1 token ≈ 4 characters
+    return Math.ceil(text.length / 4);
+  }
+
+  // Filter messages based on criteria
+  filterMessages(messages, options = {}) {
+    let filtered = [...messages];
+    const {
+      content_types = [],
+      exclude_long_messages = false,
+      priority_messages = []
+    } = options;
+
+    // Filter by content types
+    if (content_types.length > 0) {
+      filtered = filtered.filter(msg => {
+        if (!msg.role) return false;
+        
+        if (content_types.includes('user') && msg.role === 'user') return true;
+        if (content_types.includes('assistant') && msg.role === 'assistant') return true;
+        if (content_types.includes('tool_calls') && msg.role === 'assistant' && msg.content?.toolCalls) return true;
+        if (content_types.includes('tool_results') && msg.role === 'tool') return true;
+        
+        return false;
+      });
+    }
+
+    // Exclude long messages
+    if (exclude_long_messages) {
+      filtered = filtered.filter(msg => {
+        const text = this.getMessageText(msg);
+        return text.length <= 1000;
+      });
+    }
+
+    // Add priority messages back if they were filtered out
+    if (priority_messages.length > 0) {
+      const priorityMsgs = [];
+      
+      if (priority_messages.includes('first') && messages.length > 0) {
+        priorityMsgs.push(messages[0]);
+      }
+      if (priority_messages.includes('last') && messages.length > 0) {
+        priorityMsgs.push(messages[messages.length - 1]);
+      }
+      if (priority_messages.includes('errors')) {
+        const errorMsgs = messages.filter(msg => 
+          this.getMessageText(msg).toLowerCase().includes('error') ||
+          this.getMessageText(msg).toLowerCase().includes('failed') ||
+          this.getMessageText(msg).toLowerCase().includes('exception')
+        );
+        priorityMsgs.push(...errorMsgs);
+      }
+      if (priority_messages.includes('important')) {
+        const importantMsgs = messages.filter(msg => 
+          this.getMessageText(msg).toLowerCase().includes('important') ||
+          this.getMessageText(msg).toLowerCase().includes('critical') ||
+          this.getMessageText(msg).toLowerCase().includes('warning')
+        );
+        priorityMsgs.push(...importantMsgs);
+      }
+
+      // Merge priority messages with filtered results (remove duplicates)
+      const priorityIds = new Set(priorityMsgs.map((msg, i) => messages.indexOf(msg)));
+      const filteredIds = new Set(filtered.map(msg => messages.indexOf(msg)));
+      const combinedIds = new Set([...priorityIds, ...filteredIds]);
+      
+      filtered = Array.from(combinedIds)
+        .sort((a, b) => a - b)
+        .map(i => messages[i]);
+    }
+
+    return filtered;
+  }
+
+  // Get text content from message
+  getMessageText(msg) {
+    if (!msg.content) return '';
+    if (typeof msg.content === 'string') return msg.content;
+    if (Array.isArray(msg.content.text)) return msg.content.text.join(' ');
+    if (typeof msg.content.text === 'string') return msg.content.text;
+    return '';
+  }
+
+  // Format message with summary mode
+  formatMessage(msg, summaryMode = 'full') {
+    const text = this.getMessageText(msg);
+    
+    switch (summaryMode) {
+      case 'condensed':
+        return text.substring(0, 100) + (text.length > 100 ? '...' : '');
+      case 'key_points_only':
+        // Extract key points (lines starting with -, *, numbers, or containing keywords)
+        const lines = text.split('\n');
+        const keyLines = lines.filter(line => {
+          const trimmed = line.trim();
+          return trimmed.match(/^[-*\d+\.]/g) ||
+                 trimmed.toLowerCase().includes('important') ||
+                 trimmed.toLowerCase().includes('error') ||
+                 trimmed.toLowerCase().includes('summary') ||
+                 trimmed.toLowerCase().includes('result');
+        });
+        return keyLines.length > 0 ? keyLines.join('\n') : text.substring(0, 50) + '...';
+      default:
+        return text;
+    }
+  }
+
+  // Smart pagination with token limiting
+  paginateMessages(messages, page = 1, pageSize = 50, maxTokens = 20000) {
+    const startIndex = (page - 1) * pageSize;
+    let endIndex = Math.min(startIndex + pageSize, messages.length);
+    
+    // Adjust end index based on token limit
+    let currentTokens = 0;
+    let actualEndIndex = startIndex;
+    
+    for (let i = startIndex; i < endIndex; i++) {
+      const messageTokens = this.estimateTokens(this.getMessageText(messages[i]));
+      if (currentTokens + messageTokens > maxTokens * 0.8) { // Reserve 20% for metadata
+        break;
+      }
+      currentTokens += messageTokens;
+      actualEndIndex = i + 1;
+    }
+    
+    const pageMessages = messages.slice(startIndex, actualEndIndex);
+    const totalPages = Math.ceil(messages.length / pageSize);
+    
+    return {
+      messages: pageMessages,
+      pagination: {
+        currentPage: page,
+        pageSize: pageSize,
+        totalMessages: messages.length,
+        totalPages: totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        estimatedTokens: currentTokens
+      }
+    };
+  }
+
   async handleGetConversationContext(args) {
-    const { session_id, include_project_files = true } = args;
+    const { 
+      session_id, 
+      include_project_files = true,
+      page = 1,
+      page_size = 50,
+      content_types = [],
+      summary_mode = 'full',
+      max_tokens = 20000,
+      exclude_long_messages = false,
+      priority_messages = []
+    } = args;
     
     try {
       // Find the conversation file by session ID
@@ -272,12 +475,37 @@ class AIMemoryMCPServer {
 
       const { conversation } = targetFile;
       
+      // Apply filters to messages
+      const filterOptions = {
+        content_types,
+        exclude_long_messages,
+        priority_messages
+      };
+      const filteredMessages = this.filterMessages(conversation.messages, filterOptions);
+      
+      // Apply pagination with token limiting
+      const paginatedResult = this.paginateMessages(filteredMessages, page, page_size, max_tokens);
+      const { messages: pageMessages, pagination } = paginatedResult;
+
       // Format conversation context
       let contextText = `# Conversation Context\n\n`;
       contextText += `**Project**: ${conversation.projectPath}\n`;
       contextText += `**Session ID**: ${conversation.sessionId}\n`;
       contextText += `**Duration**: ${new Date(conversation.startTime).toLocaleString()} - ${new Date(conversation.endTime).toLocaleString()}\n`;
       contextText += `**Messages**: ${conversation.messageCount}\n\n`;
+
+      // Add pagination info
+      contextText += `## Pagination Info\n`;
+      contextText += `**Page**: ${pagination.currentPage} of ${pagination.totalPages}\n`;
+      contextText += `**Showing**: ${pageMessages.length} messages (${pagination.totalMessages} total after filtering)\n`;
+      contextText += `**Estimated Tokens**: ${pagination.estimatedTokens}\n`;
+      if (pagination.hasNextPage) {
+        contextText += `**Next Page Available**: Use page=${pagination.currentPage + 1}\n`;
+      }
+      if (pagination.hasPrevPage) {
+        contextText += `**Previous Page Available**: Use page=${pagination.currentPage - 1}\n`;
+      }
+      contextText += `\n`;
 
       // Extract file references
       if (include_project_files) {
@@ -297,14 +525,31 @@ class AIMemoryMCPServer {
         }
       }
 
-      // Show key messages
+      // Show filtered messages
       contextText += `## Conversation Flow\n\n`;
-      conversation.messages.forEach((msg, i) => {
-        if (msg.role && msg.content?.text?.length > 0) {
-          const textContent = msg.content.text.join(' ').substring(0, 200);
-          contextText += `**${msg.role}**: ${textContent}${textContent.length >= 200 ? '...' : ''}\n\n`;
+      pageMessages.forEach((msg, i) => {
+        if (msg.role && this.getMessageText(msg).length > 0) {
+          const textContent = this.formatMessage(msg, summary_mode);
+          contextText += `**${msg.role}**: ${textContent}\n\n`;
         }
       });
+
+      // Add filtering summary if filters were applied
+      if (content_types.length > 0 || exclude_long_messages || priority_messages.length > 0) {
+        contextText += `## Filters Applied\n`;
+        if (content_types.length > 0) {
+          contextText += `- **Content Types**: ${content_types.join(', ')}\n`;
+        }
+        if (exclude_long_messages) {
+          contextText += `- **Excluded**: Messages longer than 1000 characters\n`;
+        }
+        if (priority_messages.length > 0) {
+          contextText += `- **Priority Messages**: ${priority_messages.join(', ')}\n`;
+        }
+        if (summary_mode !== 'full') {
+          contextText += `- **Summary Mode**: ${summary_mode}\n`;
+        }
+      }
 
       return {
         content: [
