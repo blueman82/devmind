@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node src/mcp-server/mcp-server.js",
     "test": "node --test src/tests/*.test.js",
-    "dev": "node --watch src/mcp-server/mcp-server.js"
+    "dev": "node --watch src/mcp-server/mcp-server.js",
+    "monitor": "node monitor-indexer.js",
+    "status": "node indexer-status.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0"
