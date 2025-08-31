@@ -4,6 +4,7 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
 import PerformanceMetrics from '../utils/performance-metrics.js';
+import { createLogger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,6 +19,9 @@ export class DatabaseManager {
         this.dbPath = dbPath || join(homedir(), '.claude', 'ai-memory', 'conversations.db');
         this.db = null;
         this.isInitialized = false;
+        
+        // Initialize structured logging
+        this.logger = createLogger('DatabaseManager');
         
         // Initialize performance metrics if enabled
         this.metricsEnabled = options.enableMetrics !== false; // Default to true
@@ -51,6 +55,7 @@ export class DatabaseManager {
             return true;
         } catch (error) {
             console.error('Database initialization failed:', error);
+            this.logger.error('Database initialization failed', { error: error.message, stack: error.stack, dbPath: this.dbPath });
             throw error;
         }
     }
@@ -82,6 +87,7 @@ export class DatabaseManager {
             console.log('Database schema applied successfully');
         } catch (error) {
             console.error('Schema application failed:', error);
+            this.logger.error('Schema application failed', { error: error.message, stack: error.stack });
             throw error;
         }
     }
@@ -189,6 +195,22 @@ export class DatabaseManager {
             const getIdStmt = this.db.prepare('SELECT id FROM conversations WHERE session_id = ?');
             const row = getIdStmt.get(conversationData.session_id);
             conversationId = row ? row.id : null;
+            
+            // Error logging for troubleshooting
+            if (!conversationId) {
+                const errorDetails = {
+                    session_id: conversationData.session_id,
+                    lastInsertRowid: result.lastInsertRowid,
+                    changes: result.changes,
+                    row: row
+                };
+                console.error('Failed to get conversation ID:', errorDetails);
+                
+                // Log to structured logging system
+                if (this.logger) {
+                    this.logger.error('Failed to retrieve conversation ID after upsert', errorDetails);
+                }
+            }
         }
 
         // Record performance metrics
@@ -244,23 +266,60 @@ export class DatabaseManager {
 
         const transaction = this.db.transaction((messages) => {
             for (const msg of messages) {
-                stmt.run(
-                    msg.conversation_id,
-                    msg.message_index,
-                    msg.uuid,
-                    msg.timestamp,
-                    msg.role,
-                    msg.content_type || 'text',
-                    msg.content,
-                    msg.content_summary || null,
-                    JSON.stringify(msg.tool_calls || []),
-                    JSON.stringify(msg.file_references || []),
-                    msg.tokens || 0
-                );
+                // Validate conversation_id before insert
+                if (!msg.conversation_id) {
+                    const errorDetails = {
+                        conversation_id: msg.conversation_id,
+                        message_index: msg.message_index,
+                        uuid: msg.uuid,
+                        role: msg.role
+                    };
+                    this.logger.error('CRITICAL: Attempting to insert message with null/undefined conversation_id', errorDetails);
+                    throw new Error(`Cannot insert message: conversation_id is ${msg.conversation_id}`);
+                }
+                
+                try {
+                    stmt.run(
+                        msg.conversation_id,
+                        msg.message_index,
+                        msg.uuid,
+                        msg.timestamp,
+                        msg.role,
+                        msg.content_type || 'text',
+                        msg.content,
+                        msg.content_summary || null,
+                        JSON.stringify(msg.tool_calls || []),
+                        JSON.stringify(msg.file_references || []),
+                        msg.tokens || 0
+                    );
+                } catch (error) {
+                    const errorDetails = {
+                        error: error.message,
+                        code: error.code,
+                        conversation_id: msg.conversation_id,
+                        message_index: msg.message_index,
+                        uuid: msg.uuid,
+                        role: msg.role
+                    };
+                    this.logger.error('Database constraint error during message insert', errorDetails);
+                    throw error;
+                }
             }
         });
 
-        return transaction(messages);
+        try {
+            const result = transaction(messages);
+            this.logger.info('Successfully inserted messages', { count: messages.length, conversation_id: messages[0]?.conversation_id });
+            return result;
+        } catch (error) {
+            this.logger.error('Transaction failed during message insert', { 
+                error: error.message, 
+                code: error.code,
+                messageCount: messages.length,
+                firstConversationId: messages[0]?.conversation_id
+            });
+            throw error;
+        }
     }
 
     /**
