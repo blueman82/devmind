@@ -9,6 +9,7 @@ import FileWatcher from './src/indexer/file-watcher.js';
 import DatabaseManager from './src/database/database-manager.js';
 import { createLogger } from './src/utils/logger.js';
 import ConfigValidator from './src/utils/config-validator.js';
+import HealthChecker from './src/utils/health-check.js';
 import { promises as fs } from 'fs';
 
 const logger = createLogger('Monitor');
@@ -17,6 +18,7 @@ console.log('📊 AI Memory App - Indexer Monitoring Dashboard\n');
 
 let watcher;
 let dbManager;
+let healthChecker;
 let monitoringInterval;
 
 // ANSI colors for better output
@@ -151,6 +153,7 @@ async function displayStatus() {
         console.log(`   Press ${colorize('yellow', 'f')} to perform full index`);
         console.log(`   Press ${colorize('yellow', 'p')} to run performance test`);
         console.log(`   Press ${colorize('yellow', 's')} to show search test`);
+        console.log(`   Press ${colorize('yellow', 'h')} to run health check`);
 
     } catch (error) {
         logger.error('Status display error', { error: error.message, stack: error.stack });
@@ -178,6 +181,14 @@ async function startMonitoring() {
         await watcher.start();
         logger.info('FileWatcher started successfully');
         console.log(colorize('green', '✅ FileWatcher started'));
+
+        // Initialize health checker
+        healthChecker = new HealthChecker({
+            dbManager,
+            fileWatcher: watcher
+        });
+        logger.info('Health checker initialized');
+        console.log(colorize('green', '✅ Health checker initialized'));
 
         // Display initial status
         setTimeout(() => displayStatus().catch(console.error), 500);
@@ -240,6 +251,33 @@ async function startMonitoring() {
                     console.log(`  ${i + 1}. ${result.session_id} (score: ${result.relevance_score?.toFixed(4) || 'N/A'})`);
                 });
                 setTimeout(() => displayStatus().catch(console.error), 2000);
+            } else if (key === 'h') {
+                console.log(colorize('yellow', '\n🏥 Running health check...'));
+                if (healthChecker) {
+                    try {
+                        const healthResult = await healthChecker.runHealthCheck();
+                        console.log(`\n${colorize('bright', '🏥 Health Check Results:')}`);
+                        console.log(`   Overall Status: ${healthResult.status === 'healthy' ? colorize('green', '✅ HEALTHY') : 
+                                                         healthResult.status === 'warning' ? colorize('yellow', '⚠️ WARNING') : 
+                                                         colorize('red', '❌ UNHEALTHY')}`);
+                        console.log(`   Checks Passed: ${colorize('green', healthResult.summary.passed)}/${healthResult.summary.total}`);
+                        console.log(`   Warnings: ${colorize('yellow', healthResult.summary.warnings)}`);
+                        console.log(`   Failures: ${colorize('red', healthResult.summary.failed)}`);
+                        
+                        // Show failed checks
+                        for (const [checkName, result] of Object.entries(healthResult.checks)) {
+                            if (result.status !== 'healthy') {
+                                console.log(`   ${checkName}: ${result.status === 'warning' ? colorize('yellow', '⚠️ ' + result.message) : colorize('red', '❌ ' + result.message)}`);
+                            }
+                        }
+                    } catch (healthError) {
+                        console.error(`   Health Check: ${colorize('red', 'Error - ' + healthError.message)}`);
+                        logger.error('Health check failed', { error: healthError.message, stack: healthError.stack });
+                    }
+                } else {
+                    console.log(`   ${colorize('red', 'Health checker not initialized')}`);
+                }
+                setTimeout(() => displayStatus().catch(console.error), 3000);
             }
         });
 

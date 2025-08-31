@@ -11,6 +11,7 @@ import {
 import ConversationParser from '../parser/conversation-parser.js';
 import { ToolHandlers } from './handlers/tool-handlers.js';
 import ConfigValidator from '../utils/config-validator.js';
+import HealthChecker from '../utils/health-check.js';
 import { createLogger } from '../utils/logger.js';
 
 class AIMemoryMCPServer {
@@ -30,6 +31,7 @@ class AIMemoryMCPServer {
 
     this.parser = new ConversationParser();
     this.toolHandlers = new ToolHandlers(this.parser);
+    this.healthChecker = null; // Initialized after database setup
     this.setupErrorHandling();
     this.setupHandlers();
   }
@@ -202,6 +204,20 @@ class AIMemoryMCPServer {
               },
               required: ['problem_description']
             }
+          },
+          {
+            name: 'health_check',
+            description: 'Get system health status and diagnostics',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                detailed: {
+                  type: 'boolean',
+                  description: 'Return detailed health check results',
+                  default: false
+                }
+              }
+            }
           }
         ]
       };
@@ -223,6 +239,9 @@ class AIMemoryMCPServer {
             
           case 'find_similar_solutions':
             return await this.toolHandlers.handleFindSimilarSolutions(args);
+            
+          case 'health_check':
+            return await this.handleHealthCheck(args);
             
           default:
             throw new McpError(
@@ -248,10 +267,59 @@ class AIMemoryMCPServer {
     });
   }
 
+  /**
+   * Handle health check requests
+   */
+  async handleHealthCheck(args) {
+    try {
+      if (!this.healthChecker) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Health checker not initialized'
+          }]
+        };
+      }
+
+      const detailed = args?.detailed || false;
+      
+      let healthResult;
+      if (detailed) {
+        healthResult = await this.healthChecker.runHealthCheck();
+      } else {
+        healthResult = await this.healthChecker.getHealthStatus();
+      }
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(healthResult, null, 2)
+        }]
+      };
+
+    } catch (error) {
+      this.logger.error('Health check failed', { error: error.message, stack: error.stack });
+      return {
+        content: [{
+          type: 'text',
+          text: `Health check error: ${error.message}`
+        }]
+      };
+    }
+  }
+
   async run() {
     // Validate configuration before starting
     const validator = new ConfigValidator();
     await validator.validateOrExit();
+    
+    // Initialize health checker (needs database from tool handlers)
+    if (this.toolHandlers.dbManager) {
+      this.healthChecker = new HealthChecker({
+        dbManager: this.toolHandlers.dbManager
+      });
+      this.logger.info('Health checker initialized');
+    }
     
     this.logger.info('MCP Server starting up');
     const transport = new StdioServerTransport();
