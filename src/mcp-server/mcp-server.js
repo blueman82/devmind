@@ -297,6 +297,36 @@ class AIMemoryMCPServer {
               },
               required: ['project_path']
             }
+          },
+          {
+            name: 'list_restore_points',
+            description: 'List available restore points (tagged working states) for a project',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                project_path: {
+                  type: 'string',
+                  description: 'Path to the project directory'
+                },
+                timeframe: {
+                  type: 'string',
+                  description: 'Filter restore points by timeframe (e.g., "last week", "2 days ago", "today")'
+                },
+                include_auto_generated: {
+                  type: 'boolean',
+                  description: 'Include automatically generated restore points',
+                  default: false
+                },
+                limit: {
+                  type: 'number',
+                  description: 'Maximum number of restore points to return',
+                  default: 50,
+                  minimum: 1,
+                  maximum: 100
+                }
+              },
+              required: ['project_path']
+            }
           }
         ]
       };
@@ -327,6 +357,9 @@ class AIMemoryMCPServer {
             
           case 'get_git_context':
             return await this.gitToolHandlers.handleGetGitContext(args);
+            
+          case 'list_restore_points':
+            return await this.gitToolHandlers.handleListRestorePoints(args);
             
           default:
             throw new McpError(

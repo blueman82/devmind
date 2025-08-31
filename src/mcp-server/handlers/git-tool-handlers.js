@@ -2,6 +2,7 @@ import GitManager from '../../git/git-manager.js';
 import GitSchema from '../../database/git-schema.js';
 import { createLogger } from '../../utils/logger.js';
 import pathValidator from '../../utils/path-validator.js';
+import errorSanitizer from '../../utils/error-sanitizer.js';
 
 export class GitToolHandlers {
   constructor(dbManager) {
@@ -320,6 +321,158 @@ export class GitToolHandlers {
     } catch (error) {
       this.logger.warn('Failed to parse time range', { timeRange, error: error.message });
       return null;
+    }
+  }
+
+  async handleListRestorePoints(args) {
+    const { project_path, timeframe, include_auto_generated = false, limit = 50 } = args;
+
+    try {
+      // Validate project path
+      const pathValidation = pathValidator.validateProjectPath(project_path);
+      if (!pathValidation.isValid) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Error: Invalid project path - ${pathValidation.error}`
+          }]
+        };
+      }
+
+      // Ensure database is initialized
+      if (!this.dbManager?.db) {
+        await this.dbManager.initialize();
+      }
+
+      // Get repository from database
+      const getRepoStmt = this.dbManager.db.prepare(`
+        SELECT id, working_directory, git_directory, remote_url, current_branch
+        FROM git_repositories
+        WHERE project_path = ?
+      `);
+      
+      const repository = getRepoStmt.get(pathValidation.normalizedPath);
+      
+      if (!repository) {
+        // Repository not indexed yet
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              project_path: pathValidation.normalizedPath,
+              restore_points: [],
+              message: "No git repository found for this project. Run get_git_context first to index the repository."
+            }, null, 2)
+          }]
+        };
+      }
+
+      // Build query for restore points
+      let query = `
+        SELECT 
+          rp.id,
+          rp.commit_hash,
+          rp.created_at,
+          rp.label,
+          rp.description,
+          rp.auto_generated,
+          rp.test_status,
+          gc.author_name,
+          gc.author_email,
+          gc.commit_date,
+          gc.message as commit_message
+        FROM restore_points rp
+        LEFT JOIN git_commits gc ON gc.commit_hash = rp.commit_hash 
+          AND gc.repository_id = rp.repository_id
+        WHERE rp.repository_id = ?
+      `;
+
+      const queryParams = [repository.id];
+
+      // Apply auto_generated filter
+      if (!include_auto_generated) {
+        query += ' AND rp.auto_generated = 0';
+      }
+
+      // Apply timeframe filter if specified
+      if (timeframe) {
+        const sinceDate = this.parseTimeRange(timeframe);
+        if (sinceDate) {
+          query += ' AND rp.created_at >= ?';
+          queryParams.push(sinceDate.toISOString());
+        }
+      }
+
+      // Order by creation date and apply limit
+      query += ' ORDER BY rp.created_at DESC LIMIT ?';
+      queryParams.push(Math.min(limit, 100));
+
+      const restorePointsStmt = this.dbManager.db.prepare(query);
+      const restorePoints = restorePointsStmt.all(...queryParams);
+
+      // Format response
+      const formattedPoints = restorePoints.map(point => ({
+        id: point.id,
+        commit_hash: point.commit_hash,
+        label: point.label,
+        description: point.description,
+        created_at: point.created_at,
+        auto_generated: Boolean(point.auto_generated),
+        test_status: point.test_status,
+        commit_info: point.commit_date ? {
+          date: point.commit_date,
+          author: point.author_name,
+          email: point.author_email,
+          message: point.commit_message
+        } : null
+      }));
+
+      this.logger.info('Restore points retrieved', {
+        project_path: pathValidation.normalizedPath,
+        repository_id: repository.id,
+        points_found: formattedPoints.length,
+        filters: { timeframe, include_auto_generated }
+      });
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            project_path: pathValidation.normalizedPath,
+            repository: {
+              working_directory: repository.working_directory,
+              git_directory: repository.git_directory,
+              remote_url: repository.remote_url,
+              current_branch: repository.current_branch
+            },
+            restore_points: formattedPoints,
+            total_points: formattedPoints.length,
+            filters_applied: {
+              timeframe: timeframe || null,
+              include_auto_generated,
+              limit
+            }
+          }, null, 2)
+        }]
+      };
+
+    } catch (error) {
+      const sanitizedError = errorSanitizer.sanitizeError(error.message, { 
+        operation: 'list_restore_points' 
+      });
+      
+      this.logger.error('Failed to list restore points', {
+        project_path,
+        error: sanitizedError,
+        stack: error.stack
+      });
+
+      return {
+        content: [{
+          type: 'text',
+          text: `Error listing restore points: ${sanitizedError}`
+        }]
+      };
     }
   }
 }

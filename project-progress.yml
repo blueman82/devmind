@@ -883,3 +883,60 @@ git_cache_timing_fix:
   validation: "Cache still provides performance benefit while ensuring fresh data"
   
   commit_pending: "Optimize git cache timing: Reduce TTL from 5 minutes to 30 seconds"
+
+## Git Tool Implementation - list_restore_points (2025-08-31)
+
+list_restore_points_tool:
+  status: "✅ COMPLETE"
+  completion_date: "2025-08-31T14:50:00Z"
+  implementation_type: "Database query tool (no git commands)"
+  
+  functionality_implemented:
+    core_features:
+      - "Query restore_points table from database"
+      - "Filter by timeframe (e.g., 'last week', '2 days ago')"
+      - "Include/exclude auto-generated restore points"
+      - "Limit number of results (default 50, max 100)"
+      - "Join with git_commits for commit metadata"
+    
+    security_features:
+      - "Path validation using path-validator.js"
+      - "Error sanitization for safe error messages"
+      - "Database-only operations (no git command execution)"
+      - "Parameterized queries to prevent SQL injection"
+    
+    response_format:
+      - "Project path and repository information"
+      - "List of restore points with metadata"
+      - "Commit information when available"
+      - "Applied filters summary"
+  
+  files_modified:
+    git_tool_handlers:
+      file: "src/mcp-server/handlers/git-tool-handlers.js"
+      changes:
+        - "Added handleListRestorePoints method (150 lines)"
+        - "Added errorSanitizer import"
+        - "Database-only implementation (no git commands)"
+    
+    mcp_server:
+      file: "src/mcp-server/mcp-server.js"
+      changes:
+        - "Added list_restore_points tool definition"
+        - "Added case handler for list_restore_points"
+        - "Proper schema with parameters and defaults"
+  
+  testing_results:
+    status: "✅ SUCCESSFUL"
+    test_output: "Tool correctly queries database and returns empty array (no restore points yet)"
+    repository_found: "Yes - /Users/harrison/Documents/Github/devmind"
+    error_handling: "Verified - handles missing repository gracefully"
+  
+  architecture_compliance:
+    separation_of_concerns: "✅ MAINTAINED - Database query only"
+    mcp_role: "✅ CORRECT - Queries indexed data, no data collection"
+    security_posture: "✅ SECURE - No direct git command execution"
+    
+  git_tools_progress: "2/5 tools implemented (get_git_context, list_restore_points)"
+  
+  commit_pending: "Implement list_restore_points MCP tool - database query for tagged working states"
