@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+// Removed direct execSync - now using secure-git-executor for all git operations
 import path from 'path';
 import fs from 'fs';
 import { createLogger } from '../utils/logger.js';
@@ -235,13 +235,10 @@ export default class GitManager {
           };
         });
 
-      const stats = execSync(
-        `git show --stat --format="" ${commitHash}`,
-        { 
-          cwd: repository.workingDirectory, 
-          encoding: 'utf8',
-          timeout: 10000
-        }
+      // Use secure git executor to prevent command injection
+      const stats = secureGitExecutor.getCommitStats(
+        repository.workingDirectory,
+        commitHash
       );
 
       const statsMatch = stats.match(/(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?/);

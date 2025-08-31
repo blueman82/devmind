@@ -21,7 +21,7 @@ export class SecureGitExecutor {
       ['remote', new Set(['get-url'])],
       ['branch', new Set(['--show-current'])],
       ['log', new Set(['-1', '--format=%H|%ad|%an|%ae|%s|%P', '--date=iso', '--since', '--until', '--author', '--grep', '--stat'])],
-      ['show', new Set(['--format=%H|%ad|%an|%ae|%s|%P', '--name-status', '--stat'])],
+      ['show', new Set(['--format=%H|%ad|%an|%ae|%s|%P', '--format=', '--name-status', '--stat'])],
       ['status', new Set(['--porcelain'])],
       ['rev-parse', new Set(['--show-toplevel', '--git-dir'])],
       ['config', new Set(['--get', '--list'])]
@@ -208,6 +208,22 @@ export class SecureGitExecutor {
     return this.executeGitCommand('status', ['--porcelain'], { 
       cwd: workingDirectory,
       timeout: 5000 
+    });
+  }
+
+  getCommitStats(workingDirectory, commitHash) {
+    // Validate commit hash to prevent injection
+    if (!/^[a-f0-9]{7,40}$/.test(commitHash)) {
+      throw new Error('Invalid commit hash format');
+    }
+
+    return this.executeGitCommand('show', [
+      '--stat',
+      '--format=',
+      commitHash
+    ], { 
+      cwd: workingDirectory,
+      timeout: 10000 
     });
   }
 }
