@@ -666,3 +666,45 @@ code_review_implementation:
     phase_8b: "2-3 days (operational improvements)" 
     phase_8c: "1 day (security hardening)"
     total_estimate: "4-6 days for complete implementation"
+
+## Phase 8B+ - Critical Production Issues (2025-08-31)
+
+critical_constraint_error_resolution:
+  status: "IN PROGRESS"
+  date_discovered: "2025-08-31T12:45:00Z"
+  severity: "CRITICAL - Production indexing failure"
+  
+  issue_description:
+    primary_error: "FOREIGN KEY constraint failed during message insertion"
+    error_location: "DatabaseManager.insertMessages() at line 247"
+    affected_conversation: "ef6c8298-4d91-4252-b014-980b7d1def65.jsonl"
+    root_cause: "conversationId returning undefined from upsertConversation method"
+    
+  debugging_actions_taken:
+    - "✅ Added debug logging to identify undefined conversationId issue"
+    - "✅ Enhanced upsertConversation to properly return conversation ID for existing records" 
+    - "✅ Fixed FileWatcher to use correct conversationId field from result"
+    - "✅ Implemented comprehensive error logging throughout DatabaseManager"
+    - "✅ Added conversation_id validation before database insert attempts"
+    - "✅ Created audit trail for all critical database operations"
+    
+  commits_applied:
+    - "c3d51a5: Fix FOREIGN KEY constraint failed error in conversation indexing"
+    - "cb2adc4: Add comprehensive error logging and audit trail to DatabaseManager"
+    
+  logging_improvements:
+    structured_logging: "Added Winston logger to DatabaseManager constructor"
+    error_audit_trail:
+      - "Database initialization failures with stack traces"
+      - "Schema application errors with context"
+      - "insertMessages validation and constraint violations"
+      - "Transaction failures with detailed error context"
+    log_locations:
+      - "/Users/harrison/.claude/ai-memory/logs/combined.log (all levels)"
+      - "/Users/harrison/.claude/ai-memory/logs/error.log (errors only)"
+      
+  current_status: "Debugging in progress - monitoring for constraint errors with enhanced logging"
+  next_steps:
+    - "Monitor system with enhanced logging to capture constraint errors"
+    - "Verify fix resolves undefined conversationId issue" 
+    - "Update code review documentation with constraint error resolution"
