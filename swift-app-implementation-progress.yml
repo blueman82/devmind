@@ -80,9 +80,10 @@ implementation_phases:
         completed: "2025-08-31"
         
       - task: "Configure menu bar only app (LSUIElement = true)"
-        status: "🔄 IN PROGRESS"
-        implementation: "Adding LSUIElement property in Xcode Info tab"
-        instructions: "Add 'Application is agent (UIElement)' = YES in Info tab"
+        status: "✅ COMPLETED"
+        implementation: "Added LSUIElement property in Xcode Info tab"
+        property_added: "Application is agent (UIElement) = YES"
+        completed: "2025-08-31"
         
       - task: "Implement basic MenuBarExtra with dropdown"
         status: "✅ COMPLETED"
