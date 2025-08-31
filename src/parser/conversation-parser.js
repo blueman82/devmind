@@ -31,18 +31,18 @@ class ConversationParser {
     
     const conversation = {
       session_id: filename, // Use filename as fallback session_id (snake_case for DB)
-      projectHash: null,
+      project_hash: null, // Changed to snake_case to match database schema
       project_name: null, // Changed to snake_case to match database schema
-      projectPath: null,
+      project_path: null, // Changed to snake_case to match database schema
       messages: [],
       startTime: null,
       endTime: null,
       lastUpdated: null,
-      messageCount: 0,
-      fileReferences: [],
+      message_count: 0, // Changed to snake_case to match database schema
+      file_references: [], // Changed to snake_case to match database schema
       topics: [],
       keywords: [],
-      totalTokens: 0
+      total_tokens: 0 // Changed to snake_case to match database schema
     };
 
     for (const line of lines) {
@@ -53,8 +53,8 @@ class ConversationParser {
         if (msg.sessionId) {
           conversation.session_id = msg.sessionId; // Override filename with actual sessionId
         }
-        if (!conversation.projectPath && msg.cwd) {
-          conversation.projectPath = msg.cwd;
+        if (!conversation.project_path && msg.cwd) {
+          conversation.project_path = msg.cwd;
           conversation.startTime = msg.timestamp;
           
           // Derive project name from path
@@ -62,13 +62,13 @@ class ConversationParser {
           
           // Generate project hash from directory name (matches Claude's structure)
           const projectDir = path.dirname(filePath);
-          conversation.projectHash = path.basename(projectDir);
+          conversation.project_hash = path.basename(projectDir);
         }
         
         // Update end time and message count
         conversation.endTime = msg.timestamp;
         conversation.lastUpdated = msg.timestamp;
-        conversation.messageCount++;
+        conversation.message_count++;
         
         // Skip metadata messages like summary that don't have roles
         if (msg.type === 'summary') {
@@ -116,10 +116,10 @@ class ConversationParser {
       }
     });
     
-    conversation.fileReferences = Array.from(allFileRefs);
+    conversation.file_references = Array.from(allFileRefs);
     conversation.topics = Array.from(allTopics);
     conversation.keywords = Array.from(allKeywords);
-    conversation.totalTokens = totalTokens;
+    conversation.total_tokens = totalTokens;
     
     return conversation;
   }
@@ -225,10 +225,10 @@ class ConversationParser {
         
         if (searchResult.hasMatch) {
           results.push({
-            sessionId: conversation.sessionId,
-            projectPath: conversation.projectPath,
+            sessionId: conversation.session_id,
+            projectPath: conversation.project_path,
             startTime: conversation.startTime,
-            messageCount: conversation.messageCount,
+            messageCount: conversation.message_count,
             preview: this.getConversationPreview(conversation),
             relevanceScore: searchResult.score,
             matchedTerms: searchResult.matchedTerms

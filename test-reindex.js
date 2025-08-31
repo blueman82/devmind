@@ -25,11 +25,11 @@ try {
     
     for (const conv of conversations) {
         console.log(`📊 Conversation details:`);
-        console.log(`   Session ID: ${conv.sessionId}`);
-        console.log(`   session_id: ${conv.session_id}`);
+        console.log(`   Session ID: ${conv.session_id}`);
         console.log(`   Project Name: ${conv.project_name || 'null'}`);
-        console.log(`   Project Path: ${conv.projectPath || 'null'}`);
+        console.log(`   Project Path: ${conv.project_path || 'null'}`);
         console.log(`   Messages: ${conv.messages?.length || 0}`);
+        console.log(`   Message Count: ${conv.message_count}`);
         console.log(`📋 Full object keys:`, Object.keys(conv));
         
         // Update/insert the conversation
