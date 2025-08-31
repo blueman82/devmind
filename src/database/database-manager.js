@@ -29,8 +29,13 @@ export class DatabaseManager {
 
             // Open database connection
             this.db = new Database(this.dbPath);
+            
+            // Performance and concurrency optimizations
             this.db.pragma('journal_mode = WAL'); // Better concurrency
             this.db.pragma('foreign_keys = ON'); // Enforce foreign keys
+            this.db.pragma('synchronous = NORMAL'); // Better performance vs FULL
+            this.db.pragma('cache_size = -64000'); // 64MB cache
+            this.db.pragma('mmap_size = 268435456'); // 256MB memory mapping
             
             // Apply schema
             await this.applySchema();
