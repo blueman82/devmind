@@ -446,5 +446,69 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "git commit after every change, update project progress after every change.\nwhat are these errors? Are we missing data? NOT NULL constraint failed: messages.role"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "run monitor now"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I stopped you can run it now"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "whats next? just tell me only"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "full index progress, how can I check that?"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I want to trigger it, just tell me how"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "can I do it within the monitor program?"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "The monitor program shows\n  Controls:\n   Press Ctrl+C to stop monitoring\n   Press r to restart FileWatcher\n   Press f to perform full index\n   Press s to show search test"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I'm seeing a lot of these\nFailed to index conversation undefined: SqliteError: NOT NULL constraint failed: conversations.session_id\n    at DatabaseManager.upsertConversation (file:///Users/harrison/Documents/Github/devmind/src/database/database-manager.js:157:21)\n    at FileWatcher.indexConversation (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:288:49)\n    at FileWatcher.indexFile (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:262:28)\n    at async FileWatcher.performFullIndex (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:365:21)\n    at async ReadStream.<anonymous> (file:///Users/harrison/Documents/Github/devmind/monitor-indexer.js:189:17) {\n  code: 'SQLITE_CONSTRAINT_NOTNULL'\n}"
   }
 ]

@@ -26,13 +26,23 @@ class ConversationParser {
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.trim().split('\n');
     
+    // Extract sessionId from filename as fallback
+    const filename = path.basename(filePath, '.jsonl');
+    
     const conversation = {
-      sessionId: null,
+      sessionId: filename, // Use filename as fallback sessionId
+      projectHash: null,
+      projectName: null,
       projectPath: null,
       messages: [],
       startTime: null,
       endTime: null,
-      messageCount: 0
+      lastUpdated: null,
+      messageCount: 0,
+      fileReferences: [],
+      topics: [],
+      keywords: [],
+      totalTokens: 0
     };
 
     for (const line of lines) {
@@ -40,14 +50,24 @@ class ConversationParser {
         const msg = JSON.parse(line);
         
         // Extract session info from first message
-        if (!conversation.sessionId) {
-          conversation.sessionId = msg.sessionId;
+        if (msg.sessionId) {
+          conversation.sessionId = msg.sessionId; // Override filename with actual sessionId
+        }
+        if (!conversation.projectPath && msg.cwd) {
           conversation.projectPath = msg.cwd;
           conversation.startTime = msg.timestamp;
+          
+          // Derive project name from path
+          conversation.projectName = path.basename(msg.cwd);
+          
+          // Generate project hash from directory name (matches Claude's structure)
+          const projectDir = path.dirname(filePath);
+          conversation.projectHash = path.basename(projectDir);
         }
         
-        // Update end time
+        // Update end time and message count
         conversation.endTime = msg.timestamp;
+        conversation.lastUpdated = msg.timestamp;
         conversation.messageCount++;
         
         // Skip metadata messages like summary that don't have roles
@@ -73,6 +93,33 @@ class ConversationParser {
         console.warn(`Skipping invalid JSON line: ${error.message}`);
       }
     }
+    
+    // Populate metadata from parsed messages
+    const allFileRefs = new Set();
+    const allTopics = new Set();
+    const allKeywords = new Set();
+    let totalTokens = 0;
+    
+    conversation.messages.forEach(msg => {
+      if (msg.content?.fileReferences) {
+        msg.content.fileReferences.forEach(ref => allFileRefs.add(ref));
+      }
+      if (msg.content?.text) {
+        const text = msg.content.text.join(' ');
+        totalTokens += Math.ceil(text.length / 4); // Rough token estimate
+        
+        // Extract basic keywords (simplified)
+        const words = text.toLowerCase().split(/\s+/)
+          .filter(w => w.length > 3)
+          .slice(0, 5);
+        words.forEach(w => allKeywords.add(w));
+      }
+    });
+    
+    conversation.fileReferences = Array.from(allFileRefs);
+    conversation.topics = Array.from(allTopics);
+    conversation.keywords = Array.from(allKeywords);
+    conversation.totalTokens = totalTokens;
     
     return conversation;
   }

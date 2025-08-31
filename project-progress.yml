@@ -486,10 +486,15 @@ critical_issue_discovered_and_resolved:
     files_processed: "546 JSONL files successfully parsed"
     system_status: "Fully operational with real-time monitoring"
     database_size: "0.25 MB (increased from 0.09 MB)"
-  remaining_issue:
-    description: "NOT NULL constraint failed: messages.role"
-    impact: "Only 4 messages indexed from 444 conversations"
-    investigation_status: "In progress"
+  final_constraint_issue_resolved:
+    date_resolved: "2025-08-31"
+    final_issue: "NOT NULL constraint failed: messages.content"
+    root_cause: "Legitimate messages (tool calls/results) can have no text content"
+    solution_implemented:
+      - "Removed NOT NULL constraint from messages.content field in schema.sql"
+      - "Updated FileWatcher to provide empty string default for null content"
+      - "Analysis confirmed 9/14 messages legitimately have no text content"
+    commit: "c9a877b: Fix NOT NULL constraint errors for messages.content"
 
 git_status:
   current_branch: "feature/enhanced-search"
