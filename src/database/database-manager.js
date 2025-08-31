@@ -193,32 +193,29 @@ export class DatabaseManager {
             conversationData.total_tokens || 0
         );
 
-        // Get the conversation ID - either from insert or by querying for existing
-        let conversationId;
-        if (result.lastInsertRowid && result.lastInsertRowid > 0) {
-            // New conversation was inserted
-            conversationId = result.lastInsertRowid;
-        } else {
-            // Existing conversation was updated, need to query for ID
-            const getIdStmt = this.db.prepare('SELECT id FROM conversations WHERE session_id = ?');
-            const row = getIdStmt.get(conversationData.session_id);
-            conversationId = row ? row.id : null;
+        // Always query for the conversation ID to avoid lastInsertRowid issues
+        // ON CONFLICT UPDATE can cause lastInsertRowid to contain incorrect values
+        const getIdStmt = this.db.prepare('SELECT id FROM conversations WHERE session_id = ?');
+        const row = getIdStmt.get(conversationData.session_id);
+        const conversationId = row ? row.id : null;
+        
+        // Error logging for troubleshooting
+        if (!conversationId) {
+            const errorDetails = {
+                session_id: conversationData.session_id,
+                lastInsertRowid: result.lastInsertRowid,
+                changes: result.changes,
+                row: row
+            };
+            console.error('Failed to get conversation ID:', errorDetails);
             
-            // Error logging for troubleshooting
-            if (!conversationId) {
-                const errorDetails = {
-                    session_id: conversationData.session_id,
-                    lastInsertRowid: result.lastInsertRowid,
-                    changes: result.changes,
-                    row: row
-                };
-                console.error('Failed to get conversation ID:', errorDetails);
-                
-                // Log to structured logging system
-                if (this.logger) {
-                    this.logger.error('Failed to retrieve conversation ID after upsert', errorDetails);
-                }
+            // Log to structured logging system  
+            if (this.logger) {
+                this.logger.error('Failed to retrieve conversation ID after upsert', errorDetails);
             }
+            
+            // Throw error to prevent invalid foreign key references
+            throw new Error(`Failed to get conversation ID for session ${conversationData.session_id}`);
         }
 
         // Record performance metrics

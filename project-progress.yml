@@ -837,6 +837,48 @@ git_integration_security_fixes:
       file: "src/utils/secure-git-executor.js"
       changes:
         - "Added getCommitStats method with hash validation"
+
+database_constraint_fix:
+  status: "✅ COMPLETE"
+  completion_date: "2025-08-31T16:15:00Z"
+  issue_report: "npm run monitor showed FOREIGN KEY constraint errors"
+  
+  root_cause_analysis:
+    problem: "lastInsertRowid returning incorrect conversation IDs"
+    symptom: "FOREIGN KEY constraint failed for conversation_id 141189"
+    investigation:
+      - "Max conversation ID in database was 1321"
+      - "lastInsertRowid returned 141189 (invalid ID)"
+      - "better-sqlite3 lastInsertRowid unreliable for UPDATE operations"
+    
+  fix_applied:
+    location: "src/database/database-manager.js:upsertConversation"
+    changes:
+      - "Replaced lastInsertRowid with explicit ID query"
+      - "Always query for conversation ID after INSERT/UPDATE"
+      - "Added error handling for missing conversation IDs"
+      - "Throw explicit error if ID cannot be retrieved"
+    
+  code_changes:
+    before: |
+      const conversationId = result.changes > 0 ? 
+        this.db.lastInsertRowid : 
+        existingRow.id;
+    after: |
+      const getIdStmt = this.db.prepare(
+        'SELECT id FROM conversations WHERE session_id = ?'
+      );
+      const row = getIdStmt.get(conversationData.session_id);
+      const conversationId = row ? row.id : null;
+      
+      if (!conversationId) {
+        throw new Error(`Failed to get conversation ID for session ${conversationData.session_id}`);
+      }
+  
+  validation:
+    - "Error no longer appears in npm run monitor logs"
+    - "Messages properly linked to correct conversation IDs"
+    - "Foreign key constraints satisfied"
         - "Updated whitelist to allow '--format=' and '--stat' flags"
         - "Lines increased from 215 to 228"
     
