@@ -7,6 +7,10 @@
   "scripts": {
     "start": "node src/mcp-server/mcp-server.js",
     "test": "node --test src/tests/*.test.js",
+    "test:db": "node --test src/tests/database-manager.test.js",
+    "test:mcp": "node --test src/tests/mcp-server.test.js",
+    "test:watcher": "node --test src/tests/file-watcher.test.js",
+    "test:config": "node --test src/tests/config-validator.test.js",
     "dev": "node --watch src/mcp-server/mcp-server.js",
     "monitor": "node monitor-indexer.js",
     "status": "node indexer-status.js"
