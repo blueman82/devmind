@@ -30,9 +30,9 @@ class ConversationParser {
     const filename = path.basename(filePath, '.jsonl');
     
     const conversation = {
-      sessionId: filename, // Use filename as fallback sessionId
+      session_id: filename, // Use filename as fallback session_id (snake_case for DB)
       projectHash: null,
-      projectName: null,
+      project_name: null, // Changed to snake_case to match database schema
       projectPath: null,
       messages: [],
       startTime: null,
@@ -51,14 +51,14 @@ class ConversationParser {
         
         // Extract session info from first message
         if (msg.sessionId) {
-          conversation.sessionId = msg.sessionId; // Override filename with actual sessionId
+          conversation.session_id = msg.sessionId; // Override filename with actual sessionId
         }
         if (!conversation.projectPath && msg.cwd) {
           conversation.projectPath = msg.cwd;
           conversation.startTime = msg.timestamp;
           
           // Derive project name from path
-          conversation.projectName = path.basename(msg.cwd);
+          conversation.project_name = path.basename(msg.cwd);
           
           // Generate project hash from directory name (matches Claude's structure)
           const projectDir = path.dirname(filePath);
