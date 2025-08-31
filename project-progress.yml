@@ -459,7 +459,7 @@ git_integration_development:
     - "✅ get_git_context - retrieves repository status and commit history"
     - "✅ list_restore_points - browse tagged working states"
     - "✅ create_restore_point - tag current state as working"
-    - "✅ preview_restore - show what files would change"
+    - "✅ preview_restore - show what files would change (SECURITY FIXED)"
   
   remaining_git_tools:
     priority_high:
@@ -470,12 +470,15 @@ git_integration_development:
   
   security_hardening_completed:
     date_completed: "2025-08-31"
+    latest_security_fixes: "2025-08-31 - preview_restore critical fix"
     security_concerns_addressed:
       - "✅ Path validation implemented - prevents directory traversal attacks"
       - "✅ Git command injection prevention - secure command execution wrapper"
       - "✅ Error message sanitization - prevents information disclosure"
       - "✅ Database performance indexes - 11 optimized compound indexes added"
       - "✅ Comprehensive security audit logging - structured logging throughout"
+      - "✅ Git diff command whitelisting - added to secure-git-executor"
+      - "✅ Commit hash validation - prevents injection in preview_restore"
     
     security_utilities_created:
       - "src/utils/path-validator.js - Validates and sanitizes project paths"
