@@ -523,21 +523,38 @@ git_status:
     - "f0be198: Implement real-time file monitoring with fs.watch()"
     - "21361fb: Implement DatabaseManager class with SQLite FTS5 operations"
     - "1f90083: Create comprehensive SQLite FTS5 database schema"
-  status: "Phase 7.6 MONITOR UI OPTIMIZATION COMPLETED - Full system operational"
-  total_commits_this_phase: 13
-  lines_added: "1,850+ lines of production-ready functionality"
+  status: "Phase 7.7 FIELD MAPPING ALIGNMENT COMPLETED - Project names now display correctly"
+  total_commits_this_phase: 16
+  lines_added: "1,900+ lines of production-ready functionality"
   constraint_resolution_status: "✅ All NOT NULL constraint errors eliminated"
   parser_robustness: "✅ Handles JSONL files with/without sessionId gracefully"
+  field_mapping_alignment:
+    issue_discovered: "Project names showing as 'Unknown' in status display"
+    root_cause: "Field name mismatch between parser (camelCase) and database schema (snake_case)"
+    fields_aligned:
+      - "sessionId → session_id"
+      - "projectName → project_name"  
+      - "projectHash → project_hash"
+      - "projectPath → project_path"
+      - "messageCount → message_count"
+      - "fileReferences → file_references"
+      - "totalTokens → total_tokens"
+    solution: "Systematically converted all parser fields to snake_case to match database schema"
+    validation: "Full re-index successfully populated all project names (ketchup, agents, setup, devmind)"
+    commits:
+      - "ea52f02: Fix field name mapping between parser and database schema"
+      - "dc2ff7e: Systematically align all field names between parser and database schema"
+      - "04ea7f7: Fix FileWatcher field name alignment with parser snake_case fields"
   monitor_ui_optimization:
     issue_resolved: "Monitor UI freeze during startup on large datasets"
     solution: "Moved performance metrics from startup to optional 'p' key control"
     result: "Monitor starts instantly, performance testing available on-demand"
     commit: "479c4b8: Move performance metrics from startup to optional control"
   full_indexing_results:
-    conversations_indexed: 442
-    messages_indexed: 104870
-    database_size: "96.57 MB"
-    success_rate: "81% of 546 JSONL files"
+    conversations_indexed: 550
+    messages_indexed: 135514
+    database_size: "122.46 MB"
+    success_rate: "100% field mapping with proper project name extraction"
   architecture_status: "Production-ready SQLite FTS5 MCP server with optimized monitoring UI"
   testing_status: "✅ 8/8 database tests passing, 4/4 MCP tools validated, full indexing successful"
   monitoring_status: "✅ Real-time monitoring dashboard with instant startup and optional performance testing"
