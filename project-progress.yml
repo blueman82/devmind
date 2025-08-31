@@ -455,11 +455,13 @@ git_integration_development:
       - "restore_points - tagged working states"
       - "conversation_git_links - conversation to commit correlations"
   
+  completed_git_tools:
+    - "✅ get_git_context - retrieves repository status and commit history"
+    - "✅ list_restore_points - browse tagged working states"
+    - "✅ create_restore_point - tag current state as working"
+  
   remaining_git_tools:
     priority_high:
-      - "list_restore_points - browse tagged working states"
-      - "create_restore_point - tag current state as working"
-    priority_medium:
       - "preview_restore - show what files would change"
       - "restore_project_state - perform safe restoration"
     
@@ -487,7 +489,7 @@ git_integration_development:
       performance_optimization: "✅ COMPLETED - comprehensive database indexing strategy"
   
 phase_2_roadmap:
-  - "Complete git MCP tools (4 remaining after get_git_context)"
+  - "Complete git MCP tools (2 remaining: preview_restore and restore_project_state)"
   - "Swift macOS app with complete historical tooling foundation"
   - "Cross-project solution discovery enhanced with git context"
   - "Advanced AI integrations with time-machine capabilities"

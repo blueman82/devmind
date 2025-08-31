@@ -213,6 +213,34 @@ export default class GitManager {
     }
   }
 
+  async getCurrentCommitHash(projectPath) {
+    try {
+      const repository = await this.discoverRepository(projectPath);
+      if (!repository) {
+        return null;
+      }
+
+      const result = secureGitExecutor.executeGitCommand(
+        'rev-parse',
+        ['HEAD'],
+        { cwd: repository.workingDirectory, timeout: 5000 }
+      );
+
+      const hash = result.trim();
+      if (!hash || hash.includes('fatal')) {
+        return null;
+      }
+
+      return hash;
+    } catch (error) {
+      this.logger.error('Failed to get current commit hash', {
+        projectPath,
+        error: error.message
+      });
+      return null;
+    }
+  }
+
   async getCommitDetails(projectPath, commitHash) {
     try {
       const repository = await this.discoverRepository(projectPath);

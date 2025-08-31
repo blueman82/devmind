@@ -327,6 +327,39 @@ class AIMemoryMCPServer {
               },
               required: ['project_path']
             }
+          },
+          {
+            name: 'create_restore_point',
+            description: 'Create a restore point (tagged working state) for a project at the current commit',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                project_path: {
+                  type: 'string',
+                  description: 'Path to the project directory'
+                },
+                label: {
+                  type: 'string',
+                  description: 'Unique label for the restore point (e.g., "before-refactor", "stable-v1")'
+                },
+                description: {
+                  type: 'string',
+                  description: 'Optional description of what this restore point represents'
+                },
+                auto_generated: {
+                  type: 'boolean',
+                  description: 'Whether this restore point is auto-generated',
+                  default: false
+                },
+                test_status: {
+                  type: 'string',
+                  description: 'Current test status (passing, failing, unknown)',
+                  default: 'unknown',
+                  enum: ['passing', 'failing', 'unknown']
+                }
+              },
+              required: ['project_path', 'label']
+            }
           }
         ]
       };
@@ -360,6 +393,9 @@ class AIMemoryMCPServer {
             
           case 'list_restore_points':
             return await this.gitToolHandlers.handleListRestorePoints(args);
+            
+          case 'create_restore_point':
+            return await this.gitToolHandlers.handleCreateRestorePoint(args);
             
           default:
             throw new McpError(

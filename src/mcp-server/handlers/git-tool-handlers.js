@@ -523,4 +523,244 @@ export class GitToolHandlers {
       };
     }
   }
+
+  /**
+   * Handle create_restore_point MCP tool request
+   * @param {Object} args - Tool arguments
+   * @param {string} args.project_path - Path to the project directory
+   * @param {string} args.label - Label for the restore point
+   * @param {string} [args.description] - Optional description of the restore point
+   * @param {boolean} [args.auto_generated=false] - Whether this is auto-generated
+   * @param {string} [args.test_status='unknown'] - Test status at time of creation
+   * @returns {Promise<{content: Array<{type: string, text: string}>}>} MCP response
+   */
+  async handleCreateRestorePoint(args) {
+    const { 
+      project_path, 
+      label, 
+      description = '', 
+      auto_generated = false,
+      test_status = 'unknown'
+    } = args;
+
+    try {
+      // Validate required parameters
+      if (!project_path || !label) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Error: project_path and label are required'
+          }]
+        };
+      }
+
+      // Validate project path
+      const pathValidation = pathValidator.validateProjectPath(project_path);
+      if (!pathValidation.isValid) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Error: Invalid project path - ${pathValidation.error}`
+          }]
+        };
+      }
+
+      const validatedProjectPath = pathValidation.normalizedPath;
+
+      // Ensure database is initialized
+      if (!this.dbManager?.db) {
+        await this.dbManager.initialize();
+      }
+
+      // Get repository from database
+      const getRepoStmt = this.dbManager.db.prepare(`
+        SELECT id, working_directory, git_directory, remote_url, current_branch
+        FROM git_repositories
+        WHERE project_path = ?
+      `);
+      
+      let repository = getRepoStmt.get(validatedProjectPath);
+      
+      // If repository not found, try to discover and index it
+      if (!repository) {
+        this.logger.info('Repository not found in database, attempting to discover', {
+          project_path: validatedProjectPath
+        });
+
+        const discoveredRepo = await this.gitManager.discoverRepository(validatedProjectPath);
+        if (!discoveredRepo) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                error: 'Not a git repository',
+                project_path: validatedProjectPath,
+                message: 'The specified path is not a git repository. Initialize git first.'
+              }, null, 2)
+            }]
+          };
+        }
+
+        // Index the repository
+        await this.ensureRepositoryInDatabase(validatedProjectPath, discoveredRepo);
+        
+        // Retrieve the newly indexed repository
+        repository = getRepoStmt.get(validatedProjectPath);
+        if (!repository) {
+          throw new Error('Failed to index repository in database');
+        }
+      }
+
+      // Get current commit hash
+      const currentCommit = await this.gitManager.getCurrentCommitHash(validatedProjectPath);
+      if (!currentCommit) {
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              error: 'No commits found',
+              project_path: validatedProjectPath,
+              message: 'Repository has no commits. Make at least one commit before creating a restore point.'
+            }, null, 2)
+          }]
+        };
+      }
+
+      // Check if a restore point with the same label already exists
+      const checkExistingStmt = this.dbManager.db.prepare(`
+        SELECT id, commit_hash, created_at
+        FROM restore_points
+        WHERE repository_id = ? AND label = ?
+      `);
+      
+      const existing = checkExistingStmt.get(repository.id, label);
+      if (existing) {
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              error: 'Duplicate label',
+              project_path: validatedProjectPath,
+              existing_restore_point: {
+                id: existing.id,
+                label: label,
+                commit_hash: existing.commit_hash,
+                created_at: existing.created_at
+              },
+              message: `A restore point with label "${label}" already exists. Use a different label or delete the existing one.`
+            }, null, 2)
+          }]
+        };
+      }
+
+      // Create the restore point
+      const insertStmt = this.dbManager.db.prepare(`
+        INSERT INTO restore_points (
+          repository_id,
+          commit_hash,
+          label,
+          description,
+          auto_generated,
+          test_status,
+          created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+      `);
+
+      const result = insertStmt.run(
+        repository.id,
+        currentCommit,
+        label,
+        description,
+        auto_generated ? 1 : 0,
+        test_status
+      );
+
+      if (!result.lastInsertRowid) {
+        throw new Error('Failed to create restore point');
+      }
+
+      // Get the created restore point with commit details
+      const getCreatedStmt = this.dbManager.db.prepare(`
+        SELECT 
+          rp.id,
+          rp.commit_hash,
+          rp.created_at,
+          rp.label,
+          rp.description,
+          rp.auto_generated,
+          rp.test_status,
+          gc.author_name,
+          gc.author_email,
+          gc.commit_date,
+          gc.message as commit_message
+        FROM restore_points rp
+        LEFT JOIN git_commits gc ON gc.commit_hash = rp.commit_hash 
+          AND gc.repository_id = rp.repository_id
+        WHERE rp.id = ?
+      `);
+
+      const createdPoint = getCreatedStmt.get(result.lastInsertRowid);
+
+      // Get working directory status for additional context
+      const workingStatus = await this.gitManager.getWorkingDirectoryStatus(validatedProjectPath);
+
+      this.logger.info('Restore point created successfully', {
+        project_path: validatedProjectPath,
+        restore_point_id: result.lastInsertRowid,
+        label,
+        commit_hash: currentCommit,
+        auto_generated
+      });
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            project_path: validatedProjectPath,
+            restore_point: {
+              id: createdPoint.id,
+              label: createdPoint.label,
+              description: createdPoint.description,
+              commit_hash: createdPoint.commit_hash,
+              created_at: createdPoint.created_at,
+              auto_generated: Boolean(createdPoint.auto_generated),
+              test_status: createdPoint.test_status,
+              commit_info: createdPoint.commit_date ? {
+                date: createdPoint.commit_date,
+                author: createdPoint.author_name,
+                email: createdPoint.author_email,
+                message: createdPoint.commit_message
+              } : null
+            },
+            working_directory: {
+              clean: workingStatus?.clean || false,
+              modified_files: workingStatus?.modifiedFiles?.length || 0,
+              untracked_files: workingStatus?.untrackedFiles?.length || 0
+            },
+            message: `Restore point "${label}" created successfully at commit ${currentCommit.substring(0, 7)}`
+          }, null, 2)
+        }]
+      };
+
+    } catch (error) {
+      const sanitizedError = errorSanitizer.sanitizeError(error.message, { 
+        operation: 'create_restore_point' 
+      });
+      
+      this.logger.error('Failed to create restore point', {
+        project_path,
+        label,
+        error: sanitizedError,
+        stack: error.stack
+      });
+
+      return {
+        content: [{
+          type: 'text',
+          text: `Error creating restore point: ${sanitizedError}`
+        }]
+      };
+    }
+  }
 }
