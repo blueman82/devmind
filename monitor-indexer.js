@@ -100,17 +100,23 @@ async function displayStatus() {
             console.log(`\n${colorize('bright', '💾 Database:')} ${colorize('red', 'Not Connected')}`);
         }
 
-        // Project Discovery
+        // Project Discovery  
         if (watcher?.claudeProjectsPath) {
             console.log(`\n${colorize('bright', '📁 Project Discovery:')}`);
             console.log(`   Monitoring Path: ${colorize('blue', watcher.claudeProjectsPath)}`);
             
             try {
-                await fs.access(watcher.claudeProjectsPath);
+                await Promise.race([
+                    fs.access(watcher.claudeProjectsPath),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+                ]);
                 console.log(`   Directory Status: ${colorize('green', '✅ EXISTS')}`);
                 
-                // Try to count projects
-                const entries = await fs.readdir(watcher.claudeProjectsPath, { withFileTypes: true });
+                // Try to count projects with timeout
+                const entries = await Promise.race([
+                    fs.readdir(watcher.claudeProjectsPath, { withFileTypes: true }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Directory read timeout')), 3000))
+                ]);
                 const projectDirs = entries.filter(e => e.isDirectory()).length;
                 console.log(`   Project Directories: ${colorize('blue', formatNumber(projectDirs))}`);
                 
