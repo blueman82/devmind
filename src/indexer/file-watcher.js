@@ -328,6 +328,11 @@ export class FileWatcher {
         console.log('Starting full index of existing conversations...');
         
         try {
+            // Initialize database if not already initialized
+            if (!this.dbManager.isInitialized) {
+                await this.dbManager.initialize();
+            }
+            
             const projectDirs = await this.discoverProjectDirectories();
             let totalConversations = 0;
 

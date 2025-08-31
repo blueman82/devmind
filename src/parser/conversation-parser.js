@@ -10,6 +10,17 @@ class ConversationParser {
     this.claudeProjectsDir = path.join(os.homedir(), '.claude', 'projects');
   }
 
+  // Parse a single JSONL file (FileWatcher compatible method)
+  async parseJsonlFile(filePath) {
+    try {
+      const conversation = this.parseConversation(filePath);
+      return [conversation]; // Return array for compatibility
+    } catch (error) {
+      console.warn(`Failed to parse JSONL file ${filePath}: ${error.message}`);
+      throw error; // Re-throw so FileWatcher can handle it
+    }
+  }
+
   // Parse a single JSONL file
   parseConversation(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
