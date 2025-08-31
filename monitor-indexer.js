@@ -44,18 +44,14 @@ function formatTime(isoString) {
 }
 
 async function displayStatus() {
-    console.log('[DEBUG] Starting displayStatus...');
     console.clear();
     console.log(colorize('cyan', '📊 AI Memory App - Indexer Status Dashboard'));
     console.log('═'.repeat(80));
     console.log(`${colorize('yellow', '⏰ Last Updated:')} ${new Date().toLocaleString()}\n`);
-    console.log('[DEBUG] Basic setup complete...');
 
     try {
-        console.log('[DEBUG] Getting FileWatcher status...');
         // FileWatcher Status
         const watcherStatus = watcher ? watcher.getStatus() : { isRunning: false };
-        console.log('[DEBUG] Got FileWatcher status, displaying...');
         console.log(colorize('bright', '🔍 FileWatcher Status:'));
         console.log(`   Running: ${watcherStatus.isRunning ? colorize('green', '✅ YES') : colorize('red', '❌ NO')}`);
         console.log(`   Watched Directories: ${colorize('blue', watcherStatus.watchedDirectories?.length || 0)}`);
@@ -72,14 +68,11 @@ async function displayStatus() {
             });
         }
 
-        console.log('[DEBUG] Starting database statistics section...');
         // Database Statistics
         if (dbManager?.isInitialized) {
             console.log(`\n${colorize('bright', '💾 Database Statistics:')}`);
             try {
-                console.log('[DEBUG] Getting database stats...');
                 const stats = dbManager.getStats();
-                console.log('[DEBUG] Got database stats, getting counts...');
             
             // Get conversation and message counts
             const convCount = dbManager.db.prepare('SELECT COUNT(*) as count FROM conversations').get();
@@ -107,14 +100,12 @@ async function displayStatus() {
             console.log(`\n${colorize('bright', '💾 Database:')} ${colorize('red', 'Not Connected')}`);
         }
 
-        console.log('[DEBUG] Starting project discovery section...');
         // Project Discovery  
         if (watcher?.claudeProjectsPath) {
             console.log(`\n${colorize('bright', '📁 Project Discovery:')}`);
             console.log(`   Monitoring Path: ${colorize('blue', watcher.claudeProjectsPath)}`);
             
             try {
-                console.log('[DEBUG] Checking directory access...');
                 await Promise.race([
                     fs.access(watcher.claudeProjectsPath),
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
@@ -154,12 +145,9 @@ async function displayStatus() {
         console.log(`   Press ${colorize('yellow', 'f')} to perform full index`);
         console.log(`   Press ${colorize('yellow', 'p')} to run performance test`);
         console.log(`   Press ${colorize('yellow', 's')} to show search test`);
-        
-        console.log('[DEBUG] displayStatus completed successfully');
 
     } catch (error) {
         console.log(colorize('red', `Error displaying status: ${error.message}`));
-        console.log('[DEBUG] Error in displayStatus:', error);
     }
 }
 

@@ -606,5 +606,13 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "tell me about this codebase AND You are a senior code reviewer ensuring high standards of code quality and security.\n\nWhen invoked:\n1. Run git diff to see recent changes\n2. Focus on modified files\n3. Begin review immediately\n\nReview checklist:\n- Code is simple and readable\n- Functions and variables are well-named\n- No duplicated code\n- Proper error handling\n- No exposed secrets or API keys\n- Input validation implemented\n- Good test coverage\n- Performance considerations addressed\n\nProvide feedback organized by priority:\n- Critical issues (must fix)\n- Warnings (should fix)\n- Suggestions (consider improving)\n\nInclude specific examples of how to fix issues.\nDO NOT MODIFY ANY CODE."
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "document your report in docs/ as code-review.yml"
   }
 ]
