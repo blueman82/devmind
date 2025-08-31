@@ -1502,5 +1502,45 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "implement the final tool, remember the CRITICAL RULES"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "k"
+  },
+  {
+    "session_id": "f32297c6-46cf-4c09-83c8-30438cd0af90",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/f32297c6-46cf-4c09-83c8-30438cd0af90.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "back to the PRD. Whats our first step?"
+  },
+  {
+    "session_id": "f32297c6-46cf-4c09-83c8-30438cd0af90",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/f32297c6-46cf-4c09-83c8-30438cd0af90.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\"Consider splitting git-tool-handlers.js (1535 lines)\" - broke our CRITICAL RULES! What are those?"
+  },
+  {
+    "session_id": "f32297c6-46cf-4c09-83c8-30438cd0af90",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/f32297c6-46cf-4c09-83c8-30438cd0af90.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "begin"
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "use memory to gain a complete understanding of the ai memory project. I want you to organise the documents docs/ into a better structure (for example all code review docs under one folder or possible main folder/sub folder per review)"
   }
 ]
