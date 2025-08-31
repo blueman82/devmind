@@ -7,7 +7,10 @@
 
 import FileWatcher from './src/indexer/file-watcher.js';
 import DatabaseManager from './src/database/database-manager.js';
+import { createLogger } from './src/utils/logger.js';
 import { promises as fs } from 'fs';
+
+const logger = createLogger('Monitor');
 
 console.log('📊 AI Memory App - Indexer Monitoring Dashboard\n');
 
@@ -93,6 +96,7 @@ async function displayStatus() {
             
             console.log(`   Indexed This Hour: ${colorize('yellow', formatNumber(recentConvs.count))} conversations`);
             } catch (dbError) {
+                logger.error('Database statistics query failed', { error: dbError.message, stack: dbError.stack });
                 console.error(`   ${colorize('red', 'Database Error: ' + dbError.message)}`);
                 console.error(`   ${colorize('red', 'Stack trace: ' + dbError.stack)}`);
                 console.log(`   ${colorize('yellow', 'Database statistics temporarily unavailable')}`);
@@ -148,6 +152,7 @@ async function displayStatus() {
         console.log(`   Press ${colorize('yellow', 's')} to show search test`);
 
     } catch (error) {
+        logger.error('Status display error', { error: error.message, stack: error.stack });
         console.error(colorize('red', `Error displaying status: ${error.message}`));
         console.error(colorize('red', `Stack trace: ${error.stack}`));
     }
@@ -160,11 +165,13 @@ async function startMonitoring() {
         // Initialize database manager
         dbManager = new DatabaseManager();
         await dbManager.initialize();
+        logger.info('Database connected successfully');
         console.log(colorize('green', '✅ Database connected'));
 
         // Start FileWatcher
         watcher = new FileWatcher();
         await watcher.start();
+        logger.info('FileWatcher started successfully');
         console.log(colorize('green', '✅ FileWatcher started'));
 
         // Display initial status
@@ -187,15 +194,19 @@ async function startMonitoring() {
                 await cleanup();
                 process.exit(0);
             } else if (key === 'r') {
+                logger.info('User initiated FileWatcher restart');
                 console.log(colorize('yellow', '\n🔄 Restarting FileWatcher...'));
                 watcher.stop();
                 watcher = new FileWatcher();
                 await watcher.start();
+                logger.info('FileWatcher restart completed');
                 console.log(colorize('green', '✅ FileWatcher restarted'));
                 setTimeout(() => displayStatus().catch(console.error), 500);
             } else if (key === 'f') {
+                logger.info('User initiated full index operation');
                 console.log(colorize('yellow', '\n📂 Performing full index...'));
                 await watcher.performFullIndex();
+                logger.info('Full index operation completed');
                 console.log(colorize('green', '✅ Full index completed'));
                 setTimeout(() => displayStatus().catch(console.error), 500);
             } else if (key === 'p') {
@@ -208,6 +219,7 @@ async function startMonitoring() {
                         console.log(`   Search Response Time: ${colorize('green', searchTime + 'ms')}`);
                         console.log(`   Search Results Found: ${colorize('blue', testResults.length)}`);
                     } catch (perfError) {
+                        logger.error('Performance test failed', { error: perfError.message, stack: perfError.stack });
                         console.error(`   Performance Test: ${colorize('red', 'Error - ' + perfError.message)}`);
                         console.error(`   Stack trace: ${colorize('red', perfError.stack)}`);
                     }
@@ -227,6 +239,7 @@ async function startMonitoring() {
         });
 
     } catch (error) {
+        logger.error('Monitor startup failed', { error: error.message, stack: error.stack });
         console.error(colorize('red', `Failed to start monitoring: ${error.message}`));
         console.error(colorize('red', `Stack trace: ${error.stack}`));
         process.exit(1);
@@ -234,6 +247,7 @@ async function startMonitoring() {
 }
 
 async function cleanup() {
+    logger.info('Monitor cleanup initiated');
     console.log(colorize('yellow', '\n🧹 Cleaning up...'));
     
     if (monitoringInterval) {

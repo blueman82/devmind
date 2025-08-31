@@ -4,6 +4,7 @@ import { join, extname, basename } from 'path';
 import { homedir } from 'os';
 import DatabaseManager from '../database/database-manager.js';
 import ConversationParser from '../parser/conversation-parser.js';
+import { createLogger } from '../utils/logger.js';
 
 /**
  * FileWatcher - Real-time monitoring of Claude projects directory
@@ -23,6 +24,8 @@ export class FileWatcher {
         this.debounceDelay = options.debounceDelay || 1000; // 1 second
         this.pendingIndexes = new Map();
         
+        this.logger = createLogger('FileWatcher');
+        this.logger.info('FileWatcher initialized', { claudeProjectsPath: this.claudeProjectsPath });
         console.log(`FileWatcher initialized for: ${this.claudeProjectsPath}`);
     }
 
