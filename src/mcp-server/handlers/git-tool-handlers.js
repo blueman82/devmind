@@ -803,6 +803,16 @@ export class GitToolHandlers {
         };
       }
 
+      // Validate commit hash format if provided
+      if (commit_hash && !/^[a-f0-9]{7,40}$/.test(commit_hash)) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Error: Invalid commit hash format. Must be 7-40 hexadecimal characters.'
+          }]
+        };
+      }
+
       // Validate project path
       const pathValidation = pathValidator.validateProjectPath(project_path);
       if (!pathValidation.isValid) {

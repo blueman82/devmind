@@ -14,7 +14,8 @@ export class SecureGitExecutor {
       'show',
       'status',
       'rev-parse',
-      'config'
+      'config',
+      'diff'
     ]);
     
     this.allowedSubcommands = new Map([
@@ -23,8 +24,9 @@ export class SecureGitExecutor {
       ['log', new Set(['-1', '--format=%H|%ad|%an|%ae|%s|%P', '--date=iso', '--since', '--until', '--author', '--grep', '--stat'])],
       ['show', new Set(['--format=%H|%ad|%an|%ae|%s|%P', '--format=', '--name-status', '--stat'])],
       ['status', new Set(['--porcelain'])],
-      ['rev-parse', new Set(['--show-toplevel', '--git-dir'])],
-      ['config', new Set(['--get', '--list'])]
+      ['rev-parse', new Set(['--show-toplevel', '--git-dir', 'HEAD'])],
+      ['config', new Set(['--get', '--list'])],
+      ['diff', new Set(['--name-status', '--stat', '--numstat'])]
     ]);
     
     this.maxTimeout = 10000; // 10 seconds max
