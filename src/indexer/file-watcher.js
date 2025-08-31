@@ -110,41 +110,56 @@ export class FileWatcher {
      * Watch the main projects directory for new project creation
      */
     async watchProjectsDirectory() {
-        const watcher = watch(this.claudeProjectsPath, { recursive: false }, 
-            async (eventType, filename) => {
-                if (eventType === 'rename' && filename) {
-                    const newProjectPath = join(this.claudeProjectsPath, filename);
-                    
-                    try {
-                        const stat = await fs.stat(newProjectPath);
-                        if (stat.isDirectory()) {
-                            console.log(`New project directory detected: ${filename}`);
-                            
-                            // Wait a bit for the directory to be fully created
-                            setTimeout(async () => {
-                                const hasJsonl = await this.checkForJsonlFiles(newProjectPath);
-                                if (hasJsonl) {
-                                    await this.watchProjectDirectory(newProjectPath);
-                                }
-                            }, 2000);
+        try {
+            const watcher = watch(this.claudeProjectsPath, { recursive: false }, 
+                async (eventType, filename) => {
+                    if (eventType === 'rename' && filename) {
+                        const newProjectPath = join(this.claudeProjectsPath, filename);
+                        
+                        try {
+                            const stat = await fs.stat(newProjectPath);
+                            if (stat.isDirectory()) {
+                                console.log(`New project directory detected: ${filename}`);
+                                
+                                // Wait a bit for the directory to be fully created
+                                setTimeout(async () => {
+                                    const hasJsonl = await this.checkForJsonlFiles(newProjectPath);
+                                    if (hasJsonl) {
+                                        await this.watchProjectDirectory(newProjectPath);
+                                    }
+                                }, 2000);
+                            }
+                        } catch (error) {
+                            // Directory might have been deleted, ignore
                         }
-                    } catch (error) {
-                        // Directory might have been deleted, ignore
                     }
-                }
-            });
+                });
 
-        this.watchers.set('main', watcher);
-        console.log('Monitoring main projects directory for new projects');
+            this.watchers.set('main', watcher);
+            console.log('Monitoring main projects directory for new projects');
+        } catch (error) {
+            console.error(`Failed to watch main projects directory ${this.claudeProjectsPath}:`, error);
+            // Ensure any partial watcher is cleaned up
+            const existingWatcher = this.watchers.get('main');
+            if (existingWatcher) {
+                try {
+                    existingWatcher.close();
+                } catch (closeError) {
+                    console.error('Error closing failed main directory watcher:', closeError);
+                }
+                this.watchers.delete('main');
+            }
+            throw error;
+        }
     }
 
     /**
      * Watch a specific project directory for JSONL changes
      */
     async watchProjectDirectory(projectPath) {
+        const projectName = basename(projectPath);
+        
         try {
-            const projectName = basename(projectPath);
-            
             // Skip if already watching
             if (this.watchers.has(projectPath)) {
                 return;
@@ -180,6 +195,17 @@ export class FileWatcher {
 
         } catch (error) {
             console.error(`Failed to watch project directory ${projectPath}:`, error);
+            // Ensure any partial watcher is cleaned up
+            const existingWatcher = this.watchers.get(projectPath);
+            if (existingWatcher) {
+                try {
+                    existingWatcher.close();
+                } catch (closeError) {
+                    console.error(`Error closing failed project watcher for ${projectName}:`, closeError);
+                }
+                this.watchers.delete(projectPath);
+            }
+            throw error;
         }
     }
 
@@ -209,6 +235,17 @@ export class FileWatcher {
             
         } catch (error) {
             console.error('Failed to watch parent directory:', error);
+            // Ensure any partial watcher is cleaned up
+            const existingWatcher = this.watchers.get('parent');
+            if (existingWatcher) {
+                try {
+                    existingWatcher.close();
+                } catch (closeError) {
+                    console.error('Error closing failed parent directory watcher:', closeError);
+                }
+                this.watchers.delete('parent');
+            }
+            throw error;
         }
     }
 
