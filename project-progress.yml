@@ -853,3 +853,33 @@ git_integration_security_fixes:
     validation: "✅ Tested - get_git_context tool works with security fixes"
     
   commit_pending: "Fix security vulnerability: Replace direct execSync with secure git executor"
+
+## Cache Timing Optimization (2025-08-31)
+
+git_cache_timing_fix:
+  status: "✅ COMPLETE"
+  completion_date: "2025-08-31T14:45:00Z"
+  issue_source: "docs/git-integration-review.yml - LOW severity warning"
+  
+  problem_addressed:
+    issue: "Repository cache with 5-minute TTL serving stale data"
+    impact: "Branch changes or new commits not reflected immediately"
+    user_experience: "After switching branches, MCP shows old branch for up to 5 minutes"
+    
+  solution_implemented:
+    approach: "Reduced cache TTL from 5 minutes to 30 seconds"
+    location: "src/git/git-manager.js:23"
+    rationale:
+      - "Balances performance with data freshness"
+      - "Git operations are fast enough for 30-second cache"
+      - "User branch switches reflected within 30 seconds"
+      - "Minimal performance impact on typical usage"
+    
+  alternatives_considered:
+    remove_cache: "Too much performance impact"
+    smart_invalidation: "Over-engineering for current needs"
+    1_minute_ttl: "Still too long for active development"
+    
+  validation: "Cache still provides performance benefit while ensuring fresh data"
+  
+  commit_pending: "Optimize git cache timing: Reduce TTL from 5 minutes to 30 seconds"

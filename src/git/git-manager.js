@@ -20,7 +20,7 @@ export default class GitManager {
 
       if (this.repositoryCache.has(projectPath)) {
         const cached = this.repositoryCache.get(projectPath);
-        if (Date.now() - cached.timestamp < 300000) { // 5 min cache
+        if (Date.now() - cached.timestamp < 30000) { // 30 second cache for fresher data
           return cached.repository;
         }
       }
