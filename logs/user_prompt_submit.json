@@ -558,5 +558,45 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "but in monitor I can't use the controls anymore, there not visible"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I don't know when the actual full indexing will complete! Is there a way to see a progress status precetage for example? Answer only"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "its still stuck on performance metrics, kill all instances of it running and see for yourself after running it"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "what do you recommend? Answer only"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "what are the performance metrics based on right now? Answer only"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "okay so we don't need it until indexing is done, remove performance metrics as part of the startup of monitor and instead make it available as an option to run under the Controls section. What do you think?"
   }
 ]

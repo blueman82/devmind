@@ -126,25 +126,13 @@ async function displayStatus() {
             }
         }
 
-        // Performance Metrics
-        console.log(`\n${colorize('bright', '⚡ Performance Metrics:')}`);
-        if (dbManager?.isInitialized) {
-            try {
-                const startTime = Date.now();
-                const testResults = dbManager.searchConversations('test', { limit: 1 });
-                const searchTime = Date.now() - startTime;
-                console.log(`   Search Response Time: ${colorize('green', searchTime + 'ms')}`);
-                console.log(`   Search Results Found: ${colorize('blue', formatNumber(testResults.length))}`);
-            } catch (perfError) {
-                console.log(`   Search Test: ${colorize('red', 'Error - ' + perfError.message)}`);
-            }
-        }
 
         // Controls
         console.log(`\n${colorize('bright', '🎛️  Controls:')}`);
         console.log(`   Press ${colorize('yellow', 'Ctrl+C')} to stop monitoring`);
         console.log(`   Press ${colorize('yellow', 'r')} to restart FileWatcher`);
         console.log(`   Press ${colorize('yellow', 'f')} to perform full index`);
+        console.log(`   Press ${colorize('yellow', 'p')} to run performance test`);
         console.log(`   Press ${colorize('yellow', 's')} to show search test`);
 
     } catch (error) {
@@ -193,6 +181,22 @@ async function startMonitoring() {
                 await watcher.performFullIndex();
                 console.log(colorize('green', '✅ Full index completed'));
                 setTimeout(() => displayStatus().catch(console.error), 500);
+            } else if (key === 'p') {
+                console.log(colorize('yellow', '\n⚡ Running performance test...'));
+                if (dbManager?.isInitialized) {
+                    try {
+                        const startTime = Date.now();
+                        const testResults = dbManager.searchConversations('test', { limit: 1 });
+                        const searchTime = Date.now() - startTime;
+                        console.log(`   Search Response Time: ${colorize('green', searchTime + 'ms')}`);
+                        console.log(`   Search Results Found: ${colorize('blue', testResults.length)}`);
+                    } catch (perfError) {
+                        console.log(`   Performance Test: ${colorize('red', 'Error - ' + perfError.message)}`);
+                    }
+                } else {
+                    console.log(`   ${colorize('red', 'Database not initialized')}`);
+                }
+                setTimeout(() => displayStatus().catch(console.error), 2000);
             } else if (key === 's') {
                 console.log(colorize('yellow', '\n🔍 Testing search functionality...'));
                 const results = dbManager.searchConversations('authentication database', { limit: 3 });
