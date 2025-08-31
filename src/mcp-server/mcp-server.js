@@ -394,6 +394,44 @@ class AIMemoryMCPServer {
               },
               required: ['project_path']
             }
+          },
+          {
+            name: 'restore_project_state',
+            description: 'Generate commands to safely restore project to a specific restore point or commit',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                project_path: {
+                  type: 'string',
+                  description: 'Path to the project directory'
+                },
+                restore_point_id: {
+                  type: 'number',
+                  description: 'ID of the restore point to restore to'
+                },
+                commit_hash: {
+                  type: 'string',
+                  description: 'Commit hash to restore to (alternative to restore_point_id)'
+                },
+                restore_method: {
+                  type: 'string',
+                  description: 'Restoration method: safe (blocks on uncommitted), stash (stashes changes), force (discards changes)',
+                  default: 'safe',
+                  enum: ['safe', 'stash', 'force']
+                },
+                create_backup: {
+                  type: 'boolean',
+                  description: 'Create a backup branch before restoration',
+                  default: true
+                },
+                dry_run: {
+                  type: 'boolean',
+                  description: 'Generate commands without execution instructions',
+                  default: false
+                }
+              },
+              required: ['project_path']
+            }
           }
         ]
       };
@@ -433,6 +471,9 @@ class AIMemoryMCPServer {
             
           case 'preview_restore':
             return await this.gitToolHandlers.handlePreviewRestore(args);
+            
+          case 'restore_project_state':
+            return await this.gitToolHandlers.handleRestoreProjectState(args);
             
           default:
             throw new McpError(

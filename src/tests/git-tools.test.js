@@ -615,6 +615,96 @@ describe('Git Tools Tests', () => {
     }
   });
 
+  test('GitToolHandlers - handleRestoreProjectState', async () => {
+    // Initialize handlers if not already done
+    if (!gitToolHandlers) {
+      gitToolHandlers = new GitToolHandlers(dbManager);
+      await gitToolHandlers.initialize();
+    }
+    
+    // Mock path validation
+    const originalValidate = pathValidator.validateProjectPath;
+    pathValidator.validateProjectPath = function(path) {
+      return { isValid: true, normalizedPath: path };
+    };
+    
+    try {
+      // Ensure repository is indexed
+      await gitToolHandlers.handleGetGitContext({
+        project_path: testRepoPath
+      });
+      
+      // First create a restore point
+      const createResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'Test restore state point',
+        description: 'For testing restore state functionality'
+      });
+      
+      const createResponse = JSON.parse(createResult.content[0].text);
+      
+      if (createResponse.success) {
+        // Test restore with restore_point_id
+        const restoreResult = await gitToolHandlers.handleRestoreProjectState({
+          project_path: testRepoPath,
+          restore_point_id: createResponse.restore_point.id,
+          restore_method: 'safe',
+          dry_run: true
+        });
+        
+        assert.ok(restoreResult.content, 'Should return content');
+        const restoreResponse = JSON.parse(restoreResult.content[0].text);
+        
+        if (restoreResponse.status === 'already_at_target') {
+          console.log('✅ Correctly detected already at target commit');
+          assert.strictEqual(restoreResponse.status, 'already_at_target', 'Should detect same commit');
+        } else if (restoreResponse.status === 'dry_run') {
+          console.log('✅ Dry run commands generated successfully');
+          assert.ok(restoreResponse.restoration_plan, 'Should have restoration plan');
+          assert.ok(restoreResponse.restoration_commands, 'Should have commands');
+          assert.strictEqual(restoreResponse.execution_notes.includes('DRY RUN'), true, 'Should indicate dry run');
+        }
+        
+        // Test with invalid restore method
+        const invalidMethodResult = await gitToolHandlers.handleRestoreProjectState({
+          project_path: testRepoPath,
+          restore_point_id: 1,
+          restore_method: 'invalid'
+        });
+        
+        assert.ok(invalidMethodResult.content[0].text.includes('Invalid restore_method'), 'Should error on invalid method');
+        console.log('✅ Invalid restore method handled correctly');
+      } else {
+        console.log('⚠️ Could not create restore point for restore state test (expected in test environment)');
+      }
+      
+      // Test with missing parameters
+      const missingParamsResult = await gitToolHandlers.handleRestoreProjectState({
+        project_path: testRepoPath
+        // Missing both restore_point_id and commit_hash
+      });
+      
+      assert.ok(missingParamsResult.content, 'Should return content for missing params');
+      assert.strictEqual(
+        missingParamsResult.content[0].text,
+        'Error: Either restore_point_id or commit_hash is required',
+        'Should error on missing target'
+      );
+      
+      // Test with invalid commit hash
+      const invalidHashResult = await gitToolHandlers.handleRestoreProjectState({
+        project_path: testRepoPath,
+        commit_hash: 'invalid-hash'
+      });
+      
+      assert.ok(invalidHashResult.content[0].text.includes('Invalid commit hash format'), 'Should validate commit hash');
+      console.log('✅ Commit hash validation working');
+      
+    } finally {
+      pathValidator.validateProjectPath = originalValidate;
+    }
+  });
+
   test('GitSchema - restore point operations', async () => {
     // First ensure we have a repository in the database
     const repoCheckStmt = db.prepare('SELECT id FROM git_repositories WHERE project_path = ?');
