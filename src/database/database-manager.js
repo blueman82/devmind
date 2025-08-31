@@ -355,7 +355,8 @@ export class DatabaseManager {
                 snippet(messages_fts, 1, '<mark>', '</mark>', '...', 32) as snippet,
                 bm25(messages_fts) as relevance_score
             FROM conversations c
-            JOIN messages_fts ON messages_fts.project_path = c.project_path
+            JOIN messages m ON m.conversation_id = c.id  
+            JOIN messages_fts ON messages_fts.message_id = m.id
             WHERE messages_fts MATCH ?
         `;
 

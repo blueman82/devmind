@@ -878,5 +878,45 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "check current time, lok at the error\nIndexing conversation file: ef6c8298-4d91-4252-b014-980b7d1def65.jsonl\nFailed to index conversation undefined: SqliteError: FOREIGN KEY constraint failed\n    at file:///Users/harrison/Documents/Github/devmind/src/database/database-manager.js:247:22\n    at sqliteTransaction (/Users/harrison/Documents/Github/devmind/node_modules/better-sqlite3/lib/methods/transaction.js:65:24)\n    at DatabaseManager.insertMessages (file:///Users/harrison/Documents/Github/devmind/src/database/database-manager.js:263:16)\n    at FileWatcher.indexConversation (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:375:38)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async FileWatcher.indexFile (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:302:17)\n    at async Timeout._onTimeout (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:267:13) {\n  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'\n}\nFailed to index file /Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl: SqliteError: FOREIGN KEY constraint failed\n\ud83d\udcca AI Memory App - Indexer Status Dashboard\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\u23f0 Last Updated: 31/8/2025, 12:44:08"
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "check again progress"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "whats the summary of the issue, why were those errors happening? What is causing them? The root cause, and fix please."
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "foreign key being new conversations?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "what stage are we up to now? "
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I've noticed the response time from the MCP making a query to a response given is a lot slower now. Its taking over 10 seconds to respond."
   }
 ]
