@@ -1,0 +1,40 @@
+{
+  "name": "ai-memory-app",
+  "version": "1.0.0",
+  "description": "AI Memory App MCP server providing conversation indexing and search with SQLite FTS5",
+  "main": "src/mcp-server/mcp-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/mcp-server/mcp-server.js",
+    "test": "node --test src/tests/*.test.js",
+    "test:db": "node --test src/tests/database-manager.test.js",
+    "test:mcp": "node --test src/tests/mcp-server.test.js",
+    "test:watcher": "node --test src/tests/file-watcher.test.js",
+    "test:config": "node --test src/tests/config-validator.test.js",
+    "dev": "node --watch src/mcp-server/mcp-server.js",
+    "monitor": "node monitor-indexer.js",
+    "status": "node indexer-status.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "memory",
+    "conversation",
+    "indexing",
+    "search",
+    "sqlite",
+    "fts5"
+  ],
+  "author": "AI Memory App",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
