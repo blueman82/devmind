@@ -218,6 +218,25 @@ class AIMemoryMCPServer {
                 }
               }
             }
+          },
+          {
+            name: 'performance_metrics',
+            description: 'Get performance metrics and analytics',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                category: {
+                  type: 'string',
+                  description: 'Specific category to get metrics for (database, search, indexing, system)',
+                  enum: ['database', 'search', 'indexing', 'system']
+                },
+                timeWindow: {
+                  type: 'number',
+                  description: 'Time window in milliseconds for metrics aggregation',
+                  default: 60000
+                }
+              }
+            }
           }
         ]
       };
@@ -242,6 +261,9 @@ class AIMemoryMCPServer {
             
           case 'health_check':
             return await this.handleHealthCheck(args);
+            
+          case 'performance_metrics':
+            return await this.handlePerformanceMetrics(args);
             
           default:
             throw new McpError(
@@ -303,6 +325,60 @@ class AIMemoryMCPServer {
         content: [{
           type: 'text',
           text: `Health check error: ${error.message}`
+        }]
+      };
+    }
+  }
+
+  /**
+   * Handle performance metrics requests
+   */
+  async handlePerformanceMetrics(args) {
+    try {
+      if (!this.toolHandlers.dbManager || !this.toolHandlers.dbManager.getPerformanceMetrics()) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Performance metrics not available - metrics collection may be disabled'
+          }]
+        };
+      }
+
+      const timeWindow = args?.timeWindow || 60000;
+      const category = args?.category;
+
+      const performanceMetrics = this.toolHandlers.dbManager.getPerformanceMetrics();
+      
+      let metricsResult;
+      if (category) {
+        // Get analytics for specific category
+        metricsResult = performanceMetrics.getAnalytics(category, timeWindow);
+        if (!metricsResult) {
+          return {
+            content: [{
+              type: 'text',
+              text: `No metrics available for category: ${category}`
+            }]
+          };
+        }
+      } else {
+        // Get comprehensive performance report
+        metricsResult = performanceMetrics.getPerformanceReport(timeWindow);
+      }
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(metricsResult, null, 2)
+        }]
+      };
+
+    } catch (error) {
+      this.logger.error('Performance metrics request failed', { error: error.message, stack: error.stack });
+      return {
+        content: [{
+          type: 'text',
+          text: `Performance metrics error: ${error.message}`
         }]
       };
     }

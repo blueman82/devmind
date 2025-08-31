@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
+import PerformanceMetrics from '../utils/performance-metrics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,11 +13,15 @@ const __dirname = dirname(__filename);
  * Provides conversation indexing, FTS5 search, and data persistence
  */
 export class DatabaseManager {
-    constructor(dbPath = null) {
+    constructor(dbPath = null, options = {}) {
         // Default database location as specified in PRD
         this.dbPath = dbPath || join(homedir(), '.claude', 'ai-memory', 'conversations.db');
         this.db = null;
         this.isInitialized = false;
+        
+        // Initialize performance metrics if enabled
+        this.metricsEnabled = options.enableMetrics !== false; // Default to true
+        this.performanceMetrics = this.metricsEnabled ? new PerformanceMetrics() : null;
     }
 
     /**
@@ -142,6 +147,7 @@ export class DatabaseManager {
     async upsertConversation(conversationData) {
         this.ensureInitialized();
         
+        const startTime = Date.now();
         const stmt = this.db.prepare(`
             INSERT INTO conversations (
                 session_id, project_hash, project_name, project_path,
@@ -159,7 +165,7 @@ export class DatabaseManager {
                 total_tokens = excluded.total_tokens
         `);
 
-        return stmt.run(
+        const result = stmt.run(
             conversationData.session_id,
             conversationData.project_hash,
             conversationData.project_name,
@@ -172,6 +178,13 @@ export class DatabaseManager {
             JSON.stringify(conversationData.keywords || []),
             conversationData.total_tokens || 0
         );
+
+        // Record performance metrics
+        if (this.performanceMetrics) {
+            this.performanceMetrics.recordDatabaseQuery('upsertConversation', Date.now() - startTime, 1);
+        }
+
+        return result;
     }
 
     /**
@@ -244,6 +257,7 @@ export class DatabaseManager {
     searchConversations(query, options = {}) {
         this.ensureInitialized();
         
+        const startTime = Date.now();
         const {
             limit = 50,
             offset = 0,
@@ -295,7 +309,20 @@ export class DatabaseManager {
         params.push(limit, offset);
 
         const stmt = this.db.prepare(sql);
-        return stmt.all(...params);
+        const results = stmt.all(...params);
+
+        // Record performance metrics
+        if (this.performanceMetrics) {
+            this.performanceMetrics.recordSearchOperation(
+                'conversationSearch',
+                query,
+                Date.now() - startTime,
+                results.length,
+                { searchMode, limit, projectFilter: !!projectFilter, timeframe: !!timeframe }
+            );
+        }
+
+        return results;
     }
 
     /**
@@ -304,6 +331,7 @@ export class DatabaseManager {
     getConversationContext(sessionId, options = {}) {
         this.ensureInitialized();
         
+        const startTime = Date.now();
         const {
             page = 1,
             pageSize = 50,
@@ -318,6 +346,10 @@ export class DatabaseManager {
         `).get(sessionId);
 
         if (!conversation) {
+            // Record performance metrics for failed lookup
+            if (this.performanceMetrics) {
+                this.performanceMetrics.recordDatabaseQuery('getConversationContext', Date.now() - startTime, 0);
+            }
             return null;
         }
 
@@ -341,6 +373,15 @@ export class DatabaseManager {
         const paginatedMessages = this.paginateMessages(
             messages, page, pageSize, maxTokens, summaryMode
         );
+
+        // Record performance metrics
+        if (this.performanceMetrics) {
+            this.performanceMetrics.recordDatabaseQuery(
+                'getConversationContext', 
+                Date.now() - startTime, 
+                messages.length
+            );
+        }
 
         return {
             conversation: {
@@ -476,9 +517,31 @@ export class DatabaseManager {
     }
 
     /**
+     * Get performance metrics report
+     */
+    getPerformanceReport(timeWindow = 60000) {
+        if (!this.performanceMetrics) {
+            return null;
+        }
+        return this.performanceMetrics.getPerformanceReport(timeWindow);
+    }
+
+    /**
+     * Get performance metrics instance
+     */
+    getPerformanceMetrics() {
+        return this.performanceMetrics;
+    }
+
+    /**
      * Close database connection
      */
     close() {
+        // Stop performance metrics collection
+        if (this.performanceMetrics) {
+            this.performanceMetrics.stopSystemMetricsCollection();
+        }
+        
         if (this.db) {
             this.db.close();
             this.db = null;

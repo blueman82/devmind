@@ -154,6 +154,7 @@ async function displayStatus() {
         console.log(`   Press ${colorize('yellow', 'p')} to run performance test`);
         console.log(`   Press ${colorize('yellow', 's')} to show search test`);
         console.log(`   Press ${colorize('yellow', 'h')} to run health check`);
+        console.log(`   Press ${colorize('yellow', 'm')} to show performance metrics`);
 
     } catch (error) {
         logger.error('Status display error', { error: error.message, stack: error.stack });
@@ -278,6 +279,50 @@ async function startMonitoring() {
                     console.log(`   ${colorize('red', 'Health checker not initialized')}`);
                 }
                 setTimeout(() => displayStatus().catch(console.error), 3000);
+            } else if (key === 'm') {
+                console.log(colorize('yellow', '\n📊 Performance Metrics Report...'));
+                if (dbManager?.getPerformanceMetrics()) {
+                    try {
+                        const metricsReport = dbManager.getPerformanceReport(60000); // 1 minute window
+                        console.log(`\n${colorize('bright', '📊 Performance Metrics (Last 60s):')}`);
+                        console.log(`   Uptime: ${colorize('blue', metricsReport.uptimeHuman)}`);
+                        
+                        // Database metrics
+                        const dbMetrics = metricsReport.categories.database;
+                        if (dbMetrics && dbMetrics.operationCount > 0) {
+                            console.log(`   Database Operations: ${colorize('green', dbMetrics.operationCount)}`);
+                            console.log(`   Avg Query Time: ${colorize(dbMetrics.avgExecutionTime > 50 ? 'yellow' : 'green', dbMetrics.avgExecutionTime + 'ms')}`);
+                            console.log(`   Max Query Time: ${colorize(dbMetrics.maxExecutionTime > 100 ? 'red' : 'green', dbMetrics.maxExecutionTime + 'ms')}`);
+                        }
+                        
+                        // Search metrics
+                        const searchMetrics = metricsReport.categories.search;
+                        if (searchMetrics && searchMetrics.operationCount > 0) {
+                            console.log(`   Search Operations: ${colorize('green', searchMetrics.operationCount)}`);
+                            console.log(`   Avg Search Time: ${colorize(searchMetrics.avgExecutionTime > 200 ? 'yellow' : 'green', searchMetrics.avgExecutionTime + 'ms')}`);
+                        }
+                        
+                        // Performance indicators
+                        const indicators = metricsReport.performanceIndicators;
+                        console.log(`   Overall Status: ${indicators.status === 'healthy' ? colorize('green', '✅ HEALTHY') : 
+                                                      indicators.status === 'warning' ? colorize('yellow', '⚠️ WARNING') : 
+                                                      colorize('red', '❌ ISSUES')}`);
+                        
+                        if (indicators.issues.length > 0) {
+                            console.log(`   Issues:`);
+                            indicators.issues.forEach(issue => {
+                                console.log(`     • ${colorize('yellow', issue)}`);
+                            });
+                        }
+                        
+                    } catch (metricsError) {
+                        console.error(`   Performance Metrics: ${colorize('red', 'Error - ' + metricsError.message)}`);
+                        logger.error('Performance metrics failed', { error: metricsError.message, stack: metricsError.stack });
+                    }
+                } else {
+                    console.log(`   ${colorize('red', 'Performance metrics not available')}`);
+                }
+                setTimeout(() => displayStatus().catch(console.error), 4000);
             }
         });
 
