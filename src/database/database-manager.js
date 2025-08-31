@@ -179,12 +179,24 @@ export class DatabaseManager {
             conversationData.total_tokens || 0
         );
 
+        // Get the conversation ID - either from insert or by querying for existing
+        let conversationId;
+        if (result.lastInsertRowid && result.lastInsertRowid > 0) {
+            // New conversation was inserted
+            conversationId = result.lastInsertRowid;
+        } else {
+            // Existing conversation was updated, need to query for ID
+            const getIdStmt = this.db.prepare('SELECT id FROM conversations WHERE session_id = ?');
+            const row = getIdStmt.get(conversationData.session_id);
+            conversationId = row ? row.id : null;
+        }
+
         // Record performance metrics
         if (this.performanceMetrics) {
             this.performanceMetrics.recordDatabaseQuery('upsertConversation', Date.now() - startTime, 1);
         }
 
-        return result;
+        return { ...result, conversationId };
     }
 
     /**

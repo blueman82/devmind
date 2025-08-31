@@ -339,7 +339,7 @@ export class FileWatcher {
                 total_tokens: conversation.total_tokens
             });
 
-            const conversationId = result.lastInsertRowid || result.changes;
+            const conversationId = result.conversationId;
 
             // Insert messages if this is a new conversation
             if (result.changes > 0 && conversation.messages.length > 0) {
