@@ -510,5 +510,53 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "I'm seeing a lot of these\nFailed to index conversation undefined: SqliteError: NOT NULL constraint failed: conversations.session_id\n    at DatabaseManager.upsertConversation (file:///Users/harrison/Documents/Github/devmind/src/database/database-manager.js:157:21)\n    at FileWatcher.indexConversation (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:288:49)\n    at FileWatcher.indexFile (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:262:28)\n    at async FileWatcher.performFullIndex (file:///Users/harrison/Documents/Github/devmind/src/indexer/file-watcher.js:365:21)\n    at async ReadStream.<anonymous> (file:///Users/harrison/Documents/Github/devmind/monitor-indexer.js:189:17) {\n  code: 'SQLITE_CONSTRAINT_NOTNULL'\n}"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "update project progress!\nAlso, the code accounts for both ids and non ids files now?"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "run the monitor program"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "its stuck and doesnt show anything after\n\ud83d\udcbe Database Statistics:\n   Conversations Indexed: 442\n   Messages Indexed: 104,870\n   FTS5 Entries: 104,870\n   Last Full Index: 31/8/2025, 09:13:15\n   Last Incremental: 31/8/2025, 09:13:15\n   Indexed This Hour: 0 conversations\n\n\ud83d\udcc1 Project Discovery:\n   Monitoring Path: /Users/harrison/.claude/projects\n   Directory Status: \u2705 EXISTS\n   Project Directories: 9\n   Recent Projects:\n     \u2022 -Users-harrison\n     \u2022 -Users-harrison-...\n     \u2022 -Users-harrison-...\n     \u2022 -Users-harrison-...\n     \u2022 -Users-harrison-...\n\n\u26a1 Performance Metrics:"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "no controls are visible "
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "run the status yourself"
+  },
+  {
+    "session_id": "b45ca3ec-8a59-4f20-8072-ea015c1f6dd0",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b45ca3ec-8a59-4f20-8072-ea015c1f6dd0.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "but in monitor I can't use the controls anymore, there not visible"
   }
 ]

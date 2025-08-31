@@ -129,11 +129,15 @@ async function displayStatus() {
         // Performance Metrics
         console.log(`\n${colorize('bright', '⚡ Performance Metrics:')}`);
         if (dbManager?.isInitialized) {
-            const startTime = Date.now();
-            const testResults = dbManager.searchConversations('test', { limit: 1 });
-            const searchTime = Date.now() - startTime;
-            console.log(`   Search Response Time: ${colorize('green', searchTime + 'ms')}`);
-            console.log(`   Search Results Found: ${colorize('blue', formatNumber(testResults.length))}`);
+            try {
+                const startTime = Date.now();
+                const testResults = dbManager.searchConversations('test', { limit: 1 });
+                const searchTime = Date.now() - startTime;
+                console.log(`   Search Response Time: ${colorize('green', searchTime + 'ms')}`);
+                console.log(`   Search Results Found: ${colorize('blue', formatNumber(testResults.length))}`);
+            } catch (perfError) {
+                console.log(`   Search Test: ${colorize('red', 'Error - ' + perfError.message)}`);
+            }
         }
 
         // Controls
