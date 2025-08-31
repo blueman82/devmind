@@ -10,6 +10,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import ConversationParser from '../parser/conversation-parser.js';
 import { ToolHandlers } from './handlers/tool-handlers.js';
+import { GitToolHandlers } from './handlers/git-tool-handlers.js';
 import ConfigValidator from '../utils/config-validator.js';
 import HealthChecker from '../utils/health-check.js';
 import { createLogger } from '../utils/logger.js';
@@ -31,6 +32,7 @@ class AIMemoryMCPServer {
 
     this.parser = new ConversationParser();
     this.toolHandlers = new ToolHandlers(this.parser);
+    this.gitToolHandlers = new GitToolHandlers(this.toolHandlers.dbManager);
     this.healthChecker = null; // Initialized after database setup
     this.setupErrorHandling();
     this.setupHandlers();
@@ -256,6 +258,45 @@ class AIMemoryMCPServer {
                 }
               }
             }
+          },
+          {
+            name: 'get_git_context',
+            description: 'Get git repository context including commit history and working directory status for a project',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                project_path: {
+                  type: 'string',
+                  description: 'Path to the project directory'
+                },
+                conversation_id: {
+                  type: 'string',
+                  description: 'Optional conversation ID to get git links for'
+                },
+                include_commit_history: {
+                  type: 'boolean',
+                  description: 'Include recent commit history',
+                  default: true
+                },
+                include_working_status: {
+                  type: 'boolean', 
+                  description: 'Include working directory status (staged, modified, untracked files)',
+                  default: true
+                },
+                commit_limit: {
+                  type: 'number',
+                  description: 'Maximum number of commits to return',
+                  default: 20,
+                  minimum: 1,
+                  maximum: 100
+                },
+                time_range: {
+                  type: 'string',
+                  description: 'Time range for commit history (e.g., "1 week ago", "today", "2 days ago")'
+                }
+              },
+              required: ['project_path']
+            }
           }
         ]
       };
@@ -283,6 +324,9 @@ class AIMemoryMCPServer {
             
           case 'performance_metrics':
             return await this.handlePerformanceMetrics(args);
+            
+          case 'get_git_context':
+            return await this.gitToolHandlers.handleGetGitContext(args);
             
           default:
             throw new McpError(

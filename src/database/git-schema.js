@@ -1,0 +1,405 @@
+import { createLogger } from '../utils/logger.js';
+
+export default class GitSchema {
+  constructor(database) {
+    this.db = database;
+    this.logger = createLogger('GitSchema');
+  }
+
+  async initialize() {
+    try {
+      this.logger.info('Initializing git database schema');
+      
+      await this.createTables();
+      await this.createIndexes();
+      await this.createTriggers();
+      
+      this.logger.info('Git database schema initialized successfully');
+    } catch (error) {
+      this.logger.error('Failed to initialize git schema', { 
+        error: error.message,
+        stack: error.stack 
+      });
+      throw error;
+    }
+  }
+
+  async createTables() {
+    const tables = [
+      {
+        name: 'git_repositories',
+        sql: `
+          CREATE TABLE IF NOT EXISTS git_repositories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_path TEXT UNIQUE NOT NULL,
+            working_directory TEXT NOT NULL,
+            git_directory TEXT NOT NULL,
+            remote_url TEXT,
+            current_branch TEXT,
+            last_scanned DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          )
+        `
+      },
+      {
+        name: 'git_commits',
+        sql: `
+          CREATE TABLE IF NOT EXISTS git_commits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            repository_id INTEGER NOT NULL,
+            commit_hash TEXT NOT NULL,
+            commit_date DATETIME NOT NULL,
+            author_name TEXT NOT NULL,
+            author_email TEXT NOT NULL,
+            message TEXT NOT NULL,
+            parent_hashes TEXT,
+            is_merge BOOLEAN DEFAULT FALSE,
+            insertions INTEGER DEFAULT 0,
+            deletions INTEGER DEFAULT 0,
+            files_changed_count INTEGER DEFAULT 0,
+            indexed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (repository_id) REFERENCES git_repositories(id) ON DELETE CASCADE,
+            UNIQUE(repository_id, commit_hash)
+          )
+        `
+      },
+      {
+        name: 'git_commit_files',
+        sql: `
+          CREATE TABLE IF NOT EXISTS git_commit_files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            commit_id INTEGER NOT NULL,
+            file_path TEXT NOT NULL,
+            change_status TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (commit_id) REFERENCES git_commits(id) ON DELETE CASCADE
+          )
+        `
+      },
+      {
+        name: 'restore_points',
+        sql: `
+          CREATE TABLE IF NOT EXISTS restore_points (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            repository_id INTEGER NOT NULL,
+            commit_hash TEXT NOT NULL,
+            label TEXT NOT NULL,
+            description TEXT,
+            auto_generated BOOLEAN DEFAULT FALSE,
+            test_status TEXT DEFAULT 'unknown',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_by TEXT DEFAULT 'system',
+            FOREIGN KEY (repository_id) REFERENCES git_repositories(id) ON DELETE CASCADE
+          )
+        `
+      },
+      {
+        name: 'conversation_git_links',
+        sql: `
+          CREATE TABLE IF NOT EXISTS conversation_git_links (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversation_id INTEGER NOT NULL,
+            repository_id INTEGER NOT NULL,
+            commit_id INTEGER,
+            link_type TEXT NOT NULL,
+            confidence REAL DEFAULT 1.0,
+            time_correlation REAL DEFAULT 0.0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+            FOREIGN KEY (repository_id) REFERENCES git_repositories(id) ON DELETE CASCADE,
+            FOREIGN KEY (commit_id) REFERENCES git_commits(id) ON DELETE SET NULL
+          )
+        `
+      }
+    ];
+
+    for (const table of tables) {
+      this.db.exec(table.sql);
+      this.logger.debug(`Created table: ${table.name}`);
+    }
+  }
+
+  async createIndexes() {
+    const indexes = [
+      'CREATE INDEX IF NOT EXISTS idx_git_repositories_project_path ON git_repositories(project_path)',
+      'CREATE INDEX IF NOT EXISTS idx_git_commits_repository_id ON git_commits(repository_id)',
+      'CREATE INDEX IF NOT EXISTS idx_git_commits_hash ON git_commits(commit_hash)',
+      'CREATE INDEX IF NOT EXISTS idx_git_commits_date ON git_commits(commit_date)',
+      'CREATE INDEX IF NOT EXISTS idx_git_commit_files_commit_id ON git_commit_files(commit_id)',
+      'CREATE INDEX IF NOT EXISTS idx_restore_points_repository_id ON restore_points(repository_id)',
+      'CREATE INDEX IF NOT EXISTS idx_restore_points_commit_hash ON restore_points(commit_hash)',
+      'CREATE INDEX IF NOT EXISTS idx_conversation_git_links_conversation_id ON conversation_git_links(conversation_id)',
+      'CREATE INDEX IF NOT EXISTS idx_conversation_git_links_repository_id ON conversation_git_links(repository_id)'
+    ];
+
+    for (const index of indexes) {
+      this.db.exec(index);
+    }
+    
+    this.logger.debug('Created git database indexes');
+  }
+
+  async createTriggers() {
+    const triggers = [
+      `
+        CREATE TRIGGER IF NOT EXISTS update_git_repositories_timestamp
+        AFTER UPDATE ON git_repositories
+        BEGIN
+          UPDATE git_repositories SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+        END
+      `
+    ];
+
+    for (const trigger of triggers) {
+      this.db.exec(trigger);
+    }
+    
+    this.logger.debug('Created git database triggers');
+  }
+
+  async upsertRepository(repositoryData) {
+    try {
+      const {
+        projectPath,
+        workingDirectory,
+        gitDirectory,
+        remoteUrl,
+        currentBranch
+      } = repositoryData;
+
+      const stmt = this.db.prepare(`
+        INSERT INTO git_repositories 
+        (project_path, working_directory, git_directory, remote_url, current_branch, last_scanned)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(project_path) DO UPDATE SET
+          working_directory = excluded.working_directory,
+          git_directory = excluded.git_directory,
+          remote_url = excluded.remote_url,
+          current_branch = excluded.current_branch,
+          last_scanned = CURRENT_TIMESTAMP
+      `);
+
+      const result = stmt.run(projectPath, workingDirectory, gitDirectory, remoteUrl, currentBranch);
+      
+      let repositoryId;
+      if (result.lastInsertRowid && result.lastInsertRowid > 0) {
+        repositoryId = result.lastInsertRowid;
+      } else {
+        const getIdStmt = this.db.prepare('SELECT id FROM git_repositories WHERE project_path = ?');
+        const row = getIdStmt.get(projectPath);
+        repositoryId = row ? row.id : null;
+      }
+
+      this.logger.debug('Repository upserted', { 
+        projectPath,
+        repositoryId,
+        changes: result.changes
+      });
+
+      return { ...result, repositoryId };
+    } catch (error) {
+      this.logger.error('Failed to upsert repository', { 
+        repositoryData,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async insertCommit(repositoryId, commitData) {
+    try {
+      const {
+        hash,
+        date,
+        authorName,
+        authorEmail,
+        message,
+        parents,
+        isMerge,
+        insertions,
+        deletions,
+        filesChanged
+      } = commitData;
+
+      const commitStmt = this.db.prepare(`
+        INSERT OR IGNORE INTO git_commits 
+        (repository_id, commit_hash, commit_date, author_name, author_email, 
+         message, parent_hashes, is_merge, insertions, deletions, files_changed_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const parentHashesJson = parents ? JSON.stringify(parents) : null;
+      const filesChangedCount = filesChanged ? filesChanged.length : 0;
+
+      const result = commitStmt.run(
+        repositoryId, hash, date, authorName, authorEmail,
+        message, parentHashesJson, isMerge ? 1 : 0,
+        insertions || 0, deletions || 0, filesChangedCount
+      );
+
+      if (result.changes > 0 && filesChanged && filesChanged.length > 0) {
+        const commitId = result.lastInsertRowid;
+        await this.insertCommitFiles(commitId, filesChanged);
+      }
+
+      this.logger.debug('Commit inserted', { 
+        repositoryId,
+        commitHash: hash,
+        changes: result.changes
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error('Failed to insert commit', { 
+        repositoryId,
+        commitHash: commitData.hash,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async insertCommitFiles(commitId, filesChanged) {
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO git_commit_files (commit_id, file_path, change_status)
+        VALUES (?, ?, ?)
+      `);
+
+      for (const file of filesChanged) {
+        stmt.run(commitId, file.path, file.status);
+      }
+
+      this.logger.debug('Commit files inserted', { 
+        commitId,
+        fileCount: filesChanged.length
+      });
+    } catch (error) {
+      this.logger.error('Failed to insert commit files', { 
+        commitId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async getRepositoryByPath(projectPath) {
+    try {
+      const stmt = this.db.prepare(`
+        SELECT * FROM git_repositories 
+        WHERE project_path = ?
+      `);
+      
+      const repository = stmt.get(projectPath);
+      
+      if (repository) {
+        this.logger.debug('Repository found', { projectPath, repositoryId: repository.id });
+      }
+      
+      return repository;
+    } catch (error) {
+      this.logger.error('Failed to get repository by path', { 
+        projectPath,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async getCommitHistory(repositoryId, options = {}) {
+    try {
+      const {
+        limit = 50,
+        since = null,
+        until = null,
+        author = null
+      } = options;
+
+      let sql = `
+        SELECT c.*, r.project_path, r.working_directory
+        FROM git_commits c
+        JOIN git_repositories r ON r.id = c.repository_id
+        WHERE c.repository_id = ?
+      `;
+
+      const params = [repositoryId];
+
+      if (since) {
+        sql += ' AND c.commit_date >= ?';
+        params.push(since);
+      }
+
+      if (until) {
+        sql += ' AND c.commit_date <= ?';
+        params.push(until);
+      }
+
+      if (author) {
+        sql += ' AND (c.author_name LIKE ? OR c.author_email LIKE ?)';
+        params.push(`%${author}%`, `%${author}%`);
+      }
+
+      sql += ' ORDER BY c.commit_date DESC';
+
+      if (limit) {
+        sql += ' LIMIT ?';
+        params.push(limit);
+      }
+
+      const stmt = this.db.prepare(sql);
+      const commits = stmt.all(...params);
+
+      this.logger.debug('Retrieved commit history', { 
+        repositoryId,
+        commitCount: commits.length,
+        options
+      });
+
+      return commits;
+    } catch (error) {
+      this.logger.error('Failed to get commit history', { 
+        repositoryId,
+        options,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async linkConversationToGit(conversationId, repositoryId, commitId = null, linkType = 'temporal') {
+    try {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO conversation_git_links 
+        (conversation_id, repository_id, commit_id, link_type, confidence)
+        VALUES (?, ?, ?, ?, ?)
+      `);
+
+      const result = stmt.run(conversationId, repositoryId, commitId, linkType, 1.0);
+
+      this.logger.debug('Conversation linked to git', { 
+        conversationId,
+        repositoryId,
+        commitId,
+        linkType
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error('Failed to link conversation to git', { 
+        conversationId,
+        repositoryId,
+        commitId,
+        linkType,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+}

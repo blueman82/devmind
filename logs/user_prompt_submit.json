@@ -974,5 +974,93 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "yes but the critical rules ar eupdate project progress after every change, commit after every change"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "generate a prompt to handover for the next claude code session! I want to SEE the prompt!!!"
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "whats the status of the work done? "
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": " \ud83d\ude80 AI Memory App - Session Handover Prompt\n\n  # AI Memory App - Phase 8B+ Complete - Production Ready\n  project_status: \"\u2705 CRITICAL PRODUCTION ISSUES RESOLVED - 551 conversations indexed, 75% token\n  reduction achieved\"\n\n  immediate_context:\n    current_achievement: \"MASSIVE TOKEN SAVINGS implemented - 75% reduction (12.5k \u2192 3k tokens)\"\n    database_status: \"551 conversations, 139,914 messages indexed in 126MB SQLite FTS5 database\"\n    performance_status: \"450x search improvement (91s \u2192 0.2s), all constraint errors resolved\"\n    mission_alignment: \"Core product mission successfully implemented - Claude knows history\n  without re-reading\"\n\n  critical_workflow_rules:\n    rule_1: \"Update project-progress.yml after every change\"\n    rule_2: \"Commit after every change with descriptive messages\"\n    rule_3: \"Follow structured logging patterns with Winston framework\"\n    rule_4: \"Maintain token-conscious design (core mission alignment)\"\n\n  recent_critical_fixes:\n    constraint_errors:\n      status: \"\u2705 RESOLVED (commit c3d51a5)\"\n      impact: \"All 551 conversations now index successfully\"\n      before: \"FOREIGN KEY constraint failed, only 2/546 conversations indexed\"\n      after: \"Perfect indexing with comprehensive audit trail logging\"\n\n    performance_regression:\n      status: \"\u2705 RESOLVED (commit a14ef80)\"\n      impact: \"450x performance improvement achieved\"\n      before: \"Search queries taking 91+ seconds\"\n      after: \"Sub-second search responses (204ms average)\"\n\n    token_explosion:\n      status: \"\u2705 RESOLVED (commit 4b0fc27)\"\n      impact: \"75% token reduction - core mission aligned\"\n      before: \"12.5k+ token responses contradicting product mission\"\n      after: \"3k token default with progressive detail architecture\"\n\n  system_architecture:\n    mcp_tools: \"4 operational tools with token-conscious responses\"\n      - search_conversations: \"FTS5 search with 75% token reduction\"\n      - get_conversation_context: \"Smart pagination with token management\"\n      - list_recent_conversations: \"Recent activity filtering\"\n      - health_check: \"System monitoring and performance metrics\"\n\n    database: \"SQLite FTS5 with BM25 ranking, real-time fs.watch() monitoring\"\n    logging: \"Winston structured logging with comprehensive audit trail\"\n    performance: \"Sub-second search, <2s indexing delay, 126MB database\"\n\n  validation_commands:\n    system_status: \"npm run status (should show 551+ conversations)\"\n    real_time_monitor: \"npm run monitor (should show healthy status)\"\n    mcp_connectivity: \"claude mcp list (should show ai-memory: \u2713 Connected)\"\n\n  next_steps_options:\n    phase_8c_security: \"Input validation, rate limiting, audit logging (optional)\"\n    phase_9_planning: \"Advanced features, performance optimization, user experience\"\n    production_deployment: \"System is production-ready with all critical issues resolved\"\n\n  file_structure:\n    core: \"src/database/database-manager.js (500 lines), src/mcp-server/handlers/ (488 lines)\"\n    monitoring: \"monitor-indexer.js (real-time dashboard), indexer-status.js (quick status)\"\n    utils: \"src/utils/logger.js (Winston), src/utils/performance-metrics.js\"\n    documentation: \"project-progress.yml (complete history), docs/code-review.yml\"\n\n  git_context:\n    branch: \"feature/enhanced-search\"\n    safety_branch: \"safety/phase-5-complete (backup)\"\n    recent_commits: \"c3d51a5, a14ef80, 4b0fc27 (critical fixes), 28c94f0 (documentation)\"\n\n  success_metrics:\n    token_reduction: \"75% (12.5k \u2192 3k default)\"\n    search_performance: \"450x improvement (91s \u2192 0.2s)\"\n    database_health: \"551 conversations, 139,914 messages indexed\"\n    system_stability: \"All constraint errors resolved, comprehensive logging active\"\n\n  \ud83c\udfaf IMMEDIATE ACTION: Run npm run status to verify all 551+ conversations are indexed and\n  searchable. The AI Memory App now achieves its core mission of \"Massive Token Savings\" while\n  maintaining full conversation search and retrieval capabilities!\npause and wait here. Don't do anything."
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "are these paints still as they are?\n  input_validation: \"\u26a0\ufe0f  NEEDS IMPROVEMENT\"\n  test_coverage: \"\u26a0\ufe0f  PARTIAL\""
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "update the @docs/code-review.yml doc"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "would you agree the MCP tool is completely ready and that we can move on to the Mac app implementation? First read @docs/AI-Memory-App-PRD.md of what is implemented, what is NOT. \nAn example, git history is not in the MCP tooling yet."
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I think we should introduce the git integration is an essential part of the historical tool lookup. Each of the git components would be MCP tooling, correct? "
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "lets do this one tool at a time.\nFirst, we want to keep the code not too large.\nWhats the structure of these new tools? Are you going to create new files?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "what are my critical rules?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "yes - begin"
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "new folder introduced git/ and mcp updates. STart your review."
   }
 ]

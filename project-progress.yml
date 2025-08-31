@@ -423,11 +423,51 @@ phase_8_roadmap:
     - "Memory usage stable under 200MB for large datasets"
     - "User-friendly monitoring interface reduces support overhead"
 
+## Phase 8D: Git Integration Foundation ⚡ IN PROGRESS
+git_integration_development:
+  status: "IN_PROGRESS"
+  date_started: "2025-08-31"
+  current_task: "Implementing first git MCP tool - get_git_context"
+  objective: "Complete historical tool lookup with conversation + git context correlation"
+  
+  deliverables_completed:
+    infrastructure:
+      - "✅ GitManager class (349 lines) - repository discovery and git operations"
+      - "✅ GitSchema class (200+ lines) - database schema for git data"
+      - "✅ GitToolHandlers class (300+ lines) - MCP tool implementations"
+      - "✅ MCP server integration - get_git_context tool added"
+    
+    first_git_tool:
+      - "✅ get_git_context MCP tool - retrieves repository status and commit history"
+      - "✅ Repository discovery from project paths"
+      - "✅ Working directory status (staged, modified, untracked files)"
+      - "✅ Commit history retrieval with time filtering"
+      - "✅ Automatic git data indexing and caching"
+  
+  git_database_schema:
+    tables_created:
+      - "git_repositories - project to repository mapping"
+      - "git_commits - commit history with metadata"
+      - "git_commit_files - file changes per commit"
+      - "restore_points - tagged working states"
+      - "conversation_git_links - conversation to commit correlations"
+  
+  remaining_git_tools:
+    priority_high:
+      - "list_restore_points - browse tagged working states"
+      - "create_restore_point - tag current state as working"
+    priority_medium:
+      - "preview_restore - show what files would change"
+      - "restore_project_state - perform safe restoration"
+    
+  implementation_approach: "One tool at a time, following critical workflow rules"
+  file_size_management: "New git components in separate files to maintain <500 line limit"
+  
 phase_2_roadmap:
-  - "Git integration for commit tracking and disaster recovery"
-  - "Swift macOS app with menu bar interface (optional given MCP success)"
-  - "Cross-project solution discovery and recommendations"
-  - "Advanced AI integrations and tool support"
+  - "Complete git MCP tools (4 remaining after get_git_context)"
+  - "Swift macOS app with complete historical tooling foundation"
+  - "Cross-project solution discovery enhanced with git context"
+  - "Advanced AI integrations with time-machine capabilities"
 
 ## Technical Discoveries
 discoveries:
