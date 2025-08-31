@@ -2,6 +2,8 @@ import { execSync } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { createLogger } from '../utils/logger.js';
+import errorSanitizer from '../utils/error-sanitizer.js';
+import secureGitExecutor from '../utils/secure-git-executor.js';
 
 export default class GitManager {
   constructor() {
@@ -45,10 +47,11 @@ export default class GitManager {
 
       return repository;
     } catch (error) {
+      const sanitizedError = errorSanitizer.sanitizePathError(error.message, 'repository_discovery');
       this.logger.error('Repository discovery failed', { 
-        projectPath, 
-        error: error.message,
-        stack: error.stack
+        projectPath: '[SANITIZED]', 
+        error: sanitizedError,
+        originalError: error.message
       });
       return null;
     }
@@ -98,57 +101,57 @@ export default class GitManager {
       };
 
       try {
-        const remoteUrl = execSync('git remote get-url origin', { 
-          cwd: workingDirectory, 
-          encoding: 'utf8',
-          timeout: 5000
-        }).trim();
+        const remoteUrl = secureGitExecutor.getRemoteUrl(workingDirectory, 'origin');
         repository.remoteUrl = remoteUrl;
       } catch (error) {
-        this.logger.debug('No remote origin found', { workingDirectory });
+        const sanitizedError = errorSanitizer.sanitizeGitError(error.message, 'get_remote_url');
+        this.logger.debug('No remote origin found', { 
+          workingDirectory: '[SANITIZED]',
+          error: sanitizedError
+        });
         repository.remoteUrl = null;
       }
 
       try {
-        const currentBranch = execSync('git branch --show-current', { 
-          cwd: workingDirectory, 
-          encoding: 'utf8',
-          timeout: 5000
-        }).trim();
+        const currentBranch = secureGitExecutor.getCurrentBranch(workingDirectory);
         repository.currentBranch = currentBranch || 'HEAD';
       } catch (error) {
-        this.logger.debug('Could not determine current branch', { workingDirectory });
+        const sanitizedError = errorSanitizer.sanitizeGitError(error.message, 'get_current_branch');
+        this.logger.debug('Could not determine current branch', { 
+          workingDirectory: '[SANITIZED]',
+          error: sanitizedError
+        });
         repository.currentBranch = 'HEAD';
       }
 
       try {
-        const latestCommit = execSync('git log -1 --format="%H|%ad|%an|%s" --date=iso', { 
-          cwd: workingDirectory, 
-          encoding: 'utf8',
-          timeout: 5000
-        }).trim();
+        const latestCommitOutput = secureGitExecutor.getCommitHistory(workingDirectory, { limit: 1 });
         
-        if (latestCommit) {
-          const [hash, date, author, message] = latestCommit.split('|');
+        if (latestCommitOutput) {
+          const [hash, date, authorName, authorEmail, message] = latestCommitOutput.split('|');
           repository.latestCommit = {
             hash,
             date: new Date(date),
-            author,
+            author: authorName,
             message
           };
         }
       } catch (error) {
-        this.logger.debug('Could not get latest commit info', { workingDirectory });
+        const sanitizedError = errorSanitizer.sanitizeGitError(error.message, 'get_latest_commit');
+        this.logger.debug('Could not get latest commit info', { 
+          workingDirectory: '[SANITIZED]',
+          error: sanitizedError
+        });
         repository.latestCommit = null;
       }
 
       return repository;
     } catch (error) {
+      const sanitizedError = errorSanitizer.sanitizePathError(error.message, 'parse_repository_info');
       this.logger.error('Failed to parse repository info', { 
-        workingDirectory,
-        gitDirectory,
-        error: error.message,
-        stack: error.stack
+        workingDirectory: '[SANITIZED]',
+        gitDirectory: '[SANITIZED]',
+        error: sanitizedError
       });
       return null;
     }
@@ -169,18 +172,12 @@ export default class GitManager {
         grep = null
       } = options;
 
-      let gitCommand = 'git log --format="%H|%ad|%an|%ae|%s|%P" --date=iso';
-      
-      if (limit) gitCommand += ` -${limit}`;
-      if (since) gitCommand += ` --since="${since}"`;
-      if (until) gitCommand += ` --until="${until}"`;
-      if (author) gitCommand += ` --author="${author}"`;
-      if (grep) gitCommand += ` --grep="${grep}"`;
-
-      const output = execSync(gitCommand, { 
-        cwd: repository.workingDirectory, 
-        encoding: 'utf8',
-        timeout: 10000
+      const output = secureGitExecutor.getCommitHistory(repository.workingDirectory, {
+        limit,
+        since,
+        until,
+        author,
+        grep
       });
 
       const commits = output.trim().split('\n')
@@ -223,14 +220,7 @@ export default class GitManager {
         return null;
       }
 
-      const commitInfo = execSync(
-        `git show --format="%H|%ad|%an|%ae|%s|%P" --name-status ${commitHash}`,
-        { 
-          cwd: repository.workingDirectory, 
-          encoding: 'utf8',
-          timeout: 10000
-        }
-      );
+      const commitInfo = secureGitExecutor.getCommitDetails(repository.workingDirectory, commitHash);
 
       const lines = commitInfo.trim().split('\n');
       const [hash, date, authorName, authorEmail, message, parents] = lines[0].split('|');
@@ -289,11 +279,7 @@ export default class GitManager {
         return null;
       }
 
-      const status = execSync('git status --porcelain', { 
-        cwd: repository.workingDirectory, 
-        encoding: 'utf8',
-        timeout: 5000
-      });
+      const status = secureGitExecutor.getWorkingDirectoryStatus(repository.workingDirectory);
 
       const staged = [];
       const modified = [];

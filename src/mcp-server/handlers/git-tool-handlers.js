@@ -1,6 +1,7 @@
 import GitManager from '../../git/git-manager.js';
 import GitSchema from '../../database/git-schema.js';
 import { createLogger } from '../../utils/logger.js';
+import pathValidator from '../../utils/path-validator.js';
 
 export class GitToolHandlers {
   constructor(dbManager) {
@@ -57,15 +58,31 @@ export class GitToolHandlers {
         };
       }
 
+      const pathValidation = pathValidator.validateProjectPath(project_path);
+      if (!pathValidation.isValid) {
+        this.logger.error('Path validation failed for git context', {
+          originalPath: project_path,
+          error: pathValidation.error
+        });
+        return {
+          content: [{
+            type: 'text',
+            text: `Error: Invalid project path - ${pathValidation.error}`
+          }]
+        };
+      }
+
+      const validatedProjectPath = pathValidation.normalizedPath;
+
       this.logger.debug('Getting git context', { 
-        project_path, 
+        project_path: validatedProjectPath, 
         conversation_id,
         include_commit_history,
         include_working_status
       });
 
       const gitContext = {
-        project_path,
+        project_path: validatedProjectPath,
         repository: null,
         working_status: null,
         commit_history: [],
@@ -79,7 +96,7 @@ export class GitToolHandlers {
         }
       };
 
-      const repository = await this.gitManager.discoverRepository(project_path);
+      const repository = await this.gitManager.discoverRepository(validatedProjectPath);
       if (!repository) {
         gitContext.summary.has_git = false;
         return {
@@ -105,10 +122,10 @@ export class GitToolHandlers {
         gitContext.summary.last_commit_date = repository.latestCommit.date;
       }
 
-      await this.ensureRepositoryInDatabase(project_path, repository);
+      await this.ensureRepositoryInDatabase(validatedProjectPath, repository);
 
       if (include_working_status) {
-        const workingStatus = await this.gitManager.getWorkingDirectoryStatus(project_path);
+        const workingStatus = await this.gitManager.getWorkingDirectoryStatus(validatedProjectPath);
         gitContext.working_status = workingStatus;
         gitContext.summary.working_directory_clean = workingStatus ? workingStatus.clean : null;
       }
@@ -122,11 +139,11 @@ export class GitToolHandlers {
           }
         }
 
-        const commits = await this.gitManager.getCommitHistory(project_path, options);
+        const commits = await this.gitManager.getCommitHistory(validatedProjectPath, options);
         gitContext.commit_history = commits;
         gitContext.summary.total_commits = commits.length;
 
-        await this.indexCommitsIfNeeded(project_path, commits);
+        await this.indexCommitsIfNeeded(validatedProjectPath, commits);
       }
 
       if (conversation_id) {
@@ -135,7 +152,7 @@ export class GitToolHandlers {
       }
 
       this.logger.info('Git context retrieved successfully', {
-        project_path,
+        project_path: validatedProjectPath,
         has_git: gitContext.summary.has_git,
         commit_count: gitContext.summary.total_commits
       });

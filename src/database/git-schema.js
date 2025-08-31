@@ -122,6 +122,7 @@ export default class GitSchema {
 
   async createIndexes() {
     const indexes = [
+      // Primary table lookups
       'CREATE INDEX IF NOT EXISTS idx_git_repositories_project_path ON git_repositories(project_path)',
       'CREATE INDEX IF NOT EXISTS idx_git_commits_repository_id ON git_commits(repository_id)',
       'CREATE INDEX IF NOT EXISTS idx_git_commits_hash ON git_commits(commit_hash)',
@@ -130,7 +131,25 @@ export default class GitSchema {
       'CREATE INDEX IF NOT EXISTS idx_restore_points_repository_id ON restore_points(repository_id)',
       'CREATE INDEX IF NOT EXISTS idx_restore_points_commit_hash ON restore_points(commit_hash)',
       'CREATE INDEX IF NOT EXISTS idx_conversation_git_links_conversation_id ON conversation_git_links(conversation_id)',
-      'CREATE INDEX IF NOT EXISTS idx_conversation_git_links_repository_id ON conversation_git_links(repository_id)'
+      'CREATE INDEX IF NOT EXISTS idx_conversation_git_links_repository_id ON conversation_git_links(repository_id)',
+      
+      // Performance-optimized compound indexes for common query patterns
+      'CREATE INDEX IF NOT EXISTS idx_git_commits_repo_date ON git_commits(repository_id, commit_date DESC)',
+      'CREATE INDEX IF NOT EXISTS idx_git_commits_repo_author ON git_commits(repository_id, author_name)',
+      'CREATE INDEX IF NOT EXISTS idx_git_commits_hash_repo ON git_commits(commit_hash, repository_id)',
+      'CREATE INDEX IF NOT EXISTS idx_restore_points_repo_created ON restore_points(repository_id, created_at DESC)',
+      'CREATE INDEX IF NOT EXISTS idx_conversation_git_links_conv_repo ON conversation_git_links(conversation_id, repository_id)',
+      
+      // File-based query optimization
+      'CREATE INDEX IF NOT EXISTS idx_git_commit_files_path ON git_commit_files(file_path)',
+      'CREATE INDEX IF NOT EXISTS idx_git_commit_files_status ON git_commit_files(change_status)',
+      
+      // Author and time-based queries
+      'CREATE INDEX IF NOT EXISTS idx_git_commits_author_date ON git_commits(author_name, commit_date DESC)',
+      'CREATE INDEX IF NOT EXISTS idx_git_repositories_updated ON git_repositories(last_scanned DESC)',
+      
+      // Restore point optimization
+      'CREATE INDEX IF NOT EXISTS idx_restore_points_auto_generated ON restore_points(auto_generated, repository_id)'
     ];
 
     for (const index of indexes) {
