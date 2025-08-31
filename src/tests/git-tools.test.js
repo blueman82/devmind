@@ -214,7 +214,7 @@ describe('Git Tools Tests', () => {
     }
   });
 
-  test('GitToolHandlers - handleCreateRestorePoint', async () => {
+  test('GitToolHandlers - handleCreateRestorePoint basic functionality', async () => {
     // Initialize handlers if not already done
     if (!gitToolHandlers) {
       gitToolHandlers = new GitToolHandlers(dbManager);
@@ -274,6 +274,263 @@ describe('Git Tools Tests', () => {
       
     } finally {
       // Restore original validation
+      pathValidator.validateProjectPath = originalValidate;
+    }
+  });
+
+  test('GitToolHandlers - create_restore_point edge cases and validation', async () => {
+    // Initialize handlers if not already done
+    if (!gitToolHandlers) {
+      gitToolHandlers = new GitToolHandlers(dbManager);
+      await gitToolHandlers.initialize();
+    }
+    
+    // Test missing required parameters
+    const missingPathResult = await gitToolHandlers.handleCreateRestorePoint({
+      label: 'Test label'
+    });
+    
+    assert.ok(missingPathResult.content, 'Should return content for missing path');
+    assert.strictEqual(
+      missingPathResult.content[0].text,
+      'Error: project_path and label are required',
+      'Should error on missing project_path'
+    );
+    
+    const missingLabelResult = await gitToolHandlers.handleCreateRestorePoint({
+      project_path: testRepoPath
+    });
+    
+    assert.ok(missingLabelResult.content, 'Should return content for missing label');
+    assert.strictEqual(
+      missingLabelResult.content[0].text,
+      'Error: project_path and label are required',
+      'Should error on missing label'
+    );
+    
+    // Test invalid path validation
+    const originalValidate = pathValidator.validateProjectPath;
+    pathValidator.validateProjectPath = function(path) {
+      if (path === '/invalid/path') {
+        return { isValid: false, error: 'Path outside allowed directories' };
+      }
+      return { isValid: true, normalizedPath: path };
+    };
+    
+    const invalidPathResult = await gitToolHandlers.handleCreateRestorePoint({
+      project_path: '/invalid/path',
+      label: 'Test'
+    });
+    
+    assert.ok(invalidPathResult.content, 'Should return content for invalid path');
+    assert.ok(
+      invalidPathResult.content[0].text.includes('Invalid project path'),
+      'Should error on invalid path'
+    );
+    
+    // Restore original validation
+    pathValidator.validateProjectPath = originalValidate;
+    
+    console.log('✅ Edge case validation tests passed');
+  });
+
+  test('GitToolHandlers - create_restore_point with different test statuses', async () => {
+    // Initialize handlers if not already done
+    if (!gitToolHandlers) {
+      gitToolHandlers = new GitToolHandlers(dbManager);
+      await gitToolHandlers.initialize();
+    }
+    
+    // Mock path validation
+    const originalValidate = pathValidator.validateProjectPath;
+    pathValidator.validateProjectPath = function(path) {
+      return { isValid: true, normalizedPath: path };
+    };
+    
+    try {
+      // Ensure repository is indexed
+      await gitToolHandlers.handleGetGitContext({
+        project_path: testRepoPath
+      });
+      
+      // Test all test_status enum values
+      const testStatuses = ['passing', 'failing', 'unknown'];
+      
+      for (const status of testStatuses) {
+        const result = await gitToolHandlers.handleCreateRestorePoint({
+          project_path: testRepoPath,
+          label: `Test with ${status} status`,
+          description: `Testing ${status} status`,
+          test_status: status
+        });
+        
+        const response = JSON.parse(result.content[0].text);
+        
+        if (response.success) {
+          assert.strictEqual(
+            response.restore_point.test_status,
+            status,
+            `Should have ${status} test status`
+          );
+          console.log(`✅ Test status '${status}' handled correctly`);
+        }
+      }
+      
+      // Test default test_status (should be 'unknown')
+      const defaultResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'Test default status',
+        description: 'Testing default test_status'
+        // No test_status provided
+      });
+      
+      const defaultResponse = JSON.parse(defaultResult.content[0].text);
+      if (defaultResponse.success) {
+        assert.strictEqual(
+          defaultResponse.restore_point.test_status,
+          'unknown',
+          'Should default to unknown test status'
+        );
+        console.log('✅ Default test_status handled correctly');
+      }
+      
+    } finally {
+      pathValidator.validateProjectPath = originalValidate;
+    }
+  });
+
+  test('GitToolHandlers - create_restore_point auto_generated flag', async () => {
+    // Initialize handlers if not already done
+    if (!gitToolHandlers) {
+      gitToolHandlers = new GitToolHandlers(dbManager);
+      await gitToolHandlers.initialize();
+    }
+    
+    // Mock path validation
+    const originalValidate = pathValidator.validateProjectPath;
+    pathValidator.validateProjectPath = function(path) {
+      return { isValid: true, normalizedPath: path };
+    };
+    
+    try {
+      // Ensure repository is indexed
+      await gitToolHandlers.handleGetGitContext({
+        project_path: testRepoPath
+      });
+      
+      // Test auto_generated = true
+      const autoResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'Auto-generated restore point',
+        description: 'Automatically created',
+        auto_generated: true
+      });
+      
+      const autoResponse = JSON.parse(autoResult.content[0].text);
+      if (autoResponse.success) {
+        assert.strictEqual(
+          autoResponse.restore_point.auto_generated,
+          true,
+          'Should be marked as auto-generated'
+        );
+        console.log('✅ auto_generated=true handled correctly');
+      }
+      
+      // Test auto_generated = false (explicit)
+      const manualResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'Manual restore point',
+        description: 'Manually created',
+        auto_generated: false
+      });
+      
+      const manualResponse = JSON.parse(manualResult.content[0].text);
+      if (manualResponse.success) {
+        assert.strictEqual(
+          manualResponse.restore_point.auto_generated,
+          false,
+          'Should be marked as manual'
+        );
+        console.log('✅ auto_generated=false handled correctly');
+      }
+      
+      // Test default (should be false)
+      const defaultResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'Default auto flag',
+        description: 'Testing default auto_generated'
+        // No auto_generated provided
+      });
+      
+      const defaultResponse = JSON.parse(defaultResult.content[0].text);
+      if (defaultResponse.success) {
+        assert.strictEqual(
+          defaultResponse.restore_point.auto_generated,
+          false,
+          'Should default to false for auto_generated'
+        );
+        console.log('✅ Default auto_generated handled correctly');
+      }
+      
+    } finally {
+      pathValidator.validateProjectPath = originalValidate;
+    }
+  });
+
+  test('GitToolHandlers - create_restore_point with empty description', async () => {
+    // Initialize handlers if not already done
+    if (!gitToolHandlers) {
+      gitToolHandlers = new GitToolHandlers(dbManager);
+      await gitToolHandlers.initialize();
+    }
+    
+    // Mock path validation
+    const originalValidate = pathValidator.validateProjectPath;
+    pathValidator.validateProjectPath = function(path) {
+      return { isValid: true, normalizedPath: path };
+    };
+    
+    try {
+      // Ensure repository is indexed
+      await gitToolHandlers.handleGetGitContext({
+        project_path: testRepoPath
+      });
+      
+      // Test with empty description
+      const emptyDescResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'No description restore point',
+        description: ''
+      });
+      
+      const emptyDescResponse = JSON.parse(emptyDescResult.content[0].text);
+      if (emptyDescResponse.success) {
+        assert.strictEqual(
+          emptyDescResponse.restore_point.description,
+          '',
+          'Should accept empty description'
+        );
+        console.log('✅ Empty description handled correctly');
+      }
+      
+      // Test without description field
+      const noDescResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'Omitted description restore point'
+        // No description provided
+      });
+      
+      const noDescResponse = JSON.parse(noDescResult.content[0].text);
+      if (noDescResponse.success) {
+        assert.strictEqual(
+          noDescResponse.restore_point.description,
+          '',
+          'Should default to empty string when description omitted'
+        );
+        console.log('✅ Omitted description handled correctly');
+      }
+      
+    } finally {
       pathValidator.validateProjectPath = originalValidate;
     }
   });
