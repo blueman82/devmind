@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { homedir } from 'os';
 import PerformanceMetrics from '../utils/performance-metrics.js';
 import { createLogger } from '../utils/logger.js';
+import GitSchema from './git-schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,6 +27,9 @@ export class DatabaseManager {
         // Initialize performance metrics if enabled
         this.metricsEnabled = options.enableMetrics !== false; // Default to true
         this.performanceMetrics = this.metricsEnabled ? new PerformanceMetrics() : null;
+        
+        // Initialize git schema (will be set up after database connection)
+        this.gitSchema = null;
     }
 
     /**
@@ -48,6 +52,10 @@ export class DatabaseManager {
             
             // Apply schema
             await this.applySchema();
+            
+            // Initialize git schema
+            this.gitSchema = new GitSchema(this.db);
+            await this.gitSchema.initialize();
             
             this.isInitialized = true;
             console.log(`Database initialized at: ${this.dbPath}`);

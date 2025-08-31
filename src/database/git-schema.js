@@ -234,7 +234,7 @@ export default class GitSchema {
       const filesChangedCount = filesChanged ? filesChanged.length : 0;
 
       const result = commitStmt.run(
-        repositoryId, hash, date, authorName, authorEmail,
+        repositoryId, hash, date instanceof Date ? date.toISOString() : date, authorName, authorEmail,
         message, parentHashesJson, isMerge ? 1 : 0,
         insertions || 0, deletions || 0, filesChangedCount
       );

@@ -6,7 +6,6 @@ export class GitToolHandlers {
   constructor(dbManager) {
     this.dbManager = dbManager;
     this.gitManager = new GitManager();
-    this.gitSchema = new GitSchema(dbManager.db);
     this.logger = createLogger('GitToolHandlers');
     this.initialized = false;
   }
@@ -15,7 +14,11 @@ export class GitToolHandlers {
     if (this.initialized) return;
     
     try {
-      await this.gitSchema.initialize();
+      // Use the git schema from the database manager (already initialized)
+      if (!this.dbManager.gitSchema) {
+        throw new Error('Database manager git schema not initialized');
+      }
+      this.gitSchema = this.dbManager.gitSchema;
       this.initialized = true;
       this.logger.info('Git tool handlers initialized');
     } catch (error) {
@@ -29,6 +32,11 @@ export class GitToolHandlers {
 
   async handleGetGitContext(args) {
     try {
+      // Ensure database is initialized first
+      if (!this.dbManager.isInitialized) {
+        await this.dbManager.initialize();
+      }
+      
       await this.initialize();
 
       const {

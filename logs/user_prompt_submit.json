@@ -1062,5 +1062,37 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "new folder introduced git/ and mcp updates. STart your review."
+  },
+  {
+    "session_id": "e24bd958-8100-4a6d-9a44-b5573ffb81da",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/e24bd958-8100-4a6d-9a44-b5573ffb81da.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "yes"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "can we, should we test it? At this point are any changes needed to the DB? Do we add these tools to be indexed into the DB? Is that a bad non separation? Should git be added to teh db?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "yes"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "if theres an issue fix it. Test it."
   }
 ]
