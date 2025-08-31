@@ -242,6 +242,11 @@ export class FileWatcher {
         this.indexingQueue.add(filePath);
         
         try {
+            // Initialize database if not already initialized
+            if (!this.dbManager.isInitialized) {
+                await this.dbManager.initialize();
+            }
+            
             console.log(`Indexing conversation file: ${basename(filePath)}`);
             
             // Parse conversation file
@@ -298,19 +303,34 @@ export class FileWatcher {
 
             // Insert messages if this is a new conversation
             if (result.changes > 0 && conversation.messages.length > 0) {
-                const messages = conversation.messages.map((msg, index) => ({
-                    conversation_id: conversationId,
-                    message_index: index,
-                    uuid: msg.uuid,
-                    timestamp: msg.timestamp,
-                    role: msg.role,
-                    content_type: msg.contentType,
-                    content: msg.content,
-                    content_summary: msg.contentSummary,
-                    tool_calls: msg.toolCalls,
-                    file_references: msg.fileReferences,
-                    tokens: msg.tokens
-                }));
+                const messages = conversation.messages.map((msg, index) => {
+                    // Extract text content from the parsed content structure
+                    let textContent = '';
+                    let toolCalls = [];
+                    let fileReferences = [];
+                    
+                    if (msg.content) {
+                        textContent = Array.isArray(msg.content.text) ? 
+                            msg.content.text.join('\n') : '';
+                        toolCalls = msg.content.toolCalls || [];
+                        fileReferences = msg.content.fileReferences || [];
+                    }
+                    
+                    return {
+                        conversation_id: conversationId,
+                        message_index: index,
+                        uuid: msg.uuid,
+                        timestamp: msg.timestamp,
+                        role: msg.role,
+                        content_type: msg.type || 'text',
+                        content: textContent || null,
+                        content_summary: textContent.length > 200 ? 
+                            textContent.substring(0, 200) + '...' : null,
+                        tool_calls: toolCalls,
+                        file_references: fileReferences,
+                        tokens: Math.ceil(textContent.length / 4) // Rough token estimate
+                    };
+                });
 
                 await this.dbManager.insertMessages(messages);
             }

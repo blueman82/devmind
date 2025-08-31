@@ -50,16 +50,24 @@ class ConversationParser {
         conversation.endTime = msg.timestamp;
         conversation.messageCount++;
         
+        // Skip metadata messages like summary that don't have roles
+        if (msg.type === 'summary') {
+          continue;
+        }
+        
         // Extract meaningful content
         const parsed = {
           uuid: msg.uuid,
           timestamp: msg.timestamp,
           type: msg.type,
-          role: msg.message?.role,
+          role: msg.message?.role || msg.type, // Fallback to type if no role
           content: this.extractContent(msg.message?.content)
         };
         
-        conversation.messages.push(parsed);
+        // Only add messages with valid roles
+        if (parsed.role) {
+          conversation.messages.push(parsed);
+        }
         
       } catch (error) {
         console.warn(`Skipping invalid JSON line: ${error.message}`);
