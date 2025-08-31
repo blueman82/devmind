@@ -93,7 +93,8 @@ async function displayStatus() {
             
             console.log(`   Indexed This Hour: ${colorize('yellow', formatNumber(recentConvs.count))} conversations`);
             } catch (dbError) {
-                console.log(`   ${colorize('red', 'Database Error: ' + dbError.message)}`);
+                console.error(`   ${colorize('red', 'Database Error: ' + dbError.message)}`);
+                console.error(`   ${colorize('red', 'Stack trace: ' + dbError.stack)}`);
                 console.log(`   ${colorize('yellow', 'Database statistics temporarily unavailable')}`);
             }
         } else {
@@ -147,7 +148,8 @@ async function displayStatus() {
         console.log(`   Press ${colorize('yellow', 's')} to show search test`);
 
     } catch (error) {
-        console.log(colorize('red', `Error displaying status: ${error.message}`));
+        console.error(colorize('red', `Error displaying status: ${error.message}`));
+        console.error(colorize('red', `Stack trace: ${error.stack}`));
     }
 }
 
@@ -206,7 +208,8 @@ async function startMonitoring() {
                         console.log(`   Search Response Time: ${colorize('green', searchTime + 'ms')}`);
                         console.log(`   Search Results Found: ${colorize('blue', testResults.length)}`);
                     } catch (perfError) {
-                        console.log(`   Performance Test: ${colorize('red', 'Error - ' + perfError.message)}`);
+                        console.error(`   Performance Test: ${colorize('red', 'Error - ' + perfError.message)}`);
+                        console.error(`   Stack trace: ${colorize('red', perfError.stack)}`);
                     }
                 } else {
                     console.log(`   ${colorize('red', 'Database not initialized')}`);
@@ -225,6 +228,7 @@ async function startMonitoring() {
 
     } catch (error) {
         console.error(colorize('red', `Failed to start monitoring: ${error.message}`));
+        console.error(colorize('red', `Stack trace: ${error.stack}`));
         process.exit(1);
     }
 }
