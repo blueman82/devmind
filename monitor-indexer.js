@@ -71,7 +71,8 @@ async function displayStatus() {
         // Database Statistics
         if (dbManager?.isInitialized) {
             console.log(`\n${colorize('bright', '💾 Database Statistics:')}`);
-            const stats = dbManager.getStats();
+            try {
+                const stats = dbManager.getStats();
             
             // Get conversation and message counts
             const convCount = dbManager.db.prepare('SELECT COUNT(*) as count FROM conversations').get();
@@ -91,6 +92,10 @@ async function displayStatus() {
             `).get();
             
             console.log(`   Indexed This Hour: ${colorize('yellow', formatNumber(recentConvs.count))} conversations`);
+            } catch (dbError) {
+                console.log(`   ${colorize('red', 'Database Error: ' + dbError.message)}`);
+                console.log(`   ${colorize('yellow', 'Database statistics temporarily unavailable')}`);
+            }
         } else {
             console.log(`\n${colorize('bright', '💾 Database:')} ${colorize('red', 'Not Connected')}`);
         }
