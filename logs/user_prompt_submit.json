@@ -918,5 +918,61 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "I've noticed the response time from the MCP making a query to a response given is a lot slower now. Its taking over 10 seconds to respond."
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "when this happens\nai-memory - search_conversations (MCP)(query: \"langchain langgraph workflow nodes tools\n                                        implementation\", timeframe: \"3 days ago\", limit: 5)\n  \u23bf \u00a0\u26a0 Large MCP response (~12.5k tokens), this can fill up context quickly\n\nwhat is our tool doing with those large mcp responses? Answer only"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "didn't we implemente code for large responses, pagination etc?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "what does best practices tell us to do? Implement pagination etc or leave as-is?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "your recommendation is based on what exactly?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "I suppose the point is that this tool is about reducing tokens just as ShadowGit does. Right?\nYou have tools to look online to help your research."
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "lets do it. first, what are our critical rules?"
+  },
+  {
+    "session_id": "ef6c8298-4d91-4252-b014-980b7d1def65",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/ef6c8298-4d91-4252-b014-980b7d1def65.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "yes but the critical rules ar eupdate project progress after every change, commit after every change"
   }
 ]

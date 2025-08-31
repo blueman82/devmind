@@ -85,6 +85,25 @@ class AIMemoryMCPServer {
                   enum: ['OR', 'AND'],
                   description: 'Term combination logic: OR (any term matches), AND (all terms must match)',
                   default: 'OR'
+                },
+                max_tokens: {
+                  type: 'number',
+                  minimum: 1000,
+                  maximum: 10000,
+                  description: 'Maximum tokens for response (default: 3000) - enables massive token savings',
+                  default: 3000
+                },
+                include_snippets: {
+                  type: 'boolean',
+                  description: 'Include content snippets in results (default: true)',
+                  default: true
+                },
+                snippet_length: {
+                  type: 'number',
+                  minimum: 50,
+                  maximum: 500,
+                  description: 'Maximum tokens per snippet (default: 150)',
+                  default: 150
                 }
               },
               required: ['query']

@@ -83,7 +83,10 @@ export class ToolHandlers {
       limit = 20,
       search_mode = 'mixed',
       fuzzy_threshold = 0.6,
-      logic = 'OR'
+      logic = 'OR',
+      max_tokens = 3000,
+      include_snippets = true,
+      snippet_length = 150
     } = args;
 
     try {
@@ -101,38 +104,89 @@ export class ToolHandlers {
       const results = await this.hybridSearch(query, searchOptions);
       const limitedResults = results.slice(0, limit);
 
-      const formattedResults = limitedResults.map(result => ({
-        sessionId: result.sessionId,
-        projectPath: result.projectPath,
-        projectName: result.projectName,
-        messageCount: result.messageCount,
-        preview: result.preview,
-        relevanceScore: result.relevanceScore || 1.0,
-        matchedTerms: result.matchedTerms || [query],
-        startTime: result.startTime,
-        endTime: result.endTime,
-        topics: result.topics || [],
-        keywords: result.keywords || [],
-        searchMethod: results.length > 0 && results[0].relevance_score ? 'SQLite FTS5' : 'JSONL Fallback'
+      // Create token-conscious formatted results
+      let currentTokens = 0;
+      const baseResponseTokens = MessageUtils.estimateTokens(JSON.stringify({
+        query: query,
+        searchOptions: { search_mode, logic, fuzzy_threshold, timeframe },
+        results: [],
+        total_found: results.length,
+        showing: 0,
+        database_status: this.isDbInitialized ? 'Connected' : 'Fallback mode',
+        token_usage: { estimated_tokens: 0, max_tokens: max_tokens }
       }));
+      
+      currentTokens = baseResponseTokens;
+      const formattedResults = [];
+      
+      for (let i = 0; i < limitedResults.length; i++) {
+        const result = limitedResults[i];
+        
+        // Create base result (essential metadata only)
+        const baseResult = {
+          sessionId: result.sessionId,
+          projectName: result.projectName,
+          messageCount: result.messageCount,
+          startTime: result.startTime,
+          relevanceScore: result.relevanceScore || 1.0,
+          searchMethod: results.length > 0 && results[0].relevance_score ? 'SQLite FTS5' : 'JSONL Fallback'
+        };
+        
+        let finalResult = baseResult;
+        const resultTokens = MessageUtils.estimateTokens(JSON.stringify(baseResult));
+        
+        // Check if we can include snippet
+        if (include_snippets && result.preview) {
+          const truncatedPreview = result.preview.length > snippet_length * 4 ? 
+            result.preview.substring(0, snippet_length * 4) + '...' : result.preview;
+          const snippetTokens = MessageUtils.estimateTokens(truncatedPreview);
+          
+          // Add snippet only if it fits within token budget
+          if (currentTokens + resultTokens + snippetTokens < max_tokens - 200) { // 200 token buffer
+            finalResult.preview = truncatedPreview;
+          }
+        }
+        
+        const finalResultTokens = MessageUtils.estimateTokens(JSON.stringify(finalResult));
+        
+        // Stop if adding this result would exceed token limit
+        if (currentTokens + finalResultTokens > max_tokens - 200) {
+          break;
+        }
+        
+        formattedResults.push(finalResult);
+        currentTokens += finalResultTokens;
+      }
+
+      // Create token-conscious response
+      const response = {
+        query: query,
+        searchOptions: {
+          search_mode: search_mode,
+          logic: logic,
+          fuzzy_threshold: fuzzy_threshold,
+          timeframe: timeframe,
+          max_tokens: max_tokens,
+          include_snippets: include_snippets
+        },
+        results: formattedResults,
+        total_found: results.length,
+        showing: formattedResults.length,
+        token_usage: {
+          estimated_tokens: currentTokens,
+          max_tokens: max_tokens,
+          token_savings: formattedResults.length < limitedResults.length ? 
+            `Truncated ${limitedResults.length - formattedResults.length} results to stay within token limit` : null
+        },
+        database_status: this.isDbInitialized ? 'Connected' : 'Fallback mode',
+        search_engine: formattedResults.length > 0 ? formattedResults[0].searchMethod : 'None',
+        get_full_details: "Use get_conversation_context with a specific sessionId to get complete conversation details"
+      };
 
       return {
         content: [{
           type: 'text',
-          text: JSON.stringify({
-            query: query,
-            searchOptions: {
-              search_mode: search_mode,
-              logic: logic,
-              fuzzy_threshold: fuzzy_threshold,
-              timeframe: timeframe
-            },
-            results: formattedResults,
-            total_found: results.length,
-            showing: limitedResults.length,
-            database_status: this.isDbInitialized ? 'Connected' : 'Fallback mode',
-            search_engine: formattedResults.length > 0 ? formattedResults[0].searchMethod : 'None'
-          }, null, 2)
+          text: JSON.stringify(response, null, 2)
         }]
       };
     } catch (error) {
