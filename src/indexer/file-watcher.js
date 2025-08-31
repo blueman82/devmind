@@ -286,17 +286,17 @@ export class FileWatcher {
         try {
             // Upsert conversation record
             const result = await this.dbManager.upsertConversation({
-                session_id: conversation.sessionId,
-                project_hash: conversation.projectHash,
-                project_name: conversation.projectName,
-                project_path: conversation.projectPath,
+                session_id: conversation.session_id,
+                project_hash: conversation.project_hash,
+                project_name: conversation.project_name,
+                project_path: conversation.project_path,
                 created_at: conversation.startTime,
                 updated_at: conversation.lastUpdated,
-                message_count: conversation.messages.length,
-                file_references: conversation.fileReferences,
+                message_count: conversation.message_count,
+                file_references: conversation.file_references,
                 topics: conversation.topics,
                 keywords: conversation.keywords,
-                total_tokens: conversation.totalTokens
+                total_tokens: conversation.total_tokens
             });
 
             const conversationId = result.lastInsertRowid || result.changes;
