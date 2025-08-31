@@ -10,9 +10,12 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import ConversationParser from '../parser/conversation-parser.js';
 import { ToolHandlers } from './handlers/tool-handlers.js';
+import ConfigValidator from '../utils/config-validator.js';
+import { createLogger } from '../utils/logger.js';
 
 class AIMemoryMCPServer {
   constructor() {
+    this.logger = createLogger('MCPServer');
     this.server = new Server(
       {
         name: 'ai-memory-mcp-server',
@@ -228,6 +231,12 @@ class AIMemoryMCPServer {
             );
         }
       } catch (error) {
+        this.logger.error('MCP tool execution failed', { 
+          toolName: name, 
+          error: error.message, 
+          stack: error.stack,
+          args: Object.keys(args || {})
+        });
         console.error(`Error in ${name}:`, error);
         return {
           content: [{
@@ -240,12 +249,23 @@ class AIMemoryMCPServer {
   }
 
   async run() {
+    // Validate configuration before starting
+    const validator = new ConfigValidator();
+    await validator.validateOrExit();
+    
+    this.logger.info('MCP Server starting up');
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
+    this.logger.info('MCP Server connected on stdio transport');
     console.error('AI Memory MCP Server running on stdio');
   }
 }
 
-// Start the server
+// Start the server with configuration validation
 const server = new AIMemoryMCPServer();
-server.run().catch(console.error);
+server.run().catch((error) => {
+  const logger = createLogger('MCPServer');
+  logger.error('MCP Server startup failed', { error: error.message, stack: error.stack });
+  console.error('MCP Server startup failed:', error);
+  process.exit(1);
+});

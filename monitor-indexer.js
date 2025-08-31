@@ -8,6 +8,7 @@
 import FileWatcher from './src/indexer/file-watcher.js';
 import DatabaseManager from './src/database/database-manager.js';
 import { createLogger } from './src/utils/logger.js';
+import ConfigValidator from './src/utils/config-validator.js';
 import { promises as fs } from 'fs';
 
 const logger = createLogger('Monitor');
@@ -161,6 +162,10 @@ async function displayStatus() {
 async function startMonitoring() {
     try {
         console.log('Starting indexer monitoring...\n');
+        
+        // Validate configuration first
+        const validator = new ConfigValidator();
+        await validator.validateOrExit();
         
         // Initialize database manager
         dbManager = new DatabaseManager();
