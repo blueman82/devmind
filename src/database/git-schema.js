@@ -4,6 +4,7 @@ export default class GitSchema {
   constructor(database) {
     this.db = database;
     this.logger = createLogger('GitSchema');
+    this.statements = {}; // Cache for prepared statements
   }
 
   async initialize() {
@@ -13,6 +14,7 @@ export default class GitSchema {
       await this.createTables();
       await this.createIndexes();
       await this.createTriggers();
+      this.prepareStatements(); // Prepare and cache statements
       
       this.logger.info('Git database schema initialized successfully');
     } catch (error) {
@@ -22,6 +24,58 @@ export default class GitSchema {
       });
       throw error;
     }
+  }
+
+  prepareStatements() {
+    // Cache frequently used prepared statements
+    this.statements = {
+      upsertRepo: this.db.prepare(`
+        INSERT INTO git_repositories 
+        (project_path, working_directory, git_directory, remote_url, current_branch, last_scanned)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(project_path) DO UPDATE SET
+          working_directory = excluded.working_directory,
+          git_directory = excluded.git_directory,
+          remote_url = excluded.remote_url,
+          current_branch = excluded.current_branch,
+          last_scanned = CURRENT_TIMESTAMP
+      `),
+      
+      getRepoId: this.db.prepare('SELECT id FROM git_repositories WHERE project_path = ?'),
+      
+      insertCommit: this.db.prepare(`
+        INSERT INTO git_commits 
+        (repository_id, commit_hash, commit_date, author_name, author_email, message, parent_hashes, is_merge, insertions, deletions, files_changed_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(repository_id, commit_hash) DO UPDATE SET
+          commit_date = excluded.commit_date,
+          author_name = excluded.author_name,
+          author_email = excluded.author_email,
+          message = excluded.message
+      `),
+      
+      insertCommitFile: this.db.prepare(`
+        INSERT INTO git_commit_files 
+        (commit_id, file_path, change_status)
+        VALUES (?, ?, ?)
+      `),
+      
+      createRestorePoint: this.db.prepare(`
+        INSERT INTO restore_points 
+        (repository_id, commit_hash, label, description, auto_generated, test_status)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `),
+      
+      linkConversationGit: this.db.prepare(`
+        INSERT INTO conversation_git_links 
+        (conversation_id, repository_id, commit_id, link_type, confidence)
+        VALUES (?, ?, ?, ?, ?)
+      `)
+    };
+    
+    this.logger.debug('Prepared statements cached', { 
+      statementCount: Object.keys(this.statements).length 
+    });
   }
 
   async createTables() {
@@ -177,6 +231,16 @@ export default class GitSchema {
     this.logger.debug('Created git database triggers');
   }
 
+  /**
+   * Upsert a git repository to the database
+   * @param {Object} repositoryData - Repository information
+   * @param {string} repositoryData.projectPath - Project path
+   * @param {string} repositoryData.workingDirectory - Working directory path
+   * @param {string} repositoryData.gitDirectory - Git directory path
+   * @param {string} [repositoryData.remoteUrl] - Remote repository URL
+   * @param {string} [repositoryData.currentBranch] - Current branch name
+   * @returns {Promise<Object>} Result with repository ID
+   */
   async upsertRepository(repositoryData) {
     try {
       const {
@@ -187,26 +251,17 @@ export default class GitSchema {
         currentBranch
       } = repositoryData;
 
-      const stmt = this.db.prepare(`
-        INSERT INTO git_repositories 
-        (project_path, working_directory, git_directory, remote_url, current_branch, last_scanned)
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        ON CONFLICT(project_path) DO UPDATE SET
-          working_directory = excluded.working_directory,
-          git_directory = excluded.git_directory,
-          remote_url = excluded.remote_url,
-          current_branch = excluded.current_branch,
-          last_scanned = CURRENT_TIMESTAMP
-      `);
-
-      const result = stmt.run(projectPath, workingDirectory, gitDirectory, remoteUrl, currentBranch);
+      // Use cached prepared statement
+      const result = this.statements.upsertRepo.run(
+        projectPath, workingDirectory, gitDirectory, remoteUrl, currentBranch
+      );
       
       let repositoryId;
       if (result.lastInsertRowid && result.lastInsertRowid > 0) {
         repositoryId = result.lastInsertRowid;
       } else {
-        const getIdStmt = this.db.prepare('SELECT id FROM git_repositories WHERE project_path = ?');
-        const row = getIdStmt.get(projectPath);
+        // Use cached prepared statement
+        const row = this.statements.getRepoId.get(projectPath);
         repositoryId = row ? row.id : null;
       }
 
@@ -227,6 +282,22 @@ export default class GitSchema {
     }
   }
 
+  /**
+   * Insert a commit into the database
+   * @param {number} repositoryId - Repository ID
+   * @param {Object} commitData - Commit information
+   * @param {string} commitData.hash - Commit hash
+   * @param {Date|string} commitData.date - Commit date
+   * @param {string} commitData.authorName - Author name
+   * @param {string} commitData.authorEmail - Author email
+   * @param {string} commitData.message - Commit message
+   * @param {Array<string>} [commitData.parents] - Parent commit hashes
+   * @param {boolean} [commitData.isMerge] - Is merge commit
+   * @param {number} [commitData.insertions] - Number of insertions
+   * @param {number} [commitData.deletions] - Number of deletions
+   * @param {Array<Object>} [commitData.filesChanged] - Files changed in commit
+   * @returns {Promise<Object>} Insert result
+   */
   async insertCommit(repositoryId, commitData) {
     try {
       const {
@@ -242,17 +313,11 @@ export default class GitSchema {
         filesChanged
       } = commitData;
 
-      const commitStmt = this.db.prepare(`
-        INSERT OR IGNORE INTO git_commits 
-        (repository_id, commit_hash, commit_date, author_name, author_email, 
-         message, parent_hashes, is_merge, insertions, deletions, files_changed_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
       const parentHashesJson = parents ? JSON.stringify(parents) : null;
       const filesChangedCount = filesChanged ? filesChanged.length : 0;
 
-      const result = commitStmt.run(
+      // Use cached prepared statement (note: using insertCommit which has ON CONFLICT UPDATE)
+      const result = this.statements.insertCommit.run(
         repositoryId, hash, date instanceof Date ? date.toISOString() : date, authorName, authorEmail,
         message, parentHashesJson, isMerge ? 1 : 0,
         insertions || 0, deletions || 0, filesChangedCount
@@ -283,13 +348,9 @@ export default class GitSchema {
 
   async insertCommitFiles(commitId, filesChanged) {
     try {
-      const stmt = this.db.prepare(`
-        INSERT INTO git_commit_files (commit_id, file_path, change_status)
-        VALUES (?, ?, ?)
-      `);
-
+      // Use cached prepared statement
       for (const file of filesChanged) {
-        stmt.run(commitId, file.path, file.status);
+        this.statements.insertCommitFile.run(commitId, file.path, file.status);
       }
 
       this.logger.debug('Commit files inserted', { 

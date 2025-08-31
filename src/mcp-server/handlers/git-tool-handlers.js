@@ -5,6 +5,9 @@ import pathValidator from '../../utils/path-validator.js';
 import errorSanitizer from '../../utils/error-sanitizer.js';
 
 export class GitToolHandlers {
+  /**
+   * @param {import('../../database/database-manager.js').default} dbManager - Database manager instance
+   */
   constructor(dbManager) {
     this.dbManager = dbManager;
     this.gitManager = new GitManager();
@@ -12,6 +15,10 @@ export class GitToolHandlers {
     this.initialized = false;
   }
 
+  /**
+   * Initialize the git tool handlers
+   * @returns {Promise<void>}
+   */
   async initialize() {
     if (this.initialized) return;
     
@@ -32,6 +39,17 @@ export class GitToolHandlers {
     }
   }
 
+  /**
+   * Handle get_git_context MCP tool request
+   * @param {Object} args - Tool arguments
+   * @param {string} args.project_path - Path to the project directory
+   * @param {string} [args.conversation_id] - Optional conversation ID for linking
+   * @param {boolean} [args.include_commit_history=true] - Include commit history
+   * @param {boolean} [args.include_working_status=true] - Include working directory status
+   * @param {number} [args.commit_limit=20] - Maximum number of commits to return
+   * @param {string} [args.time_range] - Time range for filtering commits
+   * @returns {Promise<{content: Array<{type: string, text: string}>}>} MCP response
+   */
   async handleGetGitContext(args) {
     try {
       // Ensure database is initialized first
@@ -221,10 +239,31 @@ export class GitToolHandlers {
         return;
       }
 
-      for (const commit of newCommits) {
-        const commitDetails = await this.gitManager.getCommitDetails(projectPath, commit.hash);
-        if (commitDetails) {
-          await this.gitSchema.insertCommit(repository.id, commitDetails);
+      // Process commits in parallel batches for better performance
+      const BATCH_SIZE = 5; // Process 5 commits at a time to avoid overwhelming the system
+      
+      for (let i = 0; i < newCommits.length; i += BATCH_SIZE) {
+        const batch = newCommits.slice(i, i + BATCH_SIZE);
+        
+        // Fetch commit details in parallel
+        const commitDetailsPromises = batch.map(commit => 
+          this.gitManager.getCommitDetails(projectPath, commit.hash)
+            .catch(error => {
+              this.logger.warn('Failed to get commit details', { 
+                commitHash: commit.hash, 
+                error: error.message 
+              });
+              return null;
+            })
+        );
+        
+        const commitDetailsBatch = await Promise.all(commitDetailsPromises);
+        
+        // Insert commits sequentially (database operations)
+        for (const commitDetails of commitDetailsBatch) {
+          if (commitDetails) {
+            await this.gitSchema.insertCommit(repository.id, commitDetails);
+          }
         }
       }
 
@@ -324,6 +363,15 @@ export class GitToolHandlers {
     }
   }
 
+  /**
+   * Handle list_restore_points MCP tool request
+   * @param {Object} args - Tool arguments
+   * @param {string} args.project_path - Path to the project directory
+   * @param {string} [args.timeframe] - Filter by timeframe (e.g., "last week")
+   * @param {boolean} [args.include_auto_generated=false] - Include auto-generated restore points
+   * @param {number} [args.limit=50] - Maximum number of restore points to return
+   * @returns {Promise<{content: Array<{type: string, text: string}>}>} MCP response
+   */
   async handleListRestorePoints(args) {
     const { project_path, timeframe, include_auto_generated = false, limit = 50 } = args;
 
