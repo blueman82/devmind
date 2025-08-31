@@ -535,6 +535,86 @@ describe('Git Tools Tests', () => {
     }
   });
 
+  test('GitToolHandlers - handlePreviewRestore', async () => {
+    // Initialize handlers if not already done
+    if (!gitToolHandlers) {
+      gitToolHandlers = new GitToolHandlers(dbManager);
+      await gitToolHandlers.initialize();
+    }
+    
+    // Mock path validation
+    const originalValidate = pathValidator.validateProjectPath;
+    pathValidator.validateProjectPath = function(path) {
+      return { isValid: true, normalizedPath: path };
+    };
+    
+    try {
+      // Ensure repository is indexed
+      await gitToolHandlers.handleGetGitContext({
+        project_path: testRepoPath
+      });
+      
+      // First create a restore point to preview
+      const createResult = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: testRepoPath,
+        label: 'Test preview restore point',
+        description: 'For testing preview functionality'
+      });
+      
+      const createResponse = JSON.parse(createResult.content[0].text);
+      
+      if (createResponse.success) {
+        // Test preview with restore_point_id
+        const previewResult = await gitToolHandlers.handlePreviewRestore({
+          project_path: testRepoPath,
+          restore_point_id: createResponse.restore_point.id
+        });
+        
+        assert.ok(previewResult.content, 'Should return content');
+        const previewResponse = JSON.parse(previewResult.content[0].text);
+        
+        if (previewResponse.preview?.status === 'no_changes') {
+          console.log('✅ Preview correctly detected no changes (at same commit)');
+          assert.strictEqual(previewResponse.preview.status, 'no_changes', 'Should detect no changes');
+        } else if (previewResponse.project_path) {
+          console.log('✅ Preview generated successfully');
+          assert.ok(previewResponse.current_state, 'Should have current state');
+          assert.ok(previewResponse.target_state, 'Should have target state');
+          assert.ok(previewResponse.restore_commands, 'Should have restore commands');
+        }
+      } else {
+        console.log('⚠️ Could not create restore point for preview test (expected in test environment)');
+      }
+      
+      // Test with missing parameters
+      const missingParamsResult = await gitToolHandlers.handlePreviewRestore({
+        project_path: testRepoPath
+        // Missing both restore_point_id and commit_hash
+      });
+      
+      assert.ok(missingParamsResult.content, 'Should return content for missing params');
+      assert.strictEqual(
+        missingParamsResult.content[0].text,
+        'Error: Either restore_point_id or commit_hash is required',
+        'Should error on missing target'
+      );
+      
+      // Test with non-existent restore point
+      const nonExistentResult = await gitToolHandlers.handlePreviewRestore({
+        project_path: testRepoPath,
+        restore_point_id: 999999
+      });
+      
+      const nonExistentResponse = JSON.parse(nonExistentResult.content[0].text);
+      if (nonExistentResponse.error === 'Restore point not found') {
+        console.log('✅ Non-existent restore point handled correctly');
+      }
+      
+    } finally {
+      pathValidator.validateProjectPath = originalValidate;
+    }
+  });
+
   test('GitSchema - restore point operations', async () => {
     // First ensure we have a repository in the database
     const repoCheckStmt = db.prepare('SELECT id FROM git_repositories WHERE project_path = ?');

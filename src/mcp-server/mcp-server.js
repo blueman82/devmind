@@ -360,6 +360,40 @@ class AIMemoryMCPServer {
               },
               required: ['project_path', 'label']
             }
+          },
+          {
+            name: 'preview_restore',
+            description: 'Preview what would change if restoring to a specific restore point or commit',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                project_path: {
+                  type: 'string',
+                  description: 'Path to the project directory'
+                },
+                restore_point_id: {
+                  type: 'number',
+                  description: 'ID of the restore point to preview'
+                },
+                commit_hash: {
+                  type: 'string',
+                  description: 'Commit hash to preview (alternative to restore_point_id)'
+                },
+                include_file_contents: {
+                  type: 'boolean',
+                  description: 'Include file content diffs in preview',
+                  default: false
+                },
+                max_files: {
+                  type: 'number',
+                  description: 'Maximum number of files to show in preview',
+                  default: 100,
+                  minimum: 1,
+                  maximum: 1000
+                }
+              },
+              required: ['project_path']
+            }
           }
         ]
       };
@@ -396,6 +430,9 @@ class AIMemoryMCPServer {
             
           case 'create_restore_point':
             return await this.gitToolHandlers.handleCreateRestorePoint(args);
+            
+          case 'preview_restore':
+            return await this.gitToolHandlers.handlePreviewRestore(args);
             
           default:
             throw new McpError(

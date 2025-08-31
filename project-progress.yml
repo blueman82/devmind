@@ -459,11 +459,11 @@ git_integration_development:
     - "✅ get_git_context - retrieves repository status and commit history"
     - "✅ list_restore_points - browse tagged working states"
     - "✅ create_restore_point - tag current state as working"
+    - "✅ preview_restore - show what files would change"
   
   remaining_git_tools:
     priority_high:
-      - "preview_restore - show what files would change"
-      - "restore_project_state - perform safe restoration"
+      - "restore_project_state - perform safe restoration (final tool)"
     
   implementation_approach: "One tool at a time, following critical workflow rules"
   file_size_management: "New git components in separate files to maintain <500 line limit"
@@ -489,7 +489,7 @@ git_integration_development:
       performance_optimization: "✅ COMPLETED - comprehensive database indexing strategy"
   
 phase_2_roadmap:
-  - "Complete git MCP tools (2 remaining: preview_restore and restore_project_state)"
+  - "Complete git MCP tools (1 remaining: restore_project_state)"
   - "Swift macOS app with complete historical tooling foundation"
   - "Cross-project solution discovery enhanced with git context"
   - "Advanced AI integrations with time-machine capabilities"
