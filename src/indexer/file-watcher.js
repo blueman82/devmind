@@ -323,7 +323,7 @@ export class FileWatcher {
                         timestamp: msg.timestamp,
                         role: msg.role,
                         content_type: msg.type || 'text',
-                        content: textContent || null,
+                        content: textContent || '',
                         content_summary: textContent.length > 200 ? 
                             textContent.substring(0, 200) + '...' : null,
                         tool_calls: toolCalls,

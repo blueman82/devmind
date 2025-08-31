@@ -7,6 +7,7 @@
 
 import FileWatcher from './src/indexer/file-watcher.js';
 import DatabaseManager from './src/database/database-manager.js';
+import { promises as fs } from 'fs';
 
 console.log('📊 AI Memory App - Indexer Monitoring Dashboard\n');
 
@@ -42,7 +43,7 @@ function formatTime(isoString) {
     }
 }
 
-function displayStatus() {
+async function displayStatus() {
     console.clear();
     console.log(colorize('cyan', '📊 AI Memory App - Indexer Status Dashboard'));
     console.log('═'.repeat(80));
@@ -100,12 +101,11 @@ function displayStatus() {
             console.log(`   Monitoring Path: ${colorize('blue', watcher.claudeProjectsPath)}`);
             
             try {
-                const fs = await import('fs');
-                await fs.promises.access(watcher.claudeProjectsPath);
+                await fs.access(watcher.claudeProjectsPath);
                 console.log(`   Directory Status: ${colorize('green', '✅ EXISTS')}`);
                 
                 // Try to count projects
-                const entries = await fs.promises.readdir(watcher.claudeProjectsPath, { withFileTypes: true });
+                const entries = await fs.readdir(watcher.claudeProjectsPath, { withFileTypes: true });
                 const projectDirs = entries.filter(e => e.isDirectory()).length;
                 console.log(`   Project Directories: ${colorize('blue', formatNumber(projectDirs))}`);
                 
@@ -163,10 +163,10 @@ async function startMonitoring() {
         console.log(colorize('green', '✅ FileWatcher started'));
 
         // Display initial status
-        setTimeout(displayStatus, 500);
+        setTimeout(() => displayStatus().catch(console.error), 500);
 
         // Update every 2 seconds
-        monitoringInterval = setInterval(displayStatus, 2000);
+        monitoringInterval = setInterval(() => displayStatus().catch(console.error), 2000);
 
         // Handle keyboard input
         process.stdin.setRawMode(true);
@@ -183,12 +183,12 @@ async function startMonitoring() {
                 watcher = new FileWatcher();
                 await watcher.start();
                 console.log(colorize('green', '✅ FileWatcher restarted'));
-                setTimeout(displayStatus, 500);
+                setTimeout(() => displayStatus().catch(console.error), 500);
             } else if (key === 'f') {
                 console.log(colorize('yellow', '\n📂 Performing full index...'));
                 await watcher.performFullIndex();
                 console.log(colorize('green', '✅ Full index completed'));
-                setTimeout(displayStatus, 500);
+                setTimeout(() => displayStatus().catch(console.error), 500);
             } else if (key === 's') {
                 console.log(colorize('yellow', '\n🔍 Testing search functionality...'));
                 const results = dbManager.searchConversations('authentication database', { limit: 3 });
@@ -196,7 +196,7 @@ async function startMonitoring() {
                 results.forEach((result, i) => {
                     console.log(`  ${i + 1}. ${result.session_id} (score: ${result.relevance_score?.toFixed(4) || 'N/A'})`);
                 });
-                setTimeout(displayStatus, 2000);
+                setTimeout(() => displayStatus().catch(console.error), 2000);
             }
         });
 

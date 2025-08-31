@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS messages (
     timestamp DATETIME,
     role TEXT NOT NULL, -- 'user', 'assistant', 'tool_use', 'tool_result'
     content_type TEXT, -- 'text', 'tool_call', 'image', etc.
-    content TEXT NOT NULL,
+    content TEXT,
     content_summary TEXT, -- Condensed version for quick scanning
     tool_calls TEXT, -- JSON array of tool calls if applicable
     file_references TEXT, -- JSON array of files mentioned in this message
