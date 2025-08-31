@@ -1,5 +1,46 @@
 # Swift macOS App Implementation Progress
 
+## CRITICAL RULES - MUST FOLLOW THROUGHOUT IMPLEMENTATION
+
+development_rules:
+  rule_1: "✅ COMMIT AFTER EVERY CHANGE"
+    enforcement: "MANDATORY - No exceptions, every modification gets committed immediately"
+    purpose: "Maintain audit trail and enable easy rollback if needed"
+    
+  rule_2: "✅ UPDATE swift-app-implementation-progress.yml AFTER EVERY CHANGE" 
+    enforcement: "MANDATORY - This document must reflect current implementation status"
+    purpose: "Track progress, maintain synchronization between planning and reality"
+    
+  rule_3: "✅ KEEP CODE FILES AROUND ~500 LINES"
+    enforcement: "MANDATORY - Split files when approaching this limit"
+    purpose: "Maintain readability, modularity, and compliance with project standards"
+    reference: "Learned from git-tool-handlers.js incident (1534 lines violation)"
+    
+  rule_4: "✅ ENSURE WE HAVE TEST COVERAGE"
+    enforcement: "MANDATORY - Write tests for all non-trivial functionality" 
+    purpose: "Maintain code quality and prevent regressions"
+    approach: "Unit tests for models/services, UI tests for critical user flows"
+    
+  rule_5: "✅ USE CONTEXT7 FOR SWIFT/SWIFTUI ASSISTANCE"
+    resource: "context7 provides 5767+ Swift code snippets and 15,469+ SwiftUI examples"
+    usage: "Query context7 when stuck on syntax, patterns, or implementation details"
+    
+  rule_6: "✅ USE AI-MEMORY MCP FOR CONTEXT AND REFERENCE"
+    resource: "ai-memory MCP server provides context about our existing tools and implementation"
+    usage: "Query MCP tools to understand data structures, API patterns, and integration points"
+    tools_available: "search_conversations, get_conversation_context, list_restore_points, etc."
+
+compliance_tracking:
+  violations_allowed: 0
+  current_violations: 0
+  enforcement_level: "STRICT - No flexibility on these rules"
+  
+historical_context:
+  previous_violation: "git-tool-handlers.js reached 1534 lines (307% over limit)"
+  lesson_learned: "File size violations create technical debt and compliance issues"
+  resolution: "Emergency refactoring split into 6 focused modules under 500 lines"
+  outcome: "All functionality preserved, 33/33 tests still passing"
+
 project:
   name: "AI Memory - Swift macOS App"
   description: "Native macOS menu bar application providing visual interface to AI Memory conversation search and git restore functionality"
