@@ -571,13 +571,20 @@ struct ConversationSearchResult {
     let hasErrors: Bool
     
     init(from dict: [String: Any]) throws {
-        guard let sessionId = dict["session_id"] as? String,
-              let title = dict["title"] as? String,
-              let project = dict["project"] as? String,
-              let snippet = dict["snippet"] as? String,
-              let messageCount = dict["message_count"] as? Int else {
+        // Handle both old and new field names for compatibility
+        guard let sessionId = (dict["sessionId"] ?? dict["session_id"]) as? String,
+              let messageCount = (dict["messageCount"] ?? dict["message_count"]) as? Int else {
             throw MCPClientError.invalidResponse
         }
+        
+        // Use projectName or project field, defaulting to "Unknown" if neither exists
+        let project = (dict["projectName"] ?? dict["project"]) as? String ?? "Unknown"
+        
+        // Use preview as snippet, or snippet field if available
+        let snippet = (dict["preview"] ?? dict["snippet"]) as? String ?? "No preview available"
+        
+        // Use sessionId as title if no title field exists
+        let title = (dict["title"] as? String) ?? "Session \(sessionId.prefix(8))"
         
         self.sessionId = sessionId
         self.title = title
