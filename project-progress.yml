@@ -3809,9 +3809,10 @@ phase_19_parser_fix:
   error_discovered: "Skipping invalid JSON line: Cannot read properties of undefined (reading 'substring')"
   
   root_cause:
-    location: "src/parser/conversation-parser.js line 382"
-    issue: "Assumed text is always an array, tried text[0].substring()"
-    problem: "text[0] was undefined when text wasn't an array"
+    location: "src/parser/conversation-parser.js line 156-157"
+    issue: "Called substring on potentially undefined item.content"
+    problem: "JSON.stringify(item.content).substring() when item.content is undefined"
+    secondary_fix: "Also fixed line 382 for array/string text handling"
     
   fix_implemented:
     before: |
