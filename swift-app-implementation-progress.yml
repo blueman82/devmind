@@ -263,11 +263,20 @@ implementation_phases:
         features: "Server lifecycle management, output monitoring, health checks"
         lines: 250
         commit: "pending"
+        
+      - task: "MCPClient.swift - Communication layer"
+        status: "✅ COMPLETED"
+        date: "2025-09-01T15:20:00Z"
+        purpose: "JSON-RPC communication with MCP server"
+        features: "Async JSON-RPC client, MCP tool methods, error handling"
+        lines: 400
+        methods_implemented: "searchConversations, listRecentConversations, getConversationContext, listRestorePoints, createRestorePoint, previewRestore"
+        commit: "pending"
     
     in_progress_tasks:
-      - task: "MCPClient.swift - Communication layer"
+      - task: "Connect SearchWindow to live MCP data"
         status: "🔄 IN PROGRESS"
-        purpose: "JSON-RPC communication with MCP server"
+        ui_integration: "Replace mock search results with MCPClient calls"
         
     pending_tasks:
       - task: "Live conversation search integration"
