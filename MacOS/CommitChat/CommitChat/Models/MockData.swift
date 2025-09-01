@@ -153,11 +153,13 @@ struct ProjectItem: Identifiable {
 /// Mock restore point data for git integration
 struct RestorePoint: Identifiable, Hashable {
     let id = UUID()
+    let restorePointId: Int  // MCP server ID
     let label: String
     let commit: String
     let date: Date
     let author: String
     let message: String
+    let description: String?  // Optional description
     let filesChanged: Int
     let insertions: Int
     let deletions: Int
