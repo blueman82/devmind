@@ -1211,11 +1211,55 @@ code_review_suggestions_implemented:
     
   commit_pending: "Implement performance optimizations from code review suggestions"
 
+## Critical Issue Discovered - Git Tools Monorepo Limitation (2025-09-01)
+
+git_tools_critical_limitation:
+  status: "🚨 CRITICAL ISSUE IDENTIFIED"
+  date_discovered: "2025-09-01T15:30:00Z"
+  severity: "HIGH - Core functionality limitation"
+  
+  issue_description:
+    problem: "Git MCP tools assume project_path equals git repository root"
+    manifestation: "Tools look at parent repository instead of subdirectory context"
+    impact: "Cannot properly track commits/changes in monorepo subdirectories"
+    example: "ketchup subdirectory in camp-ops-tools-emea shows parent repo commits instead of ketchup-specific changes"
+    
+  root_causes:
+    - "No upward traversal to find actual .git folder"
+    - "Missing subdirectory filtering in git operations"
+    - "Tools don't handle branch-specific queries"
+    - "Architecture assumes one project per repository"
+    
+  required_fixes:
+    repository_discovery:
+      - "Walk up directory tree using git rev-parse --show-toplevel"
+      - "Map project_path to relative path within repository"
+      - "Store repository_root vs subdirectory_path relationship"
+    branch_support:
+      - "Add branch parameter to all git MCP tools"
+      - "Use git log <branch> -- <path> for subdirectory filtering"
+      - "Track branch context in database schema"
+    subdirectory_filtering:
+      - "Filter commits to only show changes in specified subdirectory"
+      - "Use git log -- <subdirectory> for path-specific history"
+      - "Update file change tracking to be subdirectory-aware"
+      
+  files_requiring_updates:
+    - "src/git/git-manager.js - Repository discovery logic"
+    - "src/database/git-schema.js - Database schema updates"
+    - "src/mcp-server/handlers/git-tool-handlers.js - Add branch/subdirectory params"
+    - "src/utils/secure-git-executor.js - Add subdirectory filtering commands"
+    
+  priority: "CRITICAL - Blocks effective monorepo usage"
+  estimated_effort: "2-3 days comprehensive fix"
+  blocks_swift_app: "Phase 3 git integration will have same limitation"
+
 ## Phase 8E: Swift macOS App Development 🚧
 swift_app_development:
-  status: "🚧 IN PROGRESS"
+  status: "🚧 IN PROGRESS - Phase 3: 50% Complete"
   date_started: "2025-08-31"
-  current_task: "Xcode project structure setup and initial implementation"
+  current_task: "MCP integration - UI layer connection to services"
+  critical_blocker: "Git tools monorepo limitation discovered"
   
   project_setup:
     xcode_requirements:
