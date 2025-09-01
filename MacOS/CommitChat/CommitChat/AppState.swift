@@ -75,13 +75,32 @@ class AppState: ObservableObject {
     // MARK: - Settings
     
     /// Path to the MCP server installation
-    @Published var mcpServerPath = "~/.claude/ai-memory"
+    @Published var mcpServerPath = "~/.claude/ai-memory" {
+        didSet {
+            UserDefaults.standard.set(mcpServerPath, forKey: "mcpServerPath")
+        }
+    }
+    
+    /// Path to the project directory for restore points
+    @Published var projectPath = "/Users/harrison/Documents/Github/devmind" {
+        didSet {
+            UserDefaults.standard.set(projectPath, forKey: "projectPath")
+        }
+    }
     
     /// Whether to automatically start the MCP server on app launch
-    @Published var autoStartServer = true
+    @Published var autoStartServer = true {
+        didSet {
+            UserDefaults.standard.set(autoStartServer, forKey: "autoStartServer")
+        }
+    }
     
     /// Whether to show system notifications
-    @Published var showNotifications = true
+    @Published var showNotifications = true {
+        didSet {
+            UserDefaults.standard.set(showNotifications, forKey: "showNotifications")
+        }
+    }
     
     // MARK: - Initialization
     
