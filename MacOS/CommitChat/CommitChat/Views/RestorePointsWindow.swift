@@ -12,6 +12,14 @@ struct RestorePointsWindow: View {
     @State private var selectedRestorePoint: RestorePoint?
     @State private var showingConfirmation = false
     @State private var searchText = ""
+    @State private var restorePoints: [RestorePoint] = []
+    @State private var isLoadingRestorePoints = false
+    @State private var restorePointError: MCPClientError?
+    @State private var restorePreview: RestorePreview?
+    @State private var isLoadingPreview = false
+    
+    private let mcpClient = MCPClient.shared
+    private let projectPath = "/Users/harrison/Documents/Github/devmind"  // Current project path
     
     var body: some View {
         VStack(spacing: 0) {
