@@ -21,6 +21,16 @@ struct ConversationItem: Identifiable {
     let hasCode: Bool
     let hasErrors: Bool
     
+    /// Traditional initializer for mock data and direct construction
+    init(title: String, project: String, date: Date, messageCount: Int, hasCode: Bool, hasErrors: Bool) {
+        self.title = title
+        self.project = project
+        self.date = date
+        self.messageCount = messageCount
+        self.hasCode = hasCode
+        self.hasErrors = hasErrors
+    }
+    
     /// Initialize from MCP search result data
     init(from searchResult: ConversationSearchResult) {
         self.title = searchResult.title
