@@ -164,11 +164,13 @@ class MCPClient: ObservableObject {
         processManager.$serverStatus
             .sink { [weak self] status in
                 DispatchQueue.main.async {
+                    let previousStatus = self?.isConnected ?? false
                     self?.isConnected = status.isRunning
                     if !status.isRunning {
                         self?.cleanup()
                     }
-                    print("MCPClient connection status updated: \(status.isRunning)")
+                    print("MCPClient connection status updated: \(previousStatus) → \(status.isRunning)")
+                    print("MCPClient isConnected property is now: \(self?.isConnected ?? false)")
                 }
             }
             .store(in: &cancellables)
