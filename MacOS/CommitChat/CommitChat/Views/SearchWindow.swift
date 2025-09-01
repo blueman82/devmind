@@ -79,7 +79,7 @@ struct SearchWindow: View {
                         .foregroundColor(.secondary)
                     Text("Type to search across \(appState.conversationCount) conversations")
                         .font(.caption)
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(.secondary.opacity(0.6))
                 }
                 Spacer()
             } else {
@@ -183,14 +183,14 @@ struct ConversationRow: View {
                         .foregroundColor(.secondary)
                     
                     Text("•")
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(.secondary.opacity(0.6))
                     
                     Text("\(item.messageCount) messages")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
                     Text("•")
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(.secondary.opacity(0.6))
                     
                     Text(item.date, style: .relative)
                         .font(.caption)
@@ -199,7 +199,7 @@ struct ConversationRow: View {
             }
             
             Image(systemName: "chevron.right")
-                .foregroundColor(.tertiary)
+                .foregroundColor(.secondary.opacity(0.6))
                 .font(.caption)
         }
         .padding(.horizontal)
