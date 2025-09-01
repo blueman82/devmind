@@ -145,15 +145,16 @@ struct SearchWindow: View {
     
     private func performSearch() {
         appState.searchQuery = searchText
-        appState.isSearching = true
         appState.searchError = .none  // Clear any previous errors
         
-        // Validate search input
+        // If search text is empty, just reset the state without showing an error
         if searchText.isEmpty {
-            appState.searchError = .searchFailed("Please enter a search query")
             appState.isSearching = false
+            appState.searchResults = []  // Clear results
             return
         }
+        
+        appState.isSearching = true
         
         // Perform async MCP search
         Task {
