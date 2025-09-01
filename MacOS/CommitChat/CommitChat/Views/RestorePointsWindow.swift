@@ -59,14 +59,67 @@ struct RestorePointsWindow: View {
             // Two-pane layout
             HSplitView {
                 // Left: Restore points list
-                List(selection: $selectedRestorePoint) {
-                    ForEach(RestorePoint.mockData) { point in
-                        RestorePointRow(point: point)
-                            .tag(point)
+                if isLoadingRestorePoints {
+                    VStack {
+                        ProgressView("Loading restore points...")
+                            .padding(50)
                     }
+                    .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
+                } else if let error = restorePointError {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundColor(.orange)
+                        
+                        Text("Failed to load restore points")
+                            .font(.headline)
+                        
+                        Text(error.localizedDescription)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                        
+                        Button("Retry") {
+                            loadRestorePoints()
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding(50)
+                    .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
+                } else if filteredRestorePoints.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                        
+                        Text("No restore points found")
+                            .font(.headline)
+                        
+                        Text("Create restore points to save working states")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Button("Create Restore Point") {
+                            createRestorePoint()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        
+                        Button("Refresh") {
+                            loadRestorePoints()
+                        }
+                    }
+                    .padding(50)
+                    .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(selection: $selectedRestorePoint) {
+                        ForEach(filteredRestorePoints) { point in
+                            RestorePointRow(point: point)
+                                .tag(point)
+                        }
+                    }
+                    .listStyle(SidebarListStyle())
+                    .frame(minWidth: 300)
                 }
-                .listStyle(SidebarListStyle())
-                .frame(minWidth: 300)
                 
                 // Right: Preview pane
                 if let point = selectedRestorePoint {
