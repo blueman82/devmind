@@ -454,27 +454,37 @@ class MCPClient: ObservableObject {
     
     /// Get conversation context
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
-        let params: [String: Any] = [
+        let toolParams: [String: Any] = [
             "session_id": sessionId,
             "page": page,
             "page_size": pageSize,
             "max_tokens": 20000
         ]
         
-        let response: [String: Any] = try await sendRequest(method: "get_conversation_context", params: params)
+        let params: [String: Any] = [
+            "name": "get_conversation_context",
+            "arguments": toolParams
+        ]
+        
+        let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
         return try ConversationContext(from: response)
     }
     
     /// List restore points
     func listRestorePoints(projectPath: String, limit: Int = 50) async throws -> [RestorePoint] {
-        let params: [String: Any] = [
+        let toolParams: [String: Any] = [
             "project_path": projectPath,
             "limit": limit,
             "include_auto_generated": false
         ]
         
-        let response: [String: Any] = try await sendRequest(method: "list_restore_points", params: params)
+        let params: [String: Any] = [
+            "name": "list_restore_points",
+            "arguments": toolParams
+        ]
+        
+        let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
         guard let restorePoints = response["restore_points"] as? [[String: Any]] else {
             throw MCPClientError.invalidResponse
@@ -487,14 +497,19 @@ class MCPClient: ObservableObject {
     
     /// Create a restore point
     func createRestorePoint(projectPath: String, label: String, description: String? = nil) async throws -> RestorePoint {
-        let params: [String: Any] = [
+        let toolParams: [String: Any] = [
             "project_path": projectPath,
             "label": label,
             "description": description ?? "",
             "test_status": "unknown"
         ]
         
-        let response: [String: Any] = try await sendRequest(method: "create_restore_point", params: params)
+        let params: [String: Any] = [
+            "name": "create_restore_point",
+            "arguments": toolParams
+        ]
+        
+        let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
         return try RestorePoint(from: response)
     }
