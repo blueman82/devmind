@@ -315,7 +315,7 @@ class MCPClient: ObservableObject {
                    let stdin = process.standardInput as? FileHandle {
                     // Check if process is still running before writing
                     if !process.isRunning {
-                        requestQueue.sync {
+                        _ = requestQueue.sync {
                             pendingRequests.removeValue(forKey: id)
                         }
                         continuation.resume(throwing: MCPClientError.notConnected)
@@ -331,7 +331,7 @@ class MCPClient: ObservableObject {
                     
                     // Check if file descriptor is valid using fstat
                     if fstat(fd, &statBuf) == -1 {
-                        requestQueue.sync {
+                        _ = requestQueue.sync {
                             pendingRequests.removeValue(forKey: id)
                         }
                         continuation.resume(throwing: MCPClientError.serverError("Failed to send request: File descriptor is invalid"))
@@ -345,7 +345,7 @@ class MCPClient: ObservableObject {
                     
                     if writeResult == -1 {
                         let error = String(cString: strerror(errno))
-                        requestQueue.sync {
+                        _ = requestQueue.sync {
                             pendingRequests.removeValue(forKey: id)
                         }
                         continuation.resume(throwing: MCPClientError.serverError("Failed to send request: \(error)"))
