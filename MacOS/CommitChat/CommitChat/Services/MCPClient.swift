@@ -189,7 +189,72 @@ class MCPClient: ObservableObject {
             }
         }
         
-        return processManager.serverStatus.isRunning
+        // Set up JSON-RPC response parsing if server is running
+        if processManager.serverStatus.isRunning {
+            setupResponseParsing()
+            return true
+        }
+        
+        return false
+    }
+    
+    private func setupResponseParsing() {
+        // Access the ProcessManager's output pipe for JSON-RPC responses
+        guard let process = processManager.mcpProcess,
+              let outputPipe = process.standardOutput as? Pipe else {
+            print("Failed to access MCP server output pipe")
+            return
+        }
+        
+        // Set up JSON-RPC response parsing
+        outputPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
+            let data = handle.availableData
+            if !data.isEmpty {
+                let output = String(data: data, encoding: .utf8) ?? ""
+                self?.parseJSONRPCResponses(output)
+            }
+        }
+        
+        self.outputPipe = outputPipe
+        print("JSON-RPC response parsing set up successfully")
+    }
+    
+    private func parseJSONRPCResponses(_ output: String) {
+        // Split by newlines as each JSON-RPC response should be on a separate line
+        let lines = output.components(separatedBy: .newlines)
+        
+        for line in lines {
+            let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedLine.isEmpty && trimmedLine.hasPrefix("{") {
+                parseJSONRPCResponse(trimmedLine)
+            }
+        }
+    }
+    
+    private func parseJSONRPCResponse(_ jsonString: String) {
+        guard let data = jsonString.data(using: .utf8) else { return }
+        
+        do {
+            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let id = json["id"] as? Int {
+                
+                // Match response to pending request
+                requestQueue.sync {
+                    if let completion = pendingRequests.removeValue(forKey: id) {
+                        if let error = json["error"] as? [String: Any] {
+                            let errorMessage = error["message"] as? String ?? "Unknown error"
+                            completion(.failure(MCPClientError.serverError(errorMessage)))
+                        } else if let result = json["result"] {
+                            completion(.success(result))
+                        } else {
+                            completion(.failure(MCPClientError.invalidResponse))
+                        }
+                    }
+                }
+            }
+        } catch {
+            print("Failed to parse JSON-RPC response: \(error)")
+        }
     }
     
     func disconnect() {
