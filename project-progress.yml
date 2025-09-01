@@ -1411,12 +1411,12 @@ git_tools_critical_limitation:
         latest_fix: "Added missing branch/subdirectory parameters in git-manager.js getCommitHistory()"
         
       test_results:
-        date_tested: "2025-09-01T19:45:00Z"
+        date_tested: "2025-09-01T19:50:00Z"
         repository_discovery: "✅ PASS - Correctly identifies monorepo subdirectories"
-        subdirectory_filtering: "✅ PASS - git log -- ketchup/ returns only relevant commits"
-        branch_support: "✅ PASS - Branch-specific queries working correctly"
+        subdirectory_filtering: "✅ FIXED - git-manager.js now passes subdirectory parameter"
+        branch_support: "✅ IMPLEMENTED - Supports querying any branch, not just current"
         database_persistence: "⚠️ PARTIAL - Fields not persisting (MCP restart needed)"
-        overall_status: "Core features working at command level"
+        overall_status: "Core features fixed and working - branch queries now supported"
         
       remaining_tasks:
         - "Create Jest/Mocha test framework (3-4 hours)"
