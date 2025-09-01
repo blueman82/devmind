@@ -168,6 +168,10 @@ class MCPClient: ObservableObject {
                     self?.isConnected = status.isRunning
                     if !status.isRunning {
                         self?.cleanup()
+                    } else if !previousStatus && status.isRunning {
+                        // Connection just established - set up response parsing
+                        self?.setupResponseParsing()
+                        print("MCPClient: Response parsing set up after connection established")
                     }
                     print("MCPClient connection status updated: \(previousStatus) → \(status.isRunning)")
                     print("MCPClient isConnected property is now: \(self?.isConnected ?? false)")
