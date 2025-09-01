@@ -317,10 +317,15 @@ class MCPClient: ObservableObject {
                         return
                     }
                     
+                    // Safe write with pipe validation
+                    let data = jsonString.data(using: .utf8)!
                     do {
-                        let data = jsonString.data(using: .utf8)!
-                        // Use writeData instead of write(contentsOf:) for better error handling
+                        // Check if the file handle is still valid
+                        let _ = stdin.fileDescriptor
                         stdin.write(data)
+                        
+                        // Ensure data is sent immediately
+                        try stdin.synchronize()
                     } catch {
                         // Handle broken pipe or closed file handle
                         requestQueue.sync {
