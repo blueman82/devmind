@@ -368,14 +368,19 @@ class MCPClient: ObservableObject {
     /// )
     /// ```
     func searchConversations(query: String, limit: Int = 10) async throws -> [ConversationSearchResult] {
-        let params: [String: Any] = [
+        let toolParams: [String: Any] = [
             "query": query,
             "limit": limit,
             "include_snippets": true,
             "max_tokens": 3000
         ]
         
-        let response: [String: Any] = try await sendRequest(method: "search_conversations", params: params)
+        let params: [String: Any] = [
+            "name": "search_conversations",
+            "arguments": toolParams
+        ]
+        
+        let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
         // Parse response into ConversationSearchResult objects
         guard let results = response["results"] as? [[String: Any]] else {
