@@ -245,7 +245,7 @@ class AppState: ObservableObject {
         Task {
             do {
                 let restorePoints = try await mcpClient.listRestorePoints(
-                    projectPath: "/Users/harrison/Documents/Github/devmind",
+                    projectPath: projectPath,
                     limit: 100
                 )
                 
