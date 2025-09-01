@@ -2828,3 +2828,43 @@ ui_status_discrepancy_session:
     step_2: "Observe detailed status transition logs"
     step_3: "Test actual MCP functionality despite UI showing disconnected"
     step_4: "Identify UI component showing incorrect status"
+
+## Phase 9++++++ CRITICAL CORRECTION - Output Detection Not Working ⚠️
+corrected_analysis_session:
+  date: "2025-09-01"
+  status: "🚨 ISSUE STILL UNRESOLVED"
+  correction: "Previous success analysis was incorrect - output-based detection failing"
+  
+  actual_log_analysis:
+    initial_failure_sequence:
+      - "ProcessManager: startMCPServer() called"
+      - "ProcessManager: Current serverStatus = stopped"
+      - "MCPClient connection status updated: false → false"
+      - "MCPClient isConnected property is now: false"
+    server_startup_evidence:
+      - "MCP Server Output: Configuration validation passed"
+      - "MCP Server Output: MCP Server connected on stdio transport"  
+    missing_detection:
+      - "No 'ProcessManager: Detected MCP server startup via output' log"
+      - "Output-based detection not triggering despite server messages"
+    ui_behavior:
+      - "Search UI shows MCP Server not connected"
+      - "UI is CORRECTLY reflecting actual isConnected = false state"
+      
+  root_cause_identification:
+    issue: "Output-based detection mechanism not working"
+    evidence: "MCP server startup messages present but not triggering status update"
+    impact: "Connection remains false despite functional server"
+    timing_gap: "Delay between server ready and status detection"
+    
+  corrected_status:
+    stdin_pipe_fix: "✅ RESOLVED - Bad file descriptor eliminated"
+    mcp_server_startup: "✅ WORKING - Server starts and produces output"
+    output_based_detection: "❌ FAILING - Not detecting startup messages"
+    timing_based_detection: "⏳ UNKNOWN - May work after 1-second delay"
+    ui_status_display: "✅ CORRECT - UI accurately reflects false connection state"
+    
+  next_investigation_priority:
+    primary_issue: "Fix output-based detection not triggering on startup messages"
+    technical_focus: "setupOutputMonitoring output handler not detecting server messages"
+    debugging_needed: "Verify output monitoring is receiving MCP server output correctly"
