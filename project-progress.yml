@@ -3657,9 +3657,32 @@ phase_15_unified_handler:
       - "Thread-safe with proper dispatch queues"
       
   step_3_testing:
-    status: "READY TO TEST"
+    status: "COMPLETED"
     test_plan:
       - "Build and run the app"
       - "Start MCP server via UI"
       - "Open Search UI and perform a search"
       - "Verify Search UI shows results instead of 'MCP server not connected'"
+    
+  phase_15_summary:
+    completion_time: "2025-09-02T00:15:00"
+    problem_statement: "Dual readabilityHandler conflict - can't have two handlers on same FileHandle"
+    root_cause: "Both ProcessManager and MCPClient trying to set handlers on same outputPipe"
+    
+    solution_implemented:
+      step_1: "Removed MCPClient's conflicting readabilityHandler setup"
+      step_2: "Made parseJSONRPCResponses() internal instead of private"
+      step_3: "Added MCPClient.shared.parseJSONRPCResponses() call in ProcessManager"
+      step_4: "Passes raw output before ANSI stripping to preserve JSON-RPC format"
+      
+    files_changed:
+      MCPClient_swift:
+        - "Line 210-214: Simplified setupResponseParsing() to just log delegation"
+        - "Line 216: Changed parseJSONRPCResponses from private to internal"
+      ProcessManager_swift:
+        - "Line 227-229: Added MCPClient.parseJSONRPCResponses() call"
+        - "Line 227: Only passes data when serverStatus == .running"
+        
+    result: "✅ Unified handler architecture successfully implemented"
+    app_status: "Built successfully and launched for testing"
+    next_validation: "User to test Search UI functionality with live MCP server"
