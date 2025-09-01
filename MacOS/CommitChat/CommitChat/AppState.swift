@@ -105,10 +105,34 @@ class AppState: ObservableObject {
     // MARK: - Initialization
     
     init() {
+        // Load settings from UserDefaults
+        loadSettings()
         // Initialize state
         setupInitialState()
         // Setup MCP server monitoring
         setupMCPMonitoring()
+    }
+    
+    /// Loads settings from UserDefaults
+    private func loadSettings() {
+        if let savedMCPPath = UserDefaults.standard.string(forKey: "mcpServerPath") {
+            mcpServerPath = savedMCPPath
+        }
+        if let savedProjectPath = UserDefaults.standard.string(forKey: "projectPath") {
+            projectPath = savedProjectPath
+        }
+        autoStartServer = UserDefaults.standard.bool(forKey: "autoStartServer")
+        showNotifications = UserDefaults.standard.bool(forKey: "showNotifications")
+        
+        // Set defaults for first run
+        if UserDefaults.standard.object(forKey: "autoStartServer") == nil {
+            UserDefaults.standard.set(true, forKey: "autoStartServer")
+            autoStartServer = true
+        }
+        if UserDefaults.standard.object(forKey: "showNotifications") == nil {
+            UserDefaults.standard.set(true, forKey: "showNotifications")
+            showNotifications = true
+        }
     }
     
     /// Sets up initial application state and starts MCP server if configured
