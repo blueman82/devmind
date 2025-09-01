@@ -226,11 +226,15 @@ class ProcessManager: ObservableObject {
                     self?.serverOutput.append(output.trimmingCharacters(in: .whitespacesAndNewlines))
                     print("MCP Server Output: \(output)")
                     
+                    // Strip ANSI color codes before pattern matching
+                    let cleanOutput = output.replacingOccurrences(of: "\\[[0-9;]*m", with: "", options: .regularExpression)
+                    print("ProcessManager: cleaned output = '\(cleanOutput)'")
+                    
                     // Enhanced debugging for pattern matching
                     let pattern1 = "MCP Server connected on stdio transport"
                     let pattern2 = "AI Memory MCP Server running on stdio"
-                    let containsPattern1 = output.contains(pattern1)
-                    let containsPattern2 = output.contains(pattern2)
+                    let containsPattern1 = cleanOutput.contains(pattern1)
+                    let containsPattern2 = cleanOutput.contains(pattern2)
                     
                     print("ProcessManager: Checking patterns:")
                     print("ProcessManager:   - Pattern1 '\(pattern1)': \(containsPattern1)")
