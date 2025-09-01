@@ -3304,3 +3304,46 @@ phase_11_3_COMPLETE_LOG_ANALYSIS_connection_working:
     primary_focus: "Debug search UI error despite successful MCP connection"
     investigation_approach: "Examine search request/response flow and error handling"
     context_available: "Connection is working, issue is in search functionality layer"
+
+phase_11_4_ACTUAL_ERROR_ui_still_shows_disconnected:
+  timestamp: "2025-09-01 23:51:00"
+  objective: "ACTUAL ERROR - Search UI shows 'mcp server not connected'"
+  status: "❌ CRITICAL DISCONNECT - Connection logs vs UI reality"
+  
+  reported_error:
+    search_ui_message: "mcp server not connected"
+    context: "User attempted to use search functionality"
+    result: "Search UI still displays disconnected state"
+    
+  critical_contradiction:
+    logs_show: "MCPClient isConnected property is now: true"
+    ui_shows: "mcp server not connected"
+    problem: "Connection status not propagating to search UI component"
+    
+  root_cause_analysis:
+    connection_layer: "✅ ProcessManager → MCPClient working (logs confirm)"
+    ui_propagation: "❌ MCPClient → Search UI failing (UI shows disconnected)"
+    possible_causes:
+      1: "Search UI component not observing MCPClient.isConnected properly"
+      2: "SwiftUI @Published property not triggering UI updates"
+      3: "Search view using different connection status source"
+      4: "Threading issue - UI update not on main thread"
+      5: "Stale UI state not refreshing after connection established"
+      
+  investigation_needed:
+    search_ui_file: "Examine how search view checks connection status"
+    mcpclient_observation: "Verify @Published isConnected property is properly observed"
+    ui_binding: "Check SwiftUI binding between MCPClient and search interface"
+    state_management: "Review connection state propagation to search components"
+    
+  corrected_issue_status:
+    bad_file_descriptor: "✅ RESOLVED"
+    pattern_matching: "✅ RESOLVED"
+    connection_detection: "✅ RESOLVED"
+    status_propagation_to_mcpclient: "✅ RESOLVED"
+    ui_connection_display_in_search: "❌ FAILING - Still shows 'not connected'"
+    
+  session_reality:
+    core_connection_established: "✅ MCP server connection working at protocol level"
+    ui_layer_disconnect: "❌ Search UI not reflecting actual connection status"
+    next_debugging_target: "UI state management and SwiftUI property observation"
