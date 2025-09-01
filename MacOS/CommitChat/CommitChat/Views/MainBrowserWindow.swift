@@ -12,7 +12,11 @@ struct MainBrowserWindow: View {
     @State private var selectedProject: String? = nil
     @State private var searchText = ""
     @State private var selectedConversation: ConversationItem?
+    @State private var recentConversations: [ConversationItem] = []
+    @State private var isLoadingConversations = false
+    @State private var conversationError: MCPClientError?
     
+    private let mcpClient = MCPClient.shared
     let projects = ["All Projects", "devmind", "api-server", "CommitChat", "web-app", "docs"]
     
     var body: some View {
