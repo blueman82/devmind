@@ -382,8 +382,17 @@ class MCPClient: ObservableObject {
         
         let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
-        // Parse response into ConversationSearchResult objects
-        guard let results = response["results"] as? [[String: Any]] else {
+        // MCP server returns tool responses in content array with nested JSON
+        guard let content = response["content"] as? [[String: Any]],
+              let firstContent = content.first,
+              let textContent = firstContent["text"] as? String else {
+            throw MCPClientError.invalidResponse
+        }
+        
+        // Parse the nested JSON response from the tool
+        guard let data = textContent.data(using: .utf8),
+              let toolResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let results = toolResponse["results"] as? [[String: Any]] else {
             throw MCPClientError.invalidResponse
         }
         
