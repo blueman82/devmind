@@ -208,24 +208,9 @@ class MCPClient: ObservableObject {
     }
     
     private func setupResponseParsing() {
-        // Access the ProcessManager's output pipe for JSON-RPC responses
-        guard let process = processManager.mcpProcess,
-              let outputPipe = process.standardOutput as? Pipe else {
-            print("Failed to access MCP server output pipe")
-            return
-        }
-        
-        // Set up JSON-RPC response parsing
-        outputPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
-            let data = handle.availableData
-            if !data.isEmpty {
-                let output = String(data: data, encoding: .utf8) ?? ""
-                self?.parseJSONRPCResponses(output)
-            }
-        }
-        
-        self.outputPipe = outputPipe
-        print("JSON-RPC response parsing set up successfully")
+        // Response parsing is now handled via ProcessManager's unified handler
+        // ProcessManager will call parseJSONRPCResponses() directly
+        print("JSON-RPC response parsing delegated to ProcessManager's unified handler")
     }
     
     private func parseJSONRPCResponses(_ output: String) {
