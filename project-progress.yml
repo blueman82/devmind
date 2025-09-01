@@ -2124,6 +2124,26 @@ swift_app_phase3_mcp_integration:
     expected_result: "MCP server should launch without permission errors"
     rebuild_required: "App must be rebuilt for entitlements to take effect"
   
+  sandbox_disable_test_2025_09_01:
+    status: "✅ COMPLETED"
+    date_completed: "2025-09-01T23:20:00Z"
+    issue: "Entitlements approach failed - still getting 'env: node: Operation not permitted' (exit code 126)"
+    problem: "Previous entitlements were insufficient to allow Node.js execution from sandboxed app"
+    escalated_solution: "Disabled app sandbox entirely as diagnostic test"
+    files_modified:
+      - file: "CommitChat.entitlements"
+        change: "com.apple.security.app-sandbox changed from true to false"
+    rationale:
+      - "Comprehensive entitlements failed to resolve Node.js execution issue"
+      - "Need to determine if sandboxing is fundamental blocker"
+      - "Temporary measure to isolate the core problem"
+    security_implications:
+      warning: "App now runs without sandbox protection"
+      temporary: "This is a diagnostic change, not production solution"
+      next_steps: "If this works, implement minimal required entitlements"
+    expected_result: "MCP server should launch successfully without sandbox restrictions"
+    rebuild_required: "App must be rebuilt to test sandbox-free execution"
+  
   final_build_status: "✅ BUILD SUCCEEDED - Zero errors, zero warnings"
   
   mcp_architecture_completed:
