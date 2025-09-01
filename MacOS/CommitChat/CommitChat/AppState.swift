@@ -12,6 +12,9 @@ import Combine
 /// Manages window visibility, MCP server connection status, and application settings.
 class AppState: ObservableObject {
     
+    /// Shared singleton instance for consistent state management
+    static let shared = AppState()
+    
     // MARK: - MCP Integration
     
     /// Reference to the ProcessManager for server lifecycle
