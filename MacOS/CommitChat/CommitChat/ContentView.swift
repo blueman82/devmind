@@ -67,7 +67,7 @@ struct ContentView: View {
                     icon: "gearshape",
                     title: "Settings",
                     isHovered: hoveredItem == "settings",
-                    action: { openSettings() },
+                    action: { windowManager.openSettings() },
                     onHover: { hoveredItem = $0 ? "settings" : nil }
                 )
             }
