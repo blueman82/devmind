@@ -91,7 +91,7 @@ struct RestorePointsWindow: View {
     }
 }
 
-struct RestorePoint: Identifiable {
+struct RestorePoint: Identifiable, Hashable {
     let id = UUID()
     let label: String
     let commit: String
@@ -185,14 +185,14 @@ struct RestorePointRow: View {
                 HStack {
                     Text(point.commit)
                         .font(.system(.caption, design: .monospaced))
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(.secondary.opacity(0.6))
                     
                     Text("•")
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(.secondary.opacity(0.6))
                     
                     Text(point.date, style: .relative)
                         .font(.caption)
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(.secondary.opacity(0.6))
                 }
             }
             
