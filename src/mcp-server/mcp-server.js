@@ -293,6 +293,14 @@ class AIMemoryMCPServer {
                 time_range: {
                   type: 'string',
                   description: 'Time range for commit history (e.g., "1 week ago", "today", "2 days ago")'
+                },
+                branch: {
+                  type: 'string',
+                  description: 'Branch name to get commits from (default: current branch)'
+                },
+                subdirectory: {
+                  type: 'string',
+                  description: 'Subdirectory path to filter commits (for monorepo support)'
                 }
               },
               required: ['project_path']
