@@ -2685,3 +2685,22 @@ processmanager_timing_debug_session:
     step_2: "Launch app and observe ProcessManager status check logs"
     step_3: "Identify if issue is timing-based or process detection failure"
     step_4: "Implement appropriate fix based on log analysis"
+
+  alternative_status_detection:
+    status: "🔄 IMPLEMENTED"
+    approach: "Output-based status detection as backup to timing method"
+    implementation:
+      - "Added MCP server startup message detection in output monitoring"
+      - "Looks for 'MCP Server connected on stdio transport' message"
+      - "Also detects 'AI Memory MCP Server running on stdio' message"
+      - "Sets serverStatus to .running when startup messages detected"
+    files_modified:
+      - path: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+        change: "Added output-based status detection to setupOutputMonitoring"
+        lines_modified: 8
+        specific_changes:
+          - "Added startup message detection in output handler"
+          - "Added conditional serverStatus update on message detection"
+          - "Added logging for output-based status detection"
+    rationale: "More reliable than timing-based approach - directly detects when server reports ready"
+    validation_pending: "Need to rebuild and test both timing and output-based detection methods"
