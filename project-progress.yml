@@ -1253,13 +1253,99 @@ git_tools_critical_limitation:
   priority: "CRITICAL - Blocks effective monorepo usage"
   estimated_effort: "2-3 days comprehensive fix"
   blocks_swift_app: "Phase 3 git integration will have same limitation"
+  
+  required_actions:
+    immediate:
+      - "⏸️ PAUSE Swift Phase 3 MCP integration"
+      - "🔧 Fix git tools monorepo limitation before proceeding"
+      - "📋 Update swift-app-implementation-progress.yml with pause status"
+      
+    phase_8f_git_monorepo_fixes:
+      status: "🚨 CRITICAL PRIORITY"
+      date_initiated: "2025-09-01T15:45:00Z"
+      blocking_phase: "Swift Phase 3 git integration"
+      
+      tasks_required:
+        repository_discovery:
+          - task: "Implement git rev-parse --show-toplevel in GitManager"
+            file: "src/git/git-manager.js"
+            purpose: "Find actual repository root from any subdirectory"
+            priority: "CRITICAL"
+            
+          - task: "Add subdirectory path mapping to database schema"
+            file: "src/database/git-schema.js"
+            purpose: "Store repository_root vs subdirectory_path relationship"
+            priority: "CRITICAL"
+            
+          - task: "Update repository discovery to handle monorepo scenarios"
+            file: "src/git/git-manager.js"
+            purpose: "Map project paths to correct repository contexts"
+            priority: "CRITICAL"
+            
+        branch_support:
+          - task: "Add branch parameter to all git MCP tools"
+            file: "src/mcp-server/handlers/git-tool-handlers.js"
+            purpose: "Enable branch-specific queries instead of just current branch"
+            priority: "HIGH"
+            
+          - task: "Update database schema to track branch context"
+            file: "src/database/git-schema.js"
+            purpose: "Store branch information for commits and restore points"
+            priority: "HIGH"
+            
+          - task: "Add branch field to git_commits table"
+            file: "src/database/git-schema.js"
+            purpose: "Enable branch-specific commit filtering"
+            priority: "HIGH"
+            
+        subdirectory_filtering:
+          - task: "Implement git log -- <subdirectory> filtering"
+            file: "src/utils/secure-git-executor.js"
+            purpose: "Show only commits affecting specific subdirectories"
+            priority: "CRITICAL"
+            
+          - task: "Add path-based filtering to get_git_context tool"
+            file: "src/mcp-server/handlers/git-tool-handlers.js"
+            purpose: "Return subdirectory-specific git context"
+            priority: "CRITICAL"
+            
+          - task: "Update file change tracking for subdirectory awareness"
+            file: "src/git/git-manager.js"
+            purpose: "Track file changes relative to subdirectory context"
+            priority: "HIGH"
+            
+        testing_validation:
+          - task: "Create test cases for monorepo scenarios"
+            file: "src/tests/git-tools-monorepo.test.js"
+            purpose: "Validate monorepo functionality works correctly"
+            priority: "MEDIUM"
+            
+          - task: "Test with real monorepo (camp-ops-tools-emea/ketchup)"
+            purpose: "Validate fixes work with discovered use case"
+            priority: "HIGH"
+            
+      success_criteria:
+        - "get_git_context with ketchup subdirectory shows only ketchup commits"
+        - "Branch-specific queries return correct commit history"
+        - "Repository discovery works from any subdirectory level"
+        - "Swift app git integration will work with monorepos"
+        
+      estimated_timeline:
+        repository_discovery: "1 day"
+        branch_support: "1 day"  
+        subdirectory_filtering: "1 day"
+        testing_validation: "0.5 days"
+        total_estimate: "3.5 days"
 
-## Phase 8E: Swift macOS App Development 🚧
+## Phase 8E: Swift macOS App Development ⏸️ PAUSED
 swift_app_development:
-  status: "🚧 IN PROGRESS - Phase 3: 50% Complete"
+  status: "⏸️ PAUSED - Waiting for Git Tools Monorepo Fix"
   date_started: "2025-08-31"
-  current_task: "MCP integration - UI layer connection to services"
-  critical_blocker: "Git tools monorepo limitation discovered"
+  date_paused: "2025-09-01T15:45:00Z"
+  pause_reason: "Critical git tools limitation must be fixed before Phase 3 git integration"
+  current_achievement: "Phase 3: 50% Complete - MCP Foundation Ready"
+  blocking_issue: "Git tools monorepo limitation discovered - affects core functionality"
+  resume_condition: "After Phase 8F monorepo fixes are complete and tested"
   
   project_setup:
     xcode_requirements:
