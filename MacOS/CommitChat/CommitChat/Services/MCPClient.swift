@@ -163,9 +163,12 @@ class MCPClient: ObservableObject {
     private func setupProcessMonitoring() {
         processManager.$serverStatus
             .sink { [weak self] status in
-                self?.isConnected = status.isRunning
-                if !status.isRunning {
-                    self?.cleanup()
+                DispatchQueue.main.async {
+                    self?.isConnected = status.isRunning
+                    if !status.isRunning {
+                        self?.cleanup()
+                    }
+                    print("MCPClient connection status updated: \(status.isRunning)")
                 }
             }
             .store(in: &cancellables)
