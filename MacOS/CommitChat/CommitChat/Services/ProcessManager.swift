@@ -222,6 +222,13 @@ class ProcessManager: ObservableObject {
                 print("ProcessManager: raw output = '\(output)'")
                 print("ProcessManager: output.isEmpty = \(output.isEmpty)")
                 
+                // Pass raw output to MCPClient for JSON-RPC parsing BEFORE any processing
+                // This ensures MCPClient gets the unmodified JSON-RPC responses
+                if self?.serverStatus == .running {
+                    MCPClient.shared.parseJSONRPCResponses(output)
+                    print("ProcessManager: Passed output to MCPClient for JSON-RPC parsing")
+                }
+                
                 DispatchQueue.main.async {
                     self?.serverOutput.append(output.trimmingCharacters(in: .whitespacesAndNewlines))
                     print("MCP Server Output: \(output)")
@@ -250,6 +257,7 @@ class ProcessManager: ObservableObject {
                         if self?.serverStatus != .running {
                             self?.serverStatus = .running
                             print("ProcessManager: ✅ Setting serverStatus to .running via output detection")
+                            // Now that server is running, future outputs will be passed to MCPClient
                         } else {
                             print("ProcessManager: ⚠️  Server already marked as running, no status change needed")
                         }
