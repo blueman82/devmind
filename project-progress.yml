@@ -2462,11 +2462,35 @@ handover_continuation_session:
               - "Added fileDescriptor validation before write operations"
               - "Added stdin.synchronize() for immediate pipe flushing"
         validation_status: "Resolves 'Failed to send request: The file couldn't be saved' error"
+        
+      nsfilehandle_exception_crash:
+        status: "✅ FIXED"
+        description: "App crashing with NSFileHandleOperationException: Bad file descriptor"
+        root_cause: "FileHandle.writeData() throws uncatchable Objective-C exceptions on bad file descriptors"
+        crash_details:
+          - "NSFileHandleOperationException terminating app in MCPClient.swift:325"
+          - "Error code 9: Bad file descriptor when MCP server process closes stdin"
+          - "Objective-C exceptions not catchable by Swift do-catch blocks"
+        solution:
+          - "Replaced FileHandle.writeData() with low-level POSIX write() function"
+          - "Added fstat() validation to check file descriptor validity before write"
+          - "Used data.withUnsafeBytes for safe low-level data access"
+          - "Added proper errno handling with strerror() for error messages"
+        files_modified:
+          - path: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/MCPClient.swift"
+            change: "Replaced NSFileHandle methods with POSIX system calls"
+            lines_modified: 15
+            specific_changes:
+              - "Added fstat() file descriptor validation"
+              - "Replaced writeData() with POSIX write() system call"
+              - "Added errno-based error handling with strerror()"
+              - "Eliminated NSFileHandleOperationException crash vector"
+        validation_status: "Prevents app termination from bad file descriptor exceptions"
   
   build_status:
     current: "✅ SUCCESSFUL"
     compilation_errors: "0"
-    runtime_crashes: "3 fixed (WindowManager objc_retain, MCP communication, broken pipe)"
+    runtime_crashes: "4 fixed (WindowManager objc_retain, MCP communication, broken pipe, NSFileHandle exception)"
     xcode_version: "16F6"
     macos_target: "15.5"
     
