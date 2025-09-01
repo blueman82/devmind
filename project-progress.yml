@@ -1327,6 +1327,14 @@ git_tools_critical_limitation:
             file: "src/utils/secure-git-executor.js"
             purpose: "Show only commits affecting specific subdirectories"
             priority: "CRITICAL"
+            status: "✅ COMPLETED"
+            date_completed: "2025-09-01T18:00:00Z"
+            implementation_details:
+              - "Added subdirectory parameter to getCommitHistory() method"
+              - "Added branch parameter for branch-specific queries"
+              - "Validates subdirectory path to prevent injection"
+              - "Uses git log -- <path> syntax for filtering"
+              - "Whitelisted -- flag in allowed subcommands"
             
           - task: "Add path-based filtering to get_git_context tool"
             file: "src/mcp-server/handlers/git-tool-handlers.js"
