@@ -1424,10 +1424,17 @@ git_tools_critical_limitation:
         - "Branch queries tested with main vs feature/swift-macos-app"
         
       remaining_tasks:
+        - "Debug MCP tool empty commit history issue (2 hours)"
         - "Create Jest/Mocha test framework (3-4 hours)"
         - "Performance testing with large repositories (2-3 hours)"
         - "Edge case testing for nested subdirectories (2-3 hours)"
         - "Fix database persistence issue (1 hour)"
+        
+      known_issues:
+        date_discovered: "2025-09-01T20:05:00Z"
+        mcp_commit_history: "Returns empty array despite git commands working"
+        git_command_level: "All features working correctly"
+        impact: "MCP tool not fully functional, but git commands work"
         
       files_created_modified:
         - "src/git/git-manager.js - Enhanced with getRepositoryRoot() and monorepo support"
