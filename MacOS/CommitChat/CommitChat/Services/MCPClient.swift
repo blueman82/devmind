@@ -301,7 +301,10 @@ class MCPClient: ObservableObject {
                 let jsonString = String(data: data, encoding: .utf8)! + "\n"
                 
                 if let process = processManager.mcpProcess,
-                   let stdin = process.standardInput as? FileHandle {
+                   let stdinPipe = process.standardInput as? Pipe {
+                    // Get the FileHandle for writing from the Pipe
+                    let stdin = stdinPipe.fileHandleForWriting
+                    
                     // Check if process is still running before writing
                     if !process.isRunning {
                         _ = requestQueue.sync {
