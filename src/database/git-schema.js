@@ -313,6 +313,7 @@ export default class GitSchema {
     try {
       const {
         hash,
+        branchName,
         date,
         authorName,
         authorEmail,
@@ -329,7 +330,7 @@ export default class GitSchema {
 
       // Use cached prepared statement (note: using insertCommit which has ON CONFLICT UPDATE)
       const result = this.statements.insertCommit.run(
-        repositoryId, hash, date instanceof Date ? date.toISOString() : date, authorName, authorEmail,
+        repositoryId, hash, branchName, date instanceof Date ? date.toISOString() : date, authorName, authorEmail,
         message, parentHashesJson, isMerge ? 1 : 0,
         insertions || 0, deletions || 0, filesChangedCount
       );
