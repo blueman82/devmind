@@ -2950,3 +2950,60 @@ phase_10_1_compilation_fix_and_root_cause_discovery:
       old_pattern: "MCP Server connected on stdio transport"
       new_pattern: "AI Memory MCP Server running on stdio"
       pipe_change: "stdout → stderr"
+
+phase_10_2_stderr_detection_implementation:
+  timestamp: "2025-09-01 23:37:00"
+  objective: "Implement stderr-based startup detection to fix connection status"
+  
+  implementation_details:
+    file_modified: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+    method_enhanced: "setupOutputMonitoring() - errorPipe readabilityHandler"
+    lines_affected: "258-299"
+    
+    changes_made:
+      error_handler_enhancement:
+        - "Added comprehensive debugging to stderr handler"
+        - "Implemented startup pattern detection in stderr stream"
+        - "Distinguished startup messages from actual errors"
+      
+      detection_logic:
+        pattern_used: "AI Memory MCP Server running on stdio"
+        detection_method: "error.contains(startupPattern)"
+        status_update: "self?.serverStatus = .running"
+        
+      debugging_added:
+        entry_log: "print('ProcessManager: ERROR readabilityHandler called')"
+        data_size: "print('ProcessManager: ERROR availableData size = \\(data.count) bytes')"
+        raw_content: "print('ProcessManager: ERROR raw output = \\'\\(error)\\'')"
+        pattern_check: "print('ProcessManager: ERROR - Pattern \\'\\(startupPattern)\\': \\(containsStartup)')"
+        success_indicator: "✅ STDERR STARTUP DETECTED! Found MCP server startup in stderr"
+        status_change: "✅ Setting serverStatus to .running via STDERR detection"
+        
+      error_handling_improvement:
+        startup_message: "Treated as normal startup, not error - added to serverOutput as 'MCP Server Startup'"
+        actual_errors: "Still logged as 'MCP Server Error' and set lastError property"
+        
+  expected_behavior:
+    on_mcp_startup:
+      1: "MCP server starts and writes 'AI Memory MCP Server running on stdio' to stderr"
+      2: "ProcessManager ERROR readabilityHandler detects the pattern"
+      3: "serverStatus changes from .starting → .running"
+      4: "MCPClient receives status update and sets isConnected = true"
+      5: "UI displays 'Connected' status"
+      
+  validation_required:
+    test_1: "Launch app and check for 'ProcessManager: ERROR readabilityHandler called'"
+    test_2: "Verify pattern detection: '✅ STDERR STARTUP DETECTED!'"
+    test_3: "Confirm status change: '✅ Setting serverStatus to .running via STDERR detection'"
+    test_4: "Validate UI shows connected state"
+    
+  remaining_issues:
+    compilation_warnings:
+      file: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/MCPClient.swift"
+      errors:
+        - "Line 318: Result of call to 'sync(execute:)' is unused"
+        - "Line 334: Result of call to 'sync(execute:)' is unused"
+        - "Line 348: Result of call to 'sync(execute:)' is unused"
+        - "Line 355: Result of call to 'sync(execute:)' is unused"
+        - "Line 361: Result of call to 'sync(execute:)' is unused"
+      priority: "Low - warnings don't affect functionality"
