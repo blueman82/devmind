@@ -2078,6 +2078,26 @@ swift_app_phase3_mcp_integration:
       - "Updated ProcessManager with correct path"
     expected_result: "MCP server should now connect successfully from Swift app"
   
+  nodejs_path_fix_2025_09_01:
+    status: "✅ COMPLETED"
+    date_completed: "2025-09-01T23:10:00Z"
+    issue: "Node.js executable not found - 'The file \"node\" doesn't exist'"
+    problem: "ProcessManager using hardcoded /opt/homebrew/bin/node path causing Swift app launch failure"
+    root_cause: "Swift app environment may not have access to hardcoded paths or different sandboxing"
+    solution: "Changed to use /usr/bin/env with explicit PATH environment variable"
+    files_modified:
+      - file: "ProcessManager.swift"
+        lines: [74, 75, 76]
+        changes:
+          - "process.launchPath changed from '/opt/homebrew/bin/node' to '/usr/bin/env'"
+          - "process.arguments changed to ['node', 'src/mcp-server/mcp-server.js']"
+          - "Added process.environment with explicit PATH variable"
+    technical_details:
+      old_approach: "Direct hardcoded path to Node.js binary"
+      new_approach: "Environment-based Node.js discovery with PATH specification"
+      path_included: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+    expected_result: "MCP server should launch successfully via env node resolution"
+  
   final_build_status: "✅ BUILD SUCCEEDED - Zero errors, zero warnings"
   
   mcp_architecture_completed:
