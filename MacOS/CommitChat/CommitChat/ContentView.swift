@@ -103,6 +103,10 @@ struct ContentView: View {
         .background(Color(NSColor.windowBackgroundColor))
     }
     
+    // Note: Window management methods have been moved to WindowManager.swift
+    // The WindowManager class caches window instances to avoid recreating them on each open
+    // This improves performance and prevents duplicate window creation
+    
     private func openSearchWindow() {
         if appState.showSearchWindow {
             // Window already open, bring to front
