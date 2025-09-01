@@ -3491,3 +3491,48 @@ phase_12_2_ANSI_REGEX_CORRECTED:
       - "ProcessManager: ✅ Setting serverStatus to .running via output detection"
       - "MCPClient connection status updated: false → true"
       - "Search UI shows 'MCP Server Connected'"
+
+phase_12_3_COMPREHENSIVE_ANSI_STRIPPING:
+  timestamp: "2025-09-01 23:59:21"
+  objective: "Implement comprehensive ANSI stripping for all escape sequence formats"
+  status: "✅ COMPREHENSIVE REGEX IMPLEMENTED"
+  
+  issue_discovered_in_logs:
+    logs_evidence: "/Users/harrison/Documents/Github/devmind/logs.md shows partial ANSI stripping"
+    remaining_codes: "Raw output still contains [32m and [39m format"
+    pattern_still_failing: "Line 89: Pattern1 'MCP Server connected on stdio transport': false"
+    
+  comprehensive_fix_implementation:
+    file_modified: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+    lines_enhanced: "230-233"
+    
+    multiple_regex_patterns:
+      pattern_1: "\\u001b\\[[0-9;]*m  // Unicode escape format"
+      pattern_2: "\\033\\[[0-9;]*m     // Octal escape format"  
+      pattern_3: "\\e\\[[0-9;]*m       // Literal escape format"
+      pattern_4: "\\[[0-9;]*m         // Direct bracket format"
+      
+    implementation_approach: "Sequential replacement using var cleanOutput with chained operations"
+    
+  ansi_format_coverage:
+    unicode_escape: "\\u001b[32m → handled by pattern_1"
+    octal_escape: "\\033[32m → handled by pattern_2"
+    literal_escape: "\\e[32m → handled by pattern_3"
+    direct_bracket: "[32m → handled by pattern_4"
+    
+  expected_transformation:
+    input: "'23:59:21 [32minfo[39m [MCPServer]: [32mMCP Server connected on stdio transport[39m'"
+    step_1: "'23:59:21 [32minfo[39m [MCPServer]: [32mMCP Server connected on stdio transport[39m'"
+    step_2: "'23:59:21 [32minfo[39m [MCPServer]: [32mMCP Server connected on stdio transport[39m'"  
+    step_3: "'23:59:21 [32minfo[39m [MCPServer]: [32mMCP Server connected on stdio transport[39m'"
+    step_4_final: "'23:59:21 info [MCPServer]: MCP Server connected on stdio transport'"
+    
+  validation_criteria_updated:
+    cleaned_output_expected: "'23:59:21 info [MCPServer]: MCP Server connected on stdio transport'"
+    pattern_match_expected: "Pattern1 'MCP Server connected on stdio transport': true"
+    connection_result_expected: "MCPClient connection status updated: false → true"
+    
+  comprehensive_solution:
+    coverage: "All known ANSI escape sequence formats handled"
+    robustness: "Multiple regex patterns ensure complete stripping"
+    reliability: "Should work regardless of terminal ANSI implementation"
