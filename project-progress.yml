@@ -2914,3 +2914,39 @@ phase_10_enhanced_output_debugging:
     if_handler_called_no_data: "MCP server not writing to stdout - check server implementation"
     if_data_wrong_format: "Pattern mismatch - update detection strings to match actual output"
     if_patterns_match: "Status update should work and UI should show connected"
+
+phase_10_1_compilation_fix_and_root_cause_discovery:
+  timestamp: "2025-09-01 23:36:30"
+  objective: "Fix Swift compilation errors and discover root cause of detection failure"
+  
+  compilation_errors_fixed:
+    file: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+    error_type: "Optional chaining on non-optional value"
+    line: 238
+    fix: "Removed unnecessary optional chaining: serverStatus?.displayText → serverStatus.displayText"
+    status: "✅ RESOLVED"
+  
+  critical_root_cause_discovered:
+    investigation_method: "Analyzed MCP server source code for actual startup messages"
+    server_file: "/Users/harrison/Documents/Github/devmind/src/mcp-server/mcp-server.js"
+    discovery:
+      line_621: "this.logger.info('MCP Server connected on stdio transport') // Goes to logger"
+      line_622: "console.error('AI Memory MCP Server running on stdio') // Goes to STDERR"
+    
+    problem_identified: "🔥 CRITICAL: MCP server writes startup message to STDERR, not STDOUT"
+    current_monitoring: "ProcessManager monitors stdout pipe only"
+    required_fix: "Monitor stderr pipe for 'AI Memory MCP Server running on stdio'"
+    
+  next_actions_required:
+    priority_1: "Update ProcessManager to detect stderr messages instead of stdout"
+    priority_2: "Fix remaining MCPClient compilation warnings (unused sync results)"
+    priority_3: "Test stderr-based detection and validate UI connection"
+    
+  technical_details:
+    mcp_server_outputs:
+      stdout: "Regular logger messages (structured logging)"
+      stderr: "console.error('AI Memory MCP Server running on stdio') ← TARGET MESSAGE"
+    detection_pattern_update:
+      old_pattern: "MCP Server connected on stdio transport"
+      new_pattern: "AI Memory MCP Server running on stdio"
+      pipe_change: "stdout → stderr"
