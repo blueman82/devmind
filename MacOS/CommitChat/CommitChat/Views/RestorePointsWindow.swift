@@ -105,7 +105,7 @@ struct RestorePointRow: View {
                         .font(.headline)
                     
                     Image(systemName: point.testStatus.icon)
-                        .foregroundColor(Color(point.testStatus.color))
+                        .foregroundColor(point.testStatus.color)
                         .font(.caption)
                 }
                 
@@ -198,7 +198,7 @@ struct RestorePointPreview: View {
                         title: "Test Status",
                         value: String(describing: point.testStatus).capitalized,
                         icon: point.testStatus.icon,
-                        color: Color(point.testStatus.color)
+                        color: point.testStatus.color
                     )
                 }
                 
