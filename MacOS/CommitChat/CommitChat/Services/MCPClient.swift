@@ -243,7 +243,9 @@ class MCPClient: ObservableObject {
                    let stdin = process.standardInput as? FileHandle {
                     // Check if process is still running before writing
                     if !process.isRunning {
-                        pendingRequests.removeValue(forKey: id)
+                        requestQueue.sync {
+                            pendingRequests.removeValue(forKey: id)
+                        }
                         continuation.resume(throwing: MCPClientError.notConnected)
                         return
                     }
@@ -252,16 +254,22 @@ class MCPClient: ObservableObject {
                         try stdin.write(contentsOf: jsonString.data(using: .utf8)!)
                     } catch {
                         // Handle broken pipe or closed file handle
-                        pendingRequests.removeValue(forKey: id)
+                        requestQueue.sync {
+                            pendingRequests.removeValue(forKey: id)
+                        }
                         continuation.resume(throwing: MCPClientError.serverError("Failed to send request: \(error.localizedDescription)"))
                         return
                     }
                 } else {
-                    pendingRequests.removeValue(forKey: id)
+                    requestQueue.sync {
+                        pendingRequests.removeValue(forKey: id)
+                    }
                     continuation.resume(throwing: MCPClientError.notConnected)
                 }
             } catch {
-                pendingRequests.removeValue(forKey: id)
+                requestQueue.sync {
+                    pendingRequests.removeValue(forKey: id)
+                }
                 continuation.resume(throwing: error)
             }
         }
