@@ -250,7 +250,7 @@ struct RestorePointsWindow: View {
         
         // In a real implementation, this would call an MCP tool to perform the restore
         // For now, we just log it
-        print("Restoring to restore point: \(point.label) (ID: \(point.id))")
+        print("Restoring to restore point: \(point.label) (ID: \(point.restorePointId))")
         
         // The actual restore would involve:
         // 1. Calling an MCP restore tool
