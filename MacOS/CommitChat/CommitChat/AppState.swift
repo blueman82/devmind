@@ -157,6 +157,9 @@ class AppState: ObservableObject {
         case .starting:
             // Keep previous state while starting
             break
+        case .stopping:
+            // Keep previous state while stopping
+            break
         }
     }
     
