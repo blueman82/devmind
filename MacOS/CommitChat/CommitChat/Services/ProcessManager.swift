@@ -69,10 +69,11 @@ class ProcessManager: ObservableObject {
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         
-        // Configure process with full Node.js path
-        // Using full path because Xcode apps don't inherit shell PATH
-        process.launchPath = "/opt/homebrew/bin/node"
-        process.arguments = ["src/mcp-server/mcp-server.js"]
+        // Configure process with Node.js via env
+        // Using env to locate node in case of PATH issues
+        process.launchPath = "/usr/bin/env"
+        process.arguments = ["node", "src/mcp-server/mcp-server.js"]
+        process.environment = ["PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"]
         process.currentDirectoryPath = projectPath
         process.standardOutput = outputPipe
         process.standardError = errorPipe
