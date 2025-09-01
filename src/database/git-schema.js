@@ -48,9 +48,10 @@ export default class GitSchema {
       
       insertCommit: this.db.prepare(`
         INSERT INTO git_commits 
-        (repository_id, commit_hash, commit_date, author_name, author_email, message, parent_hashes, is_merge, insertions, deletions, files_changed_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (repository_id, commit_hash, branch_name, commit_date, author_name, author_email, message, parent_hashes, is_merge, insertions, deletions, files_changed_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(repository_id, commit_hash) DO UPDATE SET
+          branch_name = excluded.branch_name,
           commit_date = excluded.commit_date,
           author_name = excluded.author_name,
           author_email = excluded.author_email,
