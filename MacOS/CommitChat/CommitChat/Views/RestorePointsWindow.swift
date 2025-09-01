@@ -91,76 +91,8 @@ struct RestorePointsWindow: View {
     }
 }
 
-struct RestorePoint: Identifiable, Hashable {
-    let id = UUID()
-    let label: String
-    let commit: String
-    let date: Date
-    let author: String
-    let message: String
-    let filesChanged: Int
-    let insertions: Int
-    let deletions: Int
-    let testStatus: TestStatus
-    
-    enum TestStatus {
-        case passing, failing, unknown
-        
-        var icon: String {
-            switch self {
-            case .passing: return "checkmark.circle.fill"
-            case .failing: return "xmark.circle.fill"
-            case .unknown: return "questionmark.circle"
-            }
-        }
-        
-        var color: Color {
-            switch self {
-            case .passing: return .green
-            case .failing: return .red
-            case .unknown: return .gray
-            }
-        }
-    }
-    
-    static var mockData: [RestorePoint] {
-        [
-            RestorePoint(
-                label: "before-refactor",
-                commit: "a1b2c3d",
-                date: Date().addingTimeInterval(-3600),
-                author: "You",
-                message: "Save point before major refactoring",
-                filesChanged: 12,
-                insertions: 245,
-                deletions: 189,
-                testStatus: .passing
-            ),
-            RestorePoint(
-                label: "stable-auth",
-                commit: "e4f5g6h",
-                date: Date().addingTimeInterval(-7200),
-                author: "You",
-                message: "Working authentication implementation",
-                filesChanged: 8,
-                insertions: 567,
-                deletions: 23,
-                testStatus: .passing
-            ),
-            RestorePoint(
-                label: "pre-merge",
-                commit: "i7j8k9l",
-                date: Date().addingTimeInterval(-10800),
-                author: "You",
-                message: "State before merging feature branch",
-                filesChanged: 23,
-                insertions: 890,
-                deletions: 456,
-                testStatus: .unknown
-            )
-        ]
-    }
-}
+// RestorePoint struct has been moved to Models/MockData.swift to avoid duplication
+// Import is handled through the project's implicit imports
 
 struct RestorePointRow: View {
     let point: RestorePoint
@@ -173,7 +105,7 @@ struct RestorePointRow: View {
                         .font(.headline)
                     
                     Image(systemName: point.testStatus.icon)
-                        .foregroundColor(point.testStatus.color)
+                        .foregroundColor(Color(point.testStatus.color))
                         .font(.caption)
                 }
                 
