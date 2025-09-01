@@ -17,6 +17,16 @@ struct SearchWindow: View {
     
     var body: some View {
         VStack(spacing: 0) {
+            // Error banner if there's a search error
+            if appState.searchError != .none {
+                ErrorBanner(
+                    error: appState.searchError,
+                    onDismiss: { appState.searchError = .none },
+                    onRetry: { performSearch() }
+                )
+                .padding()
+                .animation(.easeInOut, value: appState.searchError)
+            }
             // Header with search bar
             VStack(spacing: 16) {
                 HStack {
