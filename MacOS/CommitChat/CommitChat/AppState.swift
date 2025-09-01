@@ -50,6 +50,17 @@ class AppState: ObservableObject {
     /// Indicates if a search operation is in progress
     @Published var isSearching = false
     
+    // MARK: - Error Handling
+    
+    /// Current error state for the application
+    @Published var currentError: ErrorState = .none
+    
+    /// Error state for search operations
+    @Published var searchError: ErrorState = .none
+    
+    /// Error state for MCP server connection
+    @Published var connectionError: ErrorState = .none
+    
     // MARK: - Settings
     
     /// Path to the MCP server installation
