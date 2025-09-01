@@ -2061,6 +2061,23 @@ swift_app_phase3_mcp_integration:
     total_deprecated_fixes: 3
     validation: "All deprecated onChange modifiers updated for macOS 14.0+ compatibility"
   
+  mcp_server_path_fix_2025_09_01:
+    status: "✅ COMPLETED"
+    date_completed: "2025-09-01T23:05:00Z"
+    issue: "MCP server connection failure due to incorrect server path"
+    problem: "ProcessManager trying to launch 'src/mcp-server.js' instead of 'src/mcp-server/mcp-server.js'"
+    root_cause: "Wrong file path in ProcessManager.swift line 75"
+    solution: "Updated process.arguments to correct path 'src/mcp-server/mcp-server.js'"
+    files_modified:
+      - file: "ProcessManager.swift"
+        line: 75
+        change: "Fixed MCP server file path argument"
+    verification_steps:
+      - "Confirmed mcp-server.js exists at /Users/harrison/Documents/Github/devmind/src/mcp-server/"
+      - "Killed conflicting MCP server processes"
+      - "Updated ProcessManager with correct path"
+    expected_result: "MCP server should now connect successfully from Swift app"
+  
   final_build_status: "✅ BUILD SUCCEEDED - Zero errors, zero warnings"
   
   mcp_architecture_completed:
