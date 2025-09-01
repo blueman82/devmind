@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RestorePointsWindow: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @State private var selectedRestorePoint: RestorePoint?
     @State private var showingConfirmation = false
     @State private var searchText = ""
