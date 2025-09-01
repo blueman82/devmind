@@ -3589,3 +3589,29 @@ phase_13_SEARCH_UI_CONNECTION_FIX:
       4: "✅ Search UI disconnect - Response parsing now set up"
     
     final_status: "✅ MCP integration fully functional end-to-end"
+
+phase_14_READABILITY_HANDLER_CONFLICT:
+  timestamp: "2025-09-02 00:04:00"
+  objective: "CRITICAL DISCOVERY - Can't have two readabilityHandlers on same pipe"
+  status: "❌ ROOT CAUSE FOUND"
+  
+  web_search_discovery:
+    source: "Swift forums and Stack Overflow"
+    key_finding: "You can only have ONE readabilityHandler per FileHandle"
+    
+  code_conflict_identified:
+    processmanager_line_215: "outputPipe.fileHandleForReading.readabilityHandler = { ... }"
+    mcpclient_line_219: "outputPipe.fileHandleForReading.readabilityHandler = { ... }"
+    problem: "Both trying to set handler on same pipe - second one overwrites first"
+    
+  why_search_ui_fails:
+    1: "ProcessManager sets up handler for logging/pattern detection"
+    2: "MCPClient.setupResponseParsing() tries to set handler for JSON-RPC parsing"
+    3: "Second handler overwrites first, breaking pattern detection"
+    4: "OR second handler fails silently, breaking JSON-RPC parsing"
+    5: "Either way, MCP communication is broken"
+    
+  solution_required:
+    approach: "Combine both handlers into single readabilityHandler"
+    location: "ProcessManager should handle both logging AND pass data to MCPClient"
+    alternative: "Use separate pipes for logging vs JSON-RPC communication"
