@@ -235,7 +235,7 @@ class ProcessManager: ObservableObject {
                     print("ProcessManager: Checking patterns:")
                     print("ProcessManager:   - Pattern1 '\(pattern1)': \(containsPattern1)")
                     print("ProcessManager:   - Pattern2 '\(pattern2)': \(containsPattern2)")
-                    print("ProcessManager:   - Current serverStatus: \(self?.serverStatus?.displayText ?? "unknown")")
+                    print("ProcessManager:   - Current serverStatus: \(self?.serverStatus.displayText ?? "unknown")")
                     
                     // Alternative status detection: look for server startup messages
                     if containsPattern1 || containsPattern2 {
