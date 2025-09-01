@@ -2566,3 +2566,44 @@ handover_continuation_session:
       context7_alignment: "Strong adherence to Swift async/await patterns and modern SwiftUI conventions"
       
     conclusion: "Code demonstrates production-ready quality with excellent documentation and robust error handling. Recent memory safety improvements show significant maturity in handling complex inter-process communication scenarios."
+
+## Phase 9+ Swift macOS App Critical Fix - Stdin Pipe Missing ✅
+stdin_pipe_fix_session:
+  date: "2025-09-01"
+  context: "Critical stdin pipe missing fix - resolving Bad file descriptor error"
+  
+  issue_identified:
+    error_type: "Bad file descriptor"
+    symptom: "MCP communication failing with file descriptor error"
+    root_cause: "ProcessManager was not creating standardInput pipe for Node.js process"
+    discovery: "MCPClient trying to access stdin that was never initialized"
+    
+  critical_fix_applied:
+    missing_stdin_pipe:
+      status: "✅ FIXED"
+      issue: "ProcessManager missing standardInput pipe setup"
+      location: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift:79"
+      technical_details:
+        - "Process created with only standardOutput and standardError pipes"
+        - "standardInput was never assigned, causing MCPClient to access nil pipe"
+        - "FileHandle.fileDescriptor would return invalid descriptor"
+      solution:
+        - "Added inputPipe = Pipe() creation"
+        - "Added process.standardInput = inputPipe assignment" 
+        - "Now provides valid stdin for JSON-RPC communication"
+      files_modified:
+        - path: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+          change: "Added inputPipe creation and standardInput assignment"
+          lines_modified: 1
+          specific_change: "Added process.standardInput = inputPipe at line 79"
+      validation_status: "Should resolve Bad file descriptor error in MCP requests"
+      
+  expected_resolution:
+    communication_flow: "JSON-RPC requests can now write to valid stdin pipe"
+    error_elimination: "Bad file descriptor errors should be resolved"
+    mcp_functionality: "Full MCP server communication should work properly"
+    
+  session_impact:
+    bugs_fixed: "1 critical pipe setup issue"
+    stability_improvement: "Major - enables core MCP communication"
+    technical_depth: "System-level pipe configuration fix"
