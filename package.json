@@ -6,11 +6,15 @@
   "type": "module",
   "scripts": {
     "start": "node src/mcp-server/mcp-server.js",
-    "test": "node --test src/tests/*.test.js",
-    "test:db": "node --test src/tests/database-manager.test.js",
-    "test:mcp": "node --test src/tests/mcp-server.test.js",
-    "test:watcher": "node --test src/tests/file-watcher.test.js",
-    "test:config": "node --test src/tests/config-validator.test.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:db": "vitest run src/tests/database-manager.test.js",
+    "test:mcp": "vitest run src/tests/mcp-server.test.js",
+    "test:watcher": "vitest run src/tests/file-watcher.test.js",
+    "test:config": "vitest run src/tests/config-validator.test.js",
+    "test:git": "vitest run src/tests/git-tools.test.js",
     "dev": "node --watch src/mcp-server/mcp-server.js",
     "monitor": "node monitor-indexer.js",
     "status": "node indexer-status.js"
@@ -20,7 +24,10 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.8"
+    "@types/better-sqlite3": "^7.6.8",
+    "@vitest/ui": "^3.2.4",
+    "c8": "^10.1.3",
+    "vitest": "^3.2.4"
   },
   "keywords": [
     "mcp",
