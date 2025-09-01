@@ -219,16 +219,18 @@ class MCPClient: ObservableObject {
         let request = JSONRPCRequest(id: id, method: method, params: params)
         
         return try await withCheckedThrowingContinuation { continuation in
-            pendingRequests[id] = { result in
-                switch result {
-                case .success(let value):
-                    if let typedValue = value as? T {
-                        continuation.resume(returning: typedValue)
-                    } else {
-                        continuation.resume(throwing: MCPClientError.invalidResponse)
+            requestQueue.sync {
+                pendingRequests[id] = { result in
+                    switch result {
+                    case .success(let value):
+                        if let typedValue = value as? T {
+                            continuation.resume(returning: typedValue)
+                        } else {
+                            continuation.resume(throwing: MCPClientError.invalidResponse)
+                        }
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
                     }
-                case .failure(let error):
-                    continuation.resume(throwing: error)
                 }
             }
             
