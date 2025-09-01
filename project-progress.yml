@@ -3686,3 +3686,37 @@ phase_15_unified_handler:
     result: "✅ Unified handler architecture successfully implemented"
     app_status: "Built successfully and launched for testing"
     next_validation: "User to test Search UI functionality with live MCP server"
+
+# Phase 16: Critical stdin Pipe Casting Bug Fix
+phase_16_stdin_pipe_fix:
+  timestamp: "2025-09-02T00:20:00"
+  problem_discovered: "Search UI shows results briefly then displays 'MCP server not connected'"
+  
+  root_cause_analysis:
+    symptom: "UI works momentarily then fails"
+    investigation: "Checked logs - connection successful but no JSON-RPC communication"
+    discovery: "MCPClient.swift line 304 has CRITICAL casting bug"
+    
+  bug_details:
+    location: "MCPClient.swift line 304"
+    incorrect_code: "let stdin = process.standardInput as? FileHandle"
+    problem: "ProcessManager sets standardInput = Pipe, not FileHandle"
+    result: "Cast always returns nil, no requests ever sent to MCP server"
+    
+  fix_implemented:
+    old_line_304: "let stdin = process.standardInput as? FileHandle"
+    new_line_304: "let stdinPipe = process.standardInput as? Pipe"
+    new_line_306: "let stdin = stdinPipe.fileHandleForWriting"
+    explanation: "Must cast to Pipe first, then get fileHandleForWriting"
+    
+  why_this_matters:
+    - "Without this fix, NO JSON-RPC requests reach the MCP server"
+    - "Server runs but client can't communicate with it"
+    - "Explains why Search UI fails - requests never sent"
+    - "This was THE blocking issue preventing MCP functionality"
+    
+  testing_required:
+    - "Rebuild app with stdin pipe fix"
+    - "Start MCP server"
+    - "Test Search UI - should now work consistently"
+    - "Verify JSON-RPC requests appear in logs"
