@@ -185,13 +185,13 @@ export class SecureGitExecutor {
       args.push(`--grep=${options.grep}`);
     }
     
-    // CRITICAL: Add branch support for monorepo scenarios
+    // Add branch support for monorepo scenarios
     if (options.branch && typeof options.branch === 'string' && options.branch.length < 100) {
       // Add branch after log command but before other args
       args.unshift(options.branch);
     }
     
-    // CRITICAL: Add subdirectory filtering for monorepo support
+    // Add subdirectory filtering for monorepo support
     if (options.subdirectory && typeof options.subdirectory === 'string') {
       // Validate subdirectory path to prevent injection
       if (!/^[a-zA-Z0-9_\-\/\.]+$/.test(options.subdirectory)) {
