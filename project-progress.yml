@@ -2647,3 +2647,41 @@ connection_status_fix_session:
     ui_behavior: "App UI should properly show 'Connected' when MCP server is running"
     reactive_updates: "@Published isConnected should trigger SwiftUI view updates"
     debugging: "Logging will confirm connection status propagation"
+
+## Phase 9+++ ProcessManager Status Timing Investigation 🔍
+processmanager_timing_debug_session:
+  date: "2025-09-01"
+  context: "Connection status still false despite MCP server running successfully"
+  
+  issue_analysis:
+    symptom: "MCPClient connection status updated: false (logged twice)"
+    evidence:
+      - "MCP server logs show successful startup and configuration"
+      - "MCPClient receives false status updates from ProcessManager"
+      - "ProcessManager's 1-second delay status check may be failing"
+    suspected_cause: "ProcessManager.serverStatus not updating to .running despite process.isRunning being true"
+    
+  debugging_enhancement:
+    status: "🔍 IN PROGRESS"
+    issue: "ProcessManager status timing logic not working as expected"
+    location: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift:115"
+    debugging_added:
+      - "Added comprehensive logging to 1-second delay status check"
+      - "Added process.isRunning state logging"
+      - "Added serverStatus transition logging"
+      - "Will help identify if timing issue or process detection issue"
+    files_modified:
+      - path: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+        change: "Added detailed logging to asyncAfter status check block"
+        lines_modified: 5
+        specific_changes:
+          - "Added 'Checking process status after 1 second delay' logging"
+          - "Added process.isRunning value logging"
+          - "Added serverStatus transition logging (.running vs .error)"
+    validation_pending: "Need to rebuild and test to see ProcessManager logs"
+    
+  investigation_approach:
+    step_1: "Rebuild app with enhanced ProcessManager logging"
+    step_2: "Launch app and observe ProcessManager status check logs"
+    step_3: "Identify if issue is timing-based or process detection failure"
+    step_4: "Implement appropriate fix based on log analysis"
