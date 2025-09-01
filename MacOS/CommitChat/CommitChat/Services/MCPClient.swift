@@ -9,10 +9,32 @@ import Foundation
 import Combine
 
 /// JSON-RPC client for communicating with the Node.js MCP server
+/// 
+/// This class provides a complete implementation of JSON-RPC 2.0 protocol for communicating
+/// with the ai-memory MCP server. It handles connection lifecycle, request/response management,
+/// and provides type-safe Swift interfaces for all MCP tools.
+///
+/// ## Key Features
+/// - Automatic connection management with ProcessManager integration
+/// - Type-safe async/await methods for all 6 MCP tools
+/// - Comprehensive error handling with user-friendly messages
+/// - Singleton pattern for consistent server communication
+/// - Reactive UI updates via @Published properties
+///
+/// ## Usage
+/// ```swift
+/// let results = try await MCPClient.shared.searchConversations(
+///     query: "authentication",
+///     limit: 20
+/// )
+/// ```
 class MCPClient: ObservableObject {
+    /// Shared singleton instance for consistent MCP server communication
     static let shared = MCPClient()
     
+    /// Published connection status for reactive UI updates
     @Published var isConnected: Bool = false
+    /// Published error state for UI error handling
     @Published var lastError: String?
     
     private var inputPipe: Pipe?
