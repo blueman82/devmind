@@ -3634,10 +3634,32 @@ phase_15_unified_handler:
     rationale: "Can't have two handlers on same FileHandle - must use single unified approach"
     
   step_2_modify_processmanager:
-    status: "IN PROGRESS"
+    status: "COMPLETED"
     plan: "Add MCPClient.parseJSONRPCResponses() call within ProcessManager's handler"
-    location: "ProcessManager.swift lines 215-263"
-    changes_needed:
-      - "Access MCPClient.shared instance"
-      - "Pass data to MCPClient.parseJSONRPCResponses() after logging"
-      - "Ensure thread safety with proper dispatch queues"
+    location: "ProcessManager.swift lines 215-271"
+    changes_implemented:
+      - "Made MCPClient.parseJSONRPCResponses() internal instead of private"
+      - "Added call to MCPClient.shared.parseJSONRPCResponses(output) at line 228"
+      - "Passes raw output BEFORE any ANSI stripping to preserve JSON-RPC format"
+      - "Only passes data when serverStatus == .running to avoid parsing startup logs"
+    
+  unified_handler_architecture:
+    flow: |
+      1. ProcessManager.outputPipe → readabilityHandler (SINGLE HANDLER)
+      2. Handler receives raw output data
+      3. IF server is running: Pass to MCPClient.parseJSONRPCResponses()
+      4. THEN: Strip ANSI codes for pattern matching
+      5. THEN: Check for startup patterns and update status
+    benefits:
+      - "No more handler conflicts - only ONE handler per FileHandle"
+      - "MCPClient gets raw JSON-RPC data without ANSI interference"
+      - "Pattern matching still works with ANSI stripping"
+      - "Thread-safe with proper dispatch queues"
+      
+  step_3_testing:
+    status: "READY TO TEST"
+    test_plan:
+      - "Build and run the app"
+      - "Start MCP server via UI"
+      - "Open Search UI and perform a search"
+      - "Verify Search UI shows results instead of 'MCP server not connected'"
