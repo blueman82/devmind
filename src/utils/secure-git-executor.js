@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import path from 'path';
 import { createLogger } from './logger.js';
 import errorSanitizer from './error-sanitizer.js';
