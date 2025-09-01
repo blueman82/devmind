@@ -113,13 +113,17 @@ class ProcessManager: ObservableObject {
             
             // Give process time to start
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                print("ProcessManager: Checking process status after 1 second delay")
+                print("ProcessManager: process.isRunning = \(process.isRunning)")
                 if process.isRunning {
                     self.serverStatus = .running
+                    print("ProcessManager: Setting serverStatus to .running")
                     print("MCP server started successfully")
                 } else {
                     let error = "MCP server failed to start"
                     self.serverStatus = .error(error)
                     self.lastError = error
+                    print("ProcessManager: Setting serverStatus to .error(\(error))")
                 }
             }
             
