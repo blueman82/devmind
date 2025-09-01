@@ -16,7 +16,7 @@ class ProcessManager: ObservableObject {
     @Published var serverOutput: [String] = []
     @Published var lastError: String?
     
-    private var mcpProcess: Process?
+    var mcpProcess: Process?
     private var outputPipe: Pipe?
     private var errorPipe: Pipe?
     private let projectPath: String
