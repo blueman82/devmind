@@ -2868,3 +2868,49 @@ corrected_analysis_session:
     primary_issue: "Fix output-based detection not triggering on startup messages"
     technical_focus: "setupOutputMonitoring output handler not detecting server messages"
     debugging_needed: "Verify output monitoring is receiving MCP server output correctly"
+
+phase_10_enhanced_output_debugging:
+  timestamp: "2025-09-01 23:35:00"
+  objective: "Add comprehensive debugging to ProcessManager output handler"
+  
+  issue_analysis:
+    root_cause: "Output-based detection failing despite MCP server producing correct startup messages"
+    evidence:
+      - "MCP Server Output: [info] [MCPServer]: MCP Server connected on stdio transport"
+      - "ProcessManager: Current serverStatus = stopped"
+      - "Missing log: 'ProcessManager: Detected MCP server startup via output'"
+    
+  implementation:
+    file_modified: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+    method_enhanced: "setupOutputMonitoring() - readabilityHandler"
+    lines_affected: "215-256"
+    
+    debugging_added:
+      handler_entry: "print('ProcessManager: readabilityHandler called')"
+      data_size: "print('ProcessManager: availableData size = \\(data.count) bytes')"
+      raw_output: "print('ProcessManager: raw output = \\'\\(output)\\'')"
+      pattern_checking:
+        - "Enhanced pattern matching with individual boolean checks"
+        - "Separate logging for each detection pattern"
+        - "Current serverStatus display in debugging"
+      success_indicators:
+        - "✅ PATTERN MATCHED! Detected MCP server startup via output"
+        - "✅ Setting serverStatus to .running via output detection"
+      failure_indicators:
+        - "❌ No startup patterns found in this output"
+    
+    patterns_tested:
+      pattern1: "MCP Server connected on stdio transport"
+      pattern2: "AI Memory MCP Server running on stdio"
+      
+  validation_plan:
+    step_1: "Run app and observe if readabilityHandler is called at all"
+    step_2: "Check data size and raw output content received"
+    step_3: "Verify exact message format from MCP server matches patterns"
+    step_4: "Confirm pattern matching logic works correctly"
+    
+  expected_outcomes:
+    if_handler_not_called: "Output pipe setup issue - need to investigate pipe creation"
+    if_handler_called_no_data: "MCP server not writing to stdout - check server implementation"
+    if_data_wrong_format: "Pattern mismatch - update detection strings to match actual output"
+    if_patterns_match: "Status update should work and UI should show connected"
