@@ -395,19 +395,19 @@ implementation_phases:
       
       priority_medium:
         - task: "Connect MainBrowserWindow to MCP list methods"
-          status: "📝 PENDING"
-          ui_integration: "Replace mock conversation data with listRecentConversations()"
-          dependency: "SearchWindow completion"
+          status: "✅ COMPLETED - Moved to priority_high and completed"
+          ui_integration: "Replaced mock conversation data with listRecentConversations()"
+          completion: "See priority_high section for details"
           
         - task: "Integrate RestorePointsWindow with MCP restore tools"
-          status: "📝 PENDING"
-          ui_integration: "Connect restore interface to listRestorePoints() and createRestorePoint()"
-          dependency: "Core MCP integration complete"
+          status: "✅ COMPLETED - Moved to priority_high and completed"
+          ui_integration: "Connected restore interface to all MCP restore tools"
+          completion: "See priority_high section for details"
           
         - task: "Add real-time conversation count updates"
-          status: "📝 PENDING"
-          ui_integration: "Update AppState.conversationCount from MCP server"
-          dependency: "Status monitoring implementation"
+          status: "✅ COMPLETED - Implemented in AppState monitoring"
+          ui_integration: "AppState.conversationCount updates from MCP server"
+          completion: "Implemented via updateConversationCount() in AppState"
       
       priority_low:
         - task: "Performance optimization for large result sets"
