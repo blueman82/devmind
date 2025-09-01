@@ -360,7 +360,19 @@ implementation_phases:
             - "Loading states and error handling with retry"
             - "Empty state guidance for users"
             - "Conversation count updates based on filtered results"
-          completion_date: "2025-09-02T01:00:00Z"
+          
+        - task: "Connect RestorePointsWindow to MCP restore tools"
+          status: "✅ COMPLETED - RestorePointsWindow MCP integration 100% operational"
+          date_completed: "2025-09-01T20:15:00Z"
+          ui_integration: "RestorePointsWindow manages restore points via MCP"
+          features_added:
+            - "Live restore point loading via listRestorePoints()"
+            - "Create new restore points with createRestorePoint()"
+            - "Preview restore changes with previewRestore()"
+            - "Search filtering by label and description"
+            - "Loading states and comprehensive error handling"
+            - "Empty state with Create Restore Point action"
+            - "Automatic preview loading on selection"
           
         - task: "Implement error handling in SearchWindow UI"
           status: "✅ COMPLETED - Comprehensive error handling implemented"
