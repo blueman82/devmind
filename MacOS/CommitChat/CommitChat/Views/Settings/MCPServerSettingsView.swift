@@ -9,8 +9,7 @@ import SwiftUI
 
 /// MCP Server configuration settings tab
 struct MCPServerSettingsView: View {
-    @StateObject private var appState = AppState()
-    @State private var serverPath = ""
+    @ObservedObject private var appState = AppState()
     @State private var serverPort = "3000"
     @State private var maxMemory = "512"
     
