@@ -604,10 +604,17 @@ quality_standards:
 ## Project Integration
 
 parent_project_status:
-  current_phase: "Phase 8E - Swift macOS App Development" 
+  current_phase: "Phase 8E - Swift macOS App Development ⏸️ PAUSED" 
+  blocking_phase: "Phase 8F - Git Tools Monorepo Fix (CRITICAL PRIORITY)"
   integration_point: "Extends existing MCP server with native macOS interface"
   deployment: "Standalone .app bundle that launches MCP server as subprocess"
   user_experience: "Seamless - users get GUI interface while retaining CLI/MCP access"
+  pause_details:
+    date_paused: "2025-09-01T15:45:00Z"
+    reason: "Critical git tools monorepo limitation must be fixed first"
+    current_achievement: "Phase 3: 50% Complete - ProcessManager + MCPClient ready"
+    blocking_issue: "Git tools assume 1:1 project-to-repository mapping"
+    resume_condition: "After Phase 8F monorepo fixes complete and validated"
   
 roadmap_alignment:
   fits_prd: "✅ Addresses PRD Phase 10: macOS Application requirements"
