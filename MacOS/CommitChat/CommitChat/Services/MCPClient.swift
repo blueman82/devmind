@@ -35,6 +35,12 @@ class MCPClient: ObservableObject {
             case jsonrpc, id, method, params
         }
         
+        init(id: Int, method: String, params: [String: Any]? = nil) {
+            self.id = id
+            self.method = method
+            self.params = params
+        }
+        
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             _ = try container.decode(String.self, forKey: .jsonrpc) // Validate but don't use
