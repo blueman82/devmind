@@ -11,6 +11,17 @@ import Combine
 /// Central state management for the CommitChat application.
 /// Manages window visibility, MCP server connection status, and application settings.
 class AppState: ObservableObject {
+    
+    // MARK: - MCP Integration
+    
+    /// Reference to the ProcessManager for server lifecycle
+    private let processManager = ProcessManager.shared
+    
+    /// Reference to the MCPClient for API communication
+    private let mcpClient = MCPClient.shared
+    
+    /// Cancellables for Combine subscriptions
+    private var cancellables = Set<AnyCancellable>()
     // MARK: - Window Visibility
     
     /// Controls visibility of the search conversations window
