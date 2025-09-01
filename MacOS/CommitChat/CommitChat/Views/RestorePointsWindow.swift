@@ -207,7 +207,7 @@ struct RestorePointsWindow: View {
             do {
                 let preview = try await mcpClient.previewRestore(
                     projectPath: projectPath,
-                    restorePointId: point.id
+                    restorePointId: point.restorePointId
                 )
                 
                 await MainActor.run {
