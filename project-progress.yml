@@ -1648,6 +1648,29 @@ git_tools_critical_limitation:
                 - "Concurrent request stress testing"
                 - "All restore method validation (safe, stash, force)"
                 - "Comprehensive parameter validation coverage"
+            
+            git_restore_points_tests:
+              file: "src/tests/git-restore-points.test.js"
+              lines: 350
+              date_completed: "2025-09-01"
+              coverage_areas:
+                - "Create restore point with all parameter combinations"
+                - "List restore points with filtering and pagination"
+                - "Restore point CRUD operations and validation"
+                - "Test status enumeration (passing, failing, unknown)"
+                - "Auto-generated flag functionality"
+                - "Duplicate label detection and prevention"
+                - "Timeframe filtering and limit validation"
+                - "Concurrent restore point operations"
+                - "Error handling for invalid paths and parameters"
+              test_features:
+                - "Comprehensive restore point lifecycle testing"
+                - "Parameter validation and boundary testing"
+                - "Database integrity and constraint enforcement"
+                - "Concurrent operation safety testing"
+                - "Repository discovery integration"
+                - "Error condition handling and recovery"
+                - "Real git repository environment testing"
           
           planned_focused_files:
             - "✅ COMPLETED: git-database-schema.test.js - Database operations and schema validation"
