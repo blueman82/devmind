@@ -431,12 +431,17 @@ class MCPClient: ObservableObject {
     /// - Returns: Array of conversation items with metadata
     /// - Throws: `MCPClientError` for connection or server failures
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
-        let params: [String: Any] = [
+        let toolParams: [String: Any] = [
             "limit": limit,
             "timeframe": timeframe
         ]
         
-        let response: [String: Any] = try await sendRequest(method: "list_recent_conversations", params: params)
+        let params: [String: Any] = [
+            "name": "list_recent_conversations",
+            "arguments": toolParams
+        ]
+        
+        let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
         guard let conversations = response["conversations"] as? [[String: Any]] else {
             throw MCPClientError.invalidResponse
