@@ -1312,19 +1312,29 @@ git_tools_critical_limitation:
             
         branch_support:
           - task: "Add branch parameter to all git MCP tools"
-            file: "src/mcp-server/handlers/git-tool-handlers.js"
+            file: "src/mcp-server/mcp-server.js"
             purpose: "Enable branch-specific queries instead of just current branch"
             priority: "HIGH"
+            status: "✅ COMPLETED"
+            date_completed: "2025-09-01T18:30:00Z"
+            implementation_details:
+              - "Added branch parameter to get_git_context tool schema"
+              - "Added subdirectory parameter to get_git_context tool schema"
+              - "Parameters properly flow through to handlers"
             
           - task: "Update database schema to track branch context"
             file: "src/database/git-schema.js"
             purpose: "Store branch information for commits and restore points"
             priority: "HIGH"
+            status: "✅ COMPLETED"
+            date_completed: "2025-09-01T17:00:00Z"
             
           - task: "Add branch field to git_commits table"
             file: "src/database/git-schema.js"
             purpose: "Enable branch-specific commit filtering"
             priority: "HIGH"
+            status: "✅ COMPLETED"
+            date_completed: "2025-09-01T17:00:00Z"
             
         subdirectory_filtering:
           - task: "Implement git log -- <subdirectory> filtering"
