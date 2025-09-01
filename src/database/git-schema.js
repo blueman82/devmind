@@ -255,13 +255,16 @@ export default class GitSchema {
         projectPath,
         workingDirectory,
         gitDirectory,
+        repositoryRoot,
+        subdirectoryPath = '.',
+        isMonorepoSubdirectory = false,
         remoteUrl,
         currentBranch
       } = repositoryData;
 
       // Use cached prepared statement
       const result = this.statements.upsertRepo.run(
-        projectPath, workingDirectory, gitDirectory, remoteUrl, currentBranch
+        projectPath, workingDirectory, gitDirectory, repositoryRoot, subdirectoryPath, isMonorepoSubdirectory, remoteUrl, currentBranch
       );
       
       let repositoryId;
