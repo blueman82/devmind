@@ -182,24 +182,14 @@ struct RestorePoint: Identifiable, Hashable {
     
     /// Initialize from MCP data
     init(from dict: [String: Any]) throws {
-        guard let label = dict["label"] as? String,
-              let commit = dict["commit_hash"] as? String,
-              let author = dict["author"] as? String,
-              let message = dict["message"] as? String else {
-            throw MCPClientError.invalidResponse
-        }
-        
+        // Initialize all properties first with defaults
         self.restorePointId = dict["id"] as? Int ?? Int.random(in: 1...1000)
-        self.label = label
-        self.commit = commit
-        self.author = author
-        self.message = message
         self.description = dict["description"] as? String
         self.filesChanged = dict["files_changed"] as? Int ?? 0
         self.insertions = dict["insertions"] as? Int ?? 0
         self.deletions = dict["deletions"] as? Int ?? 0
         
-        // Parse date
+        // Parse date with default
         if let dateString = dict["date"] as? String,
            let date = ISO8601DateFormatter().date(from: dateString) {
             self.date = date
@@ -207,7 +197,7 @@ struct RestorePoint: Identifiable, Hashable {
             self.date = Date()
         }
         
-        // Parse test status
+        // Parse test status with default
         if let statusString = dict["test_status"] as? String {
             switch statusString.lowercased() {
             case "passing":
@@ -220,6 +210,20 @@ struct RestorePoint: Identifiable, Hashable {
         } else {
             self.testStatus = .unknown
         }
+        
+        // Now validate required fields and throw if needed
+        guard let label = dict["label"] as? String,
+              let commit = dict["commit_hash"] as? String,
+              let author = dict["author"] as? String,
+              let message = dict["message"] as? String else {
+            throw MCPClientError.invalidResponse
+        }
+        
+        // Set the validated required fields
+        self.label = label
+        self.commit = commit
+        self.author = author
+        self.message = message
     }
     
     enum TestStatus {
