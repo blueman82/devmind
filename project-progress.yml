@@ -1561,6 +1561,49 @@ git_tools_critical_limitation:
             - "Add performance benchmarking with large repositories"
             - "Extend edge case coverage for nested subdirectories"
         
+        test_file_breakdown_progress:
+          date_started: "2025-09-01"
+          status: "✅ IN PROGRESS"
+          motivation: "Improve maintainability by splitting large 600-line test file into focused components"
+          
+          completed_focused_files:
+            git_manager_tests:
+              file: "src/tests/git-manager.test.js"
+              lines: 250
+              date_completed: "2025-09-01"
+              coverage_areas:
+                - "Repository initialization and configuration"
+                - "Simple repository discovery and validation"
+                - "Monorepo discovery from subdirectories"
+                - "Commit history retrieval with filtering"
+                - "Subdirectory filtering (git log -- <path>)"
+                - "Branch filtering (git log <branch>)"
+                - "Combined subdirectory and branch filtering"
+                - "Performance timing assertions"
+                - "Error handling for non-git and invalid paths"
+                - "Repository discovery caching"
+              test_features:
+                - "Real git repository creation for authentic testing"
+                - "Monorepo setup with ketchup subdirectory scenario"
+                - "Feature branch creation and testing"
+                - "Performance benchmarking with timing assertions"
+                - "Comprehensive error handling validation"
+          
+          planned_focused_files:
+            - "git-database-schema.test.js - Database operations and schema validation"
+            - "git-mcp-handlers.test.js - MCP tool handlers and API integration"
+            - "git-restore-points.test.js - Restore point management and operations"
+            - "git-error-handling.test.js - Error conditions and edge cases"
+            - "git-performance.test.js - Load testing and performance benchmarks"
+            - "git-integration.test.js - End-to-end workflow testing"
+          
+          benefits_achieved:
+            - "Improved test organization and maintainability"
+            - "Focused test files for specific components"
+            - "Better test isolation and debugging"
+            - "Easier to run specific test suites"
+            - "Clear separation of concerns in testing"
+        
       resolved_issues:
         execSync_shell_issue:
           date_discovered: "2025-09-01T20:05:00Z"
