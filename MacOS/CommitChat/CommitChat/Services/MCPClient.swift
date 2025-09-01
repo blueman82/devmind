@@ -295,7 +295,16 @@ class MCPClient: ObservableObject {
         }
     }
     
-    /// List recent conversations
+    /// Lists recent conversations from the MCP server
+    ///
+    /// Retrieves a list of recent conversations based on the specified timeframe,
+    /// useful for displaying conversation history in the main browser window.
+    ///
+    /// - Parameters:
+    ///   - limit: Maximum number of conversations to return (default: 20)
+    ///   - timeframe: Time filter ("today", "yesterday", "last week", etc.)
+    /// - Returns: Array of conversation items with metadata
+    /// - Throws: `MCPClientError` for connection or server failures
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
         let params: [String: Any] = [
             "limit": limit,
