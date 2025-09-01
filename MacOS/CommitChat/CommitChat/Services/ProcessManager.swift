@@ -53,8 +53,10 @@ class ProcessManager: ObservableObject {
     
     /// Start the MCP server process
     func startMCPServer() {
+        print("ProcessManager: startMCPServer() called")
+        print("ProcessManager: Current serverStatus = \(serverStatus)")
         guard serverStatus != .running && serverStatus != .starting else {
-            print("MCP server is already running or starting")
+            print("ProcessManager: MCP server is already running or starting - exiting early")
             return
         }
         
