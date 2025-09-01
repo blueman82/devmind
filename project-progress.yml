@@ -3347,3 +3347,27 @@ phase_11_4_ACTUAL_ERROR_ui_still_shows_disconnected:
     core_connection_established: "✅ MCP server connection working at protocol level"
     ui_layer_disconnect: "❌ Search UI not reflecting actual connection status"
     next_debugging_target: "UI state management and SwiftUI property observation"
+
+phase_11_5_ANSI_COLOR_CODE_ROOT_CAUSE:
+  timestamp: "2025-09-01 23:52:00"
+  objective: "ACTUAL ROOT CAUSE - ANSI color codes breaking pattern matching"
+  status: "🎯 ROOT CAUSE IDENTIFIED"
+  
+  discovery:
+    pattern_exists: "✅ 'MCP Server connected on stdio transport' IS in the output"
+    matching_fails: "❌ contains() returns false due to ANSI color codes"
+    
+  technical_details:
+    expected_pattern: "'MCP Server connected on stdio transport'"
+    actual_raw_output: "'[32mMCP Server connected on stdio transport[39m'"
+    ansi_codes: "[32m = green color start, [39m = color reset"
+    problem: "String.contains() fails because of color code wrapper"
+    
+  fix_required:
+    solution: "Strip ANSI color codes from output before pattern matching"
+    implementation: "Add ANSI escape sequence removal in ProcessManager"
+    
+  corrected_root_cause:
+    not_ui_issue: "Connection detection failure, not UI propagation"
+    not_threading: "Pattern matching logic issue, not SwiftUI binding"
+    actual_cause: "ANSI color codes in MCP server logger output breaking string matching"
