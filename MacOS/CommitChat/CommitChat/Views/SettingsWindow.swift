@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsWindow: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @State private var selectedTab = "General"
     
     var body: some View {
@@ -65,7 +65,7 @@ struct SettingsWindow: View {
 }
 
 struct GeneralSettings: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("showInDock") private var showInDock = false
     
@@ -113,7 +113,7 @@ struct GeneralSettings: View {
 }
 
 struct MCPServerSettings: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @State private var serverPath = ""
     @State private var serverPort = "3000"
     @State private var maxMemory = "512"
@@ -294,7 +294,7 @@ struct SearchSettings: View {
 }
 
 struct NotificationSettings: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @AppStorage("notifyOnNewConversation") private var notifyOnNewConversation = true
     @AppStorage("notifyOnError") private var notifyOnError = true
     @AppStorage("notifyOnRestorePoint") private var notifyOnRestorePoint = false
