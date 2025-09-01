@@ -257,7 +257,24 @@ class MCPClient: ObservableObject {
     
     // MARK: - MCP Tool Methods
     
-    /// Search conversations using the MCP server
+    /// Searches conversations using the MCP server's full-text search capabilities
+    ///
+    /// This method queries the ai-memory MCP server to search through indexed conversations
+    /// using advanced full-text search with BM25 relevance ranking and stemming support.
+    ///
+    /// - Parameters:
+    ///   - query: Search query string (supports natural language and keywords)
+    ///   - limit: Maximum number of results to return (default: 10, max: 50)
+    /// - Returns: Array of conversation search results with snippets and metadata
+    /// - Throws: `MCPClientError` for connection, server, or parsing failures
+    ///
+    /// ## Example
+    /// ```swift
+    /// let results = try await mcpClient.searchConversations(
+    ///     query: "authentication bug fix",
+    ///     limit: 25
+    /// )
+    /// ```
     func searchConversations(query: String, limit: Int = 10) async throws -> [ConversationSearchResult] {
         let params: [String: Any] = [
             "query": query,
