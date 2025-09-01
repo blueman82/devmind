@@ -167,11 +167,13 @@ struct RestorePoint: Identifiable, Hashable {
     
     /// Traditional initializer for mock data
     init(label: String, commit: String, date: Date, author: String, message: String, filesChanged: Int, insertions: Int, deletions: Int, testStatus: TestStatus) {
+        self.restorePointId = Int.random(in: 1...1000)  // Generate random ID for mock data
         self.label = label
         self.commit = commit
         self.date = date
         self.author = author
         self.message = message
+        self.description = nil  // Mock data doesn't have descriptions
         self.filesChanged = filesChanged
         self.insertions = insertions
         self.deletions = deletions
