@@ -144,11 +144,119 @@ struct RestorePointsWindow: View {
         } message: {
             Text("This will restore your project to the selected state. Current uncommitted changes will be stashed. Continue?")
         }
+        .onAppear {
+            loadRestorePoints()
+        }
+        .onChange(of: selectedRestorePoint) { newValue in
+            if newValue != nil {
+                loadRestorePreview()
+            }
+        }
+    }
+    
+    // MARK: - Computed Properties
+    
+    var filteredRestorePoints: [RestorePoint] {
+        if searchText.isEmpty {
+            return restorePoints
+        }
+        
+        return restorePoints.filter { point in
+            point.label.localizedCaseInsensitiveContains(searchText) ||
+            (point.description ?? "").localizedCaseInsensitiveContains(searchText)
+        }
+    }
+    
+    // MARK: - Methods
+    
+    private func loadRestorePoints() {
+        isLoadingRestorePoints = true
+        restorePointError = nil
+        
+        Task {
+            do {
+                let points = try await mcpClient.listRestorePoints(
+                    projectPath: projectPath,
+                    limit: 50
+                )
+                
+                await MainActor.run {
+                    self.restorePoints = points
+                    self.isLoadingRestorePoints = false
+                }
+            } catch let error as MCPClientError {
+                await MainActor.run {
+                    self.restorePointError = error
+                    self.isLoadingRestorePoints = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.restorePointError = .serverError(error.localizedDescription)
+                    self.isLoadingRestorePoints = false
+                }
+            }
+        }
+    }
+    
+    private func loadRestorePreview() {
+        guard let point = selectedRestorePoint else { return }
+        
+        isLoadingPreview = true
+        
+        Task {
+            do {
+                let preview = try await mcpClient.previewRestore(
+                    projectPath: projectPath,
+                    restorePointId: point.id
+                )
+                
+                await MainActor.run {
+                    self.restorePreview = preview
+                    self.isLoadingPreview = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.isLoadingPreview = false
+                    // Handle preview error silently or show inline error
+                }
+            }
+        }
+    }
+    
+    private func createRestorePoint() {
+        // This would typically show a dialog to get label and description
+        Task {
+            do {
+                let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short)
+                let newPoint = try await mcpClient.createRestorePoint(
+                    projectPath: projectPath,
+                    label: "Manual restore point - \(timestamp)",
+                    description: "Created from RestorePointsWindow"
+                )
+                
+                await MainActor.run {
+                    // Reload the list to include the new restore point
+                    loadRestorePoints()
+                }
+            } catch {
+                // Handle error - could show an alert
+                print("Failed to create restore point: \(error)")
+            }
+        }
     }
     
     private func performRestore() {
-        // Phase 3: Will execute actual git restore
-        print("Restoring to: \(selectedRestorePoint?.label ?? "")")
+        guard let point = selectedRestorePoint else { return }
+        
+        // In a real implementation, this would call an MCP tool to perform the restore
+        // For now, we just log it
+        print("Restoring to restore point: \(point.label) (ID: \(point.id))")
+        
+        // The actual restore would involve:
+        // 1. Calling an MCP restore tool
+        // 2. Showing progress
+        // 3. Handling success/failure
+        // 4. Refreshing the UI
     }
 }
 
