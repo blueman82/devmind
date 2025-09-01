@@ -593,9 +593,8 @@ struct ConversationSearchResult {
         self.messageCount = messageCount
         self.hasErrors = dict["has_errors"] as? Bool ?? false
         
-        // Parse date from startTime field or use current date
-        // Parse date
-        if let dateString = dict["date"] as? String,
+        // Parse date from startTime field or date field, or use current date
+        if let dateString = (dict["startTime"] ?? dict["date"]) as? String,
            let date = ISO8601DateFormatter().date(from: dateString) {
             self.date = date
         } else {
