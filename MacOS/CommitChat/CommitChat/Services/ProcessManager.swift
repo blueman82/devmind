@@ -66,6 +66,7 @@ class ProcessManager: ObservableObject {
         
         // Create new process
         let process = Process()
+        let inputPipe = Pipe()
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         
@@ -75,6 +76,7 @@ class ProcessManager: ObservableObject {
         process.arguments = ["node", "src/mcp-server/mcp-server.js"]
         process.environment = ["PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"]
         process.currentDirectoryPath = projectPath
+        process.standardInput = inputPipe
         process.standardOutput = outputPipe
         process.standardError = errorPipe
         
