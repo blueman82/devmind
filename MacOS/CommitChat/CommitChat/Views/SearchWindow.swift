@@ -42,7 +42,7 @@ struct SearchWindow: View {
                         .onSubmit {
                             performSearch()
                         }
-                        .onChange(of: searchText) { newValue in
+                        .onChange(of: searchText) { _, newValue in
                             // Debounced search - cancel previous task
                             searchTask?.cancel()
                             
