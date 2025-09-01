@@ -181,14 +181,14 @@ remaining_work_analysis:
       quality: "Thorough - all relevant tools updated"
   
   outstanding_tasks:
-    
-    medium_priority:
-      - task: "Update all MCP tools with branch parameters"
-        complexity: "Low"
-        estimated_effort: "2-3 hours"
-      
-      - task: "Complete monorepo test suite"
+    testing_only:
+      - task: "Complete monorepo test suite with framework"
         complexity: "Medium"
+        estimated_effort: "3-4 hours"
+        priority: "HIGH for production"
+      
+      - task: "Performance testing with large repositories"
+        complexity: "Low"
         estimated_effort: "4-5 hours"
       
       - task: "Performance testing with large repositories"
