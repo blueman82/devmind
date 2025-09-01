@@ -35,6 +35,19 @@ class MCPClient: ObservableObject {
             case jsonrpc, id, method, params
         }
         
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
+            self.id = try container.decode(Int.self, forKey: .id)
+            self.method = try container.decode(String.self, forKey: .method)
+            
+            if let paramsData = try container.decodeIfPresent(AnyCodable.self, forKey: .params) {
+                self.params = paramsData.value as? [String: Any]
+            } else {
+                self.params = nil
+            }
+        }
+        
         func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(jsonrpc, forKey: .jsonrpc)
