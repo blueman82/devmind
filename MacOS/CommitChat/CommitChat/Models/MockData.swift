@@ -21,6 +21,39 @@ struct ConversationItem: Identifiable {
     let hasCode: Bool
     let hasErrors: Bool
     
+    /// Initialize from MCP search result data
+    init(from searchResult: ConversationSearchResult) {
+        self.title = searchResult.title
+        self.project = searchResult.project
+        self.date = searchResult.date
+        self.messageCount = searchResult.messageCount
+        self.hasCode = searchResult.snippet.contains("```") || searchResult.snippet.contains("function") || searchResult.snippet.contains("class")
+        self.hasErrors = searchResult.hasErrors
+    }
+    
+    /// Initialize from MCP conversation data
+    init(from dict: [String: Any]) throws {
+        guard let title = dict["title"] as? String,
+              let project = dict["project"] as? String,
+              let messageCount = dict["message_count"] as? Int else {
+            throw MCPClientError.invalidResponse
+        }
+        
+        self.title = title
+        self.project = project
+        self.messageCount = messageCount
+        self.hasErrors = dict["has_errors"] as? Bool ?? false
+        self.hasCode = dict["has_code"] as? Bool ?? false
+        
+        // Parse date
+        if let dateString = dict["date"] as? String,
+           let date = ISO8601DateFormatter().date(from: dateString) {
+            self.date = date
+        } else {
+            self.date = Date()
+        }
+    }
+    
     /// Sample mock conversations for testing
     static var mockData: [ConversationItem] {
         [
