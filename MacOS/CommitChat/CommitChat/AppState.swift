@@ -31,10 +31,7 @@ class AppState: ObservableObject {
     @Published var autoStartServer = true
     @Published var showNotifications = true
     
-    // Singleton instance
-    static let shared = AppState()
-    
-    private init() {
+    init() {
         // Initialize state
         setupInitialState()
     }
