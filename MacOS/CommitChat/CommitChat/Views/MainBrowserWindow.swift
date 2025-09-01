@@ -99,17 +99,65 @@ struct MainBrowserWindow: View {
                 
                 // Conversation grid
                 ScrollView {
-                    LazyVGrid(columns: [
-                        GridItem(.adaptive(minimum: 280, maximum: 350), spacing: 16)
-                    ], spacing: 16) {
-                        ForEach(ConversationItem.mockData) { item in
-                            ConversationCard(item: item, isSelected: selectedConversation?.id == item.id)
-                                .onTapGesture {
-                                    selectedConversation = item
-                                }
+                    if isLoadingConversations {
+                        VStack {
+                            ProgressView("Loading conversations...")
+                                .padding(50)
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if let error = conversationError {
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.largeTitle)
+                                .foregroundColor(.orange)
+                            
+                            Text("Failed to load conversations")
+                                .font(.headline)
+                            
+                            Text(error.localizedDescription)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                            
+                            Button("Retry") {
+                                loadRecentConversations()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .padding(50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if filteredConversations.isEmpty {
+                        VStack(spacing: 16) {
+                            Image(systemName: "tray")
+                                .font(.largeTitle)
+                                .foregroundColor(.secondary)
+                            
+                            Text("No conversations found")
+                                .font(.headline)
+                            
+                            Text("Start a new conversation in Claude Code to see it here")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Button("Refresh") {
+                                loadRecentConversations()
+                            }
+                        }
+                        .padding(50)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        LazyVGrid(columns: [
+                            GridItem(.adaptive(minimum: 280, maximum: 350), spacing: 16)
+                        ], spacing: 16) {
+                            ForEach(filteredConversations) { item in
+                                ConversationCard(item: item, isSelected: selectedConversation?.id == item.id)
+                                    .onTapGesture {
+                                        selectedConversation = item
+                                    }
+                            }
+                        }
+                        .padding()
                     }
-                    .padding()
                 }
                 
                 // Status bar
