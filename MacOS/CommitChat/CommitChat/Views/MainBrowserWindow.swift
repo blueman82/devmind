@@ -162,17 +162,17 @@ struct MainBrowserWindow: View {
                 
                 // Status bar
                 HStack {
-                    Text("\(appState.conversationCount) conversations")
+                    Text("\(filteredConversations.count) conversations")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
                     Spacer()
                     
                     Circle()
-                        .fill(appState.isConnected ? Color.green : Color.red)
+                        .fill(mcpClient.isConnected ? Color.green : Color.red)
                         .frame(width: 6, height: 6)
                     
-                    Text(appState.isConnected ? "Connected" : "Disconnected")
+                    Text(mcpClient.isConnected ? "Connected" : "Disconnected")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -193,6 +193,78 @@ struct MainBrowserWindow: View {
             }
         }
         .frame(minWidth: 900, minHeight: 600)
+        .onAppear {
+            loadRecentConversations()
+        }
+        .onChange(of: selectedProject) { _ in
+            filterConversations()
+        }
+        .onChange(of: searchText) { _ in
+            filterConversations()
+        }
+    }
+    
+    // MARK: - Computed Properties
+    
+    var filteredConversations: [ConversationItem] {
+        var result = recentConversations
+        
+        // Filter by project
+        if let project = selectedProject, project != "All Projects" {
+            result = result.filter { $0.project.lowercased().contains(project.lowercased()) }
+        }
+        
+        // Filter by search text
+        if !searchText.isEmpty {
+            result = result.filter { 
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.project.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+        
+        return result
+    }
+    
+    // MARK: - Methods
+    
+    private func loadRecentConversations() {
+        isLoadingConversations = true
+        conversationError = nil
+        
+        Task {
+            do {
+                // Determine timeframe based on selected project
+                let timeframe = selectedProject == nil ? "today" : "last week"
+                
+                let conversations = try await mcpClient.listRecentConversations(
+                    limit: 50,
+                    timeframe: timeframe
+                )
+                
+                await MainActor.run {
+                    self.recentConversations = conversations
+                    self.isLoadingConversations = false
+                    
+                    // Update global conversation count
+                    appState.conversationCount = conversations.count
+                }
+            } catch let error as MCPClientError {
+                await MainActor.run {
+                    self.conversationError = error
+                    self.isLoadingConversations = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.conversationError = .serverError(error.localizedDescription)
+                    self.isLoadingConversations = false
+                }
+            }
+        }
+    }
+    
+    private func filterConversations() {
+        // Filtering is handled by the computed property
+        // This method can be used for additional side effects if needed
     }
 }
 
