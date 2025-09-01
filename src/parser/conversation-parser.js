@@ -379,7 +379,14 @@ class ConversationParser {
   getConversationPreview(conversation) {
     const userMessage = conversation.messages.find(msg => msg.type === 'user');
     if (userMessage?.content?.text) {
-      return userMessage.content.text[0]?.substring(0, 100) + '...';
+      // Handle both array and string formats for text
+      const textContent = Array.isArray(userMessage.content.text) 
+        ? userMessage.content.text[0] 
+        : userMessage.content.text;
+      
+      if (textContent && typeof textContent === 'string') {
+        return textContent.substring(0, 100) + '...';
+      }
     }
     return 'No preview available';
   }
