@@ -106,6 +106,7 @@ export default class GitSchema {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             repository_id INTEGER NOT NULL,
             commit_hash TEXT NOT NULL,
+            branch_name TEXT,
             commit_date DATETIME NOT NULL,
             author_name TEXT NOT NULL,
             author_email TEXT NOT NULL,
