@@ -413,6 +413,7 @@ class AIMemoryMCPServer extends Server {
 - **Git operations**: Simple-git or NodeGit library
 - **Error handling**: Robust error handling for file system operations and corrupted JSONL files
 - **Performance**: Efficient querying with proper indexing and real-time updates
+- **Testing Framework**: Vitest with c8 coverage - Modern ES modules support, fast execution, Jest-compatible APIs
 
 ### Security & Privacy
 - **Local-only operation** - No network connections or data uploads
