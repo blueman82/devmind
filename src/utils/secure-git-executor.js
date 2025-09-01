@@ -86,8 +86,6 @@ export class SecureGitExecutor {
       const { command: validatedCommand, args: validatedArgs } = this.validateCommand(command, args);
       const validatedWorkingDir = this.validateWorkingDirectory(options.cwd || process.cwd());
       
-      const fullCommand = ['git', validatedCommand, ...validatedArgs].join(' ');
-      
       const execOptions = {
         cwd: validatedWorkingDir,
         encoding: 'utf8',
@@ -101,11 +99,11 @@ export class SecureGitExecutor {
         argsCount: validatedArgs.length,
         workingDirectory: '[SANITIZED]',
         timeout: execOptions.timeout,
-        fullCommand: fullCommand // Add this for debugging
+        args: validatedArgs // Log args for debugging
       });
 
       const startTime = Date.now();
-      const result = execSync(fullCommand, execOptions);
+      const result = execFileSync('git', [validatedCommand, ...validatedArgs], execOptions);
       const executionTime = Date.now() - startTime;
 
       this.logger.debug('Git command executed successfully', {
