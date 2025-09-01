@@ -1990,10 +1990,16 @@ swift_app_phase3_mcp_integration:
         - "✅ MainBrowserWindow integrated with MCPClient.listRecentConversations()"
         - "✅ RestorePointsWindow integrated with all MCP restore tools"
         - "✅ Error handling comprehensive across all UI components"
-      minor_enhancements_remaining:
-        - "Add MCP server status monitoring to AppState and UI indicators"
-        - "Add real-time conversation count updates"
+      appstate_monitoring_completed:
+        - "✅ MCP server status monitoring fully integrated in AppState"
+        - "✅ Real-time conversation count updates implemented"
+        - "✅ Real-time restore point count updates implemented"
+        - "✅ Auto-start MCP server on app launch"
+        - "✅ Error state propagation via Combine"
+      future_enhancements:
         - "Performance optimization for large result sets"
+        - "Advanced search filtering"
+        - "Settings persistence"
   
   technical_assessment:
     architecture_quality: "Professional with proper separation of concerns"
@@ -2008,9 +2014,11 @@ swift_app_phase3_mcp_integration:
       - "✅ Error handling implemented across all UI components"
       - "✅ MainBrowserWindow connected to MCP list methods"
       - "✅ RestorePointsWindow integrated with MCP restore tools"
-    minor_pending:
-      - "MCP server status monitoring in AppState (nice-to-have)"
-      - "Real-time conversation count updates (enhancement)"
+    appstate_enhancements:
+      - "✅ MCP server status monitoring in AppState COMPLETED"
+      - "✅ Real-time conversation count updates COMPLETED"
+      - "✅ Combine framework integration for reactive updates"
+      - "✅ Auto-start server capability implemented"
     priority_low:
       - "Performance optimization for large result sets"
       - "Advanced search filtering implementation"
