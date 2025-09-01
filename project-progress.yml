@@ -1271,16 +1271,32 @@ git_tools_critical_limitation:
             file: "src/git/git-manager.js"
             purpose: "Find actual repository root from any subdirectory"
             priority: "CRITICAL"
+            status: "✅ COMPLETED"
+            date_completed: "2025-09-01T16:00:00Z"
+            implementation_details:
+              - "Added getRepositoryRoot() method using git rev-parse --show-toplevel"
+              - "Enhanced discoverRepository() to use git command first, fallback to manual"
+              - "Added discoverRepositoryWithGitCommand() for proper monorepo handling"
+              - "Repository object now includes repositoryRoot, projectPath, subdirectoryPath fields"
+              - "Added isMonorepoSubdirectory boolean flag for subdirectory detection"
             
           - task: "Add subdirectory path mapping to database schema"
             file: "src/database/git-schema.js"
             purpose: "Store repository_root vs subdirectory_path relationship"
             priority: "CRITICAL"
+            status: "🔄 IN PROGRESS"
             
           - task: "Update repository discovery to handle monorepo scenarios"
             file: "src/git/git-manager.js"
             purpose: "Map project paths to correct repository contexts"
             priority: "CRITICAL"
+            status: "✅ COMPLETED"
+            date_completed: "2025-09-01T16:00:00Z"
+            implementation_details:
+              - "Repository objects now track both repository root and project subdirectory"
+              - "Path.relative() calculates subdirectory path from repository root"
+              - "Cache now stores monorepo-aware repository objects"
+              - "Logging enhanced to show repository vs subdirectory paths"
             
         branch_support:
           - task: "Add branch parameter to all git MCP tools"
