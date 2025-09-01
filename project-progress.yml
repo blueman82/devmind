@@ -3414,3 +3414,38 @@ phase_12_ANSI_STRIPPING_FIX:
       - "ProcessManager: ✅ PATTERN MATCHED! Detected MCP server startup via output"
       - "MCPClient connection status updated: false → true"
       - "Search UI shows connected state"
+
+phase_12_1_ANSI_REGEX_CORRECTION_NEEDED:
+  timestamp: "2025-09-01 23:55:22"
+  objective: "CORRECTION - ANSI regex pattern needs fix for \\u001b format"
+  status: "❌ REGEX PATTERN INCORRECT"
+  
+  test_results_analysis:
+    logs_file: "/Users/harrison/Documents/Github/devmind/logs.md"
+    ansi_stripping_status: "❌ NOT WORKING - Still contains ANSI codes"
+    
+  actual_ansi_format_discovered:
+    expected_format: "[32m and [39m"
+    actual_format: "\\u001b[32m and \\u001b[39m"
+    current_regex: "\\[[0-9;]*m"
+    problem: "Regex doesn't match \\u001b escape sequence prefix"
+    
+  log_evidence:
+    line_32: "raw output contains: \\u001b[32mMCP Server connected on stdio transport\\u001b[39m"
+    line_39: "cleaned output still has: \\u001binfo\\u001b and \\u001bConfiguration"
+    line_42: "Pattern1 'MCP Server connected on stdio transport': false"
+    
+  corrected_regex_needed:
+    current_broken: "\\[[0-9;]*m"
+    required_fix: "\\u001b\\[[0-9;]*m"
+    explanation: "Must include \\u001b escape sequence prefix before bracket"
+    
+  implementation_correction:
+    file_to_fix: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+    line_to_change: "230: let cleanOutput = output.replacingOccurrences(...)"
+    new_pattern: "\\\\u001b\\\\[[0-9;]*m"
+    
+  validation_after_fix:
+    expected_cleaned: "'23:55:22 info [MCPServer]: MCP Server connected on stdio transport'"
+    expected_match: "Pattern1 'MCP Server connected on stdio transport': true"
+    expected_result: "Connection detection should finally work"
