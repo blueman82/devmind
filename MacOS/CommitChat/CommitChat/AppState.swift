@@ -110,42 +110,4 @@ class AppState: ObservableObject {
     }
 }
 
-// Mock data structure for Phase 2
-struct ConversationItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let project: String
-    let date: Date
-    let messageCount: Int
-    let hasCode: Bool
-    let hasErrors: Bool
-    
-    static var mockData: [ConversationItem] {
-        [
-            ConversationItem(
-                title: "Implementing authentication system",
-                project: "devmind",
-                date: Date().addingTimeInterval(-3600),
-                messageCount: 45,
-                hasCode: true,
-                hasErrors: false
-            ),
-            ConversationItem(
-                title: "Debugging database connection",
-                project: "api-server",
-                date: Date().addingTimeInterval(-7200),
-                messageCount: 23,
-                hasCode: true,
-                hasErrors: true
-            ),
-            ConversationItem(
-                title: "Refactoring Swift UI components",
-                project: "CommitChat",
-                date: Date().addingTimeInterval(-10800),
-                messageCount: 67,
-                hasCode: true,
-                hasErrors: false
-            )
-        ]
-    }
-}
+// Note: Mock data has been moved to Models/MockData.swift for better organization
