@@ -1426,17 +1426,18 @@ git_tools_critical_limitation:
         - "Changed to execFileSync to avoid shell command injection issues"
         
       remaining_tasks:
-        - "Debug MCP tool empty commit history issue (2 hours)"
         - "Create Jest/Mocha test framework (3-4 hours)"
         - "Performance testing with large repositories (2-3 hours)"
         - "Edge case testing for nested subdirectories (2-3 hours)"
         - "Fix database persistence issue (1 hour)"
         
-      known_issues:
-        date_discovered: "2025-09-01T20:05:00Z"
-        mcp_commit_history: "Returns empty array despite git commands working"
-        git_command_level: "All features working correctly"
-        impact: "MCP tool not fully functional, but git commands work"
+      resolved_issues:
+        execSync_shell_issue:
+          date_discovered: "2025-09-01T20:05:00Z"
+          date_resolved: "2025-09-01T20:10:00Z"
+          problem: "execSync was interpreting pipe characters in git format string as shell commands"
+          solution: "Changed to execFileSync which doesn't use shell interpretation"
+          impact: "Git commands now work correctly with complex format strings"
         
       files_created_modified:
         - "src/git/git-manager.js - Enhanced with getRepositoryRoot() and monorepo support"
