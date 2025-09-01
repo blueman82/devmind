@@ -152,9 +152,19 @@ class ConversationParser {
           extracted.fileReferences.push(`pattern:${item.input.pattern}`);
         }
       } else if (item.type === 'tool_result') {
-        const content = typeof item.content === 'string' 
-          ? item.content.substring(0, 200) + '...' 
-          : JSON.stringify(item.content).substring(0, 200) + '...';
+        let content = 'No content';
+        if (item.content !== undefined && item.content !== null) {
+          if (typeof item.content === 'string') {
+            content = item.content.substring(0, 200) + '...';
+          } else {
+            try {
+              const stringified = JSON.stringify(item.content);
+              content = stringified ? stringified.substring(0, 200) + '...' : 'Empty content';
+            } catch (e) {
+              content = 'Unparseable content';
+            }
+          }
+        }
         extracted.toolResults.push({
           content: content
         });
