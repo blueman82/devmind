@@ -127,11 +127,25 @@ struct SearchWindow: View {
     private func performSearch() {
         appState.searchQuery = searchText
         appState.isSearching = true
+        appState.searchError = .none  // Clear any previous errors
         
-        // Simulate search delay
+        // Validate search input
+        if searchText.isEmpty {
+            appState.searchError = .searchFailed("Please enter a search query")
+            appState.isSearching = false
+            return
+        }
+        
+        // Simulate search delay - will be replaced with MCP call in Phase 3
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             appState.isSearching = false
+            
+            // Mock search results
             appState.searchResults = ConversationItem.mockData
+            
+            // Uncomment to test error states:
+            // appState.searchError = .mcpServerError("Connection timeout")
+            // appState.searchError = .searchFailed("No results found for '\(searchText)'")
         }
     }
 }
