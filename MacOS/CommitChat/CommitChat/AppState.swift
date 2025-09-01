@@ -86,18 +86,22 @@ class AppState: ObservableObject {
         showSearchWindow = true
     }
     
+    /// Opens the main conversation browser window
     func openMainBrowser() {
         showMainBrowser = true
     }
     
+    /// Opens the restore points window
     func openRestorePoints() {
         showRestorePoints = true
     }
     
+    /// Opens the settings window
     func openSettings() {
         showSettings = true
     }
     
+    /// Closes all application windows
     func closeAllWindows() {
         showSearchWindow = false
         showMainBrowser = false
