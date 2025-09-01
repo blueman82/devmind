@@ -147,7 +147,7 @@ struct RestorePointsWindow: View {
         .onAppear {
             loadRestorePoints()
         }
-        .onChange(of: selectedRestorePoint) {
+        .onChange(of: selectedRestorePoint) { _, _ in
             if selectedRestorePoint != nil {
                 loadRestorePreview()
             }
