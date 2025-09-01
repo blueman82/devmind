@@ -1678,5 +1678,21 @@
     "permission_mode": "bypassPermissions",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "done"
+  },
+  {
+    "session_id": "6c962d2e-42f6-4b9f-ae89-464c015d6be8",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/6c962d2e-42f6-4b9f-ae89-464c015d6be8.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "generate a prompt to handover for the next claude code session."
+  },
+  {
+    "session_id": "b76218ad-1ef6-4f8f-96d7-b06420511ece",
+    "transcript_path": "/Users/harrison/.claude/projects/-Users-harrison-Documents-Github-devmind/b76218ad-1ef6-4f8f-96d7-b06420511ece.jsonl",
+    "cwd": "/Users/harrison/Documents/Github/devmind",
+    "permission_mode": "bypassPermissions",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "generate a prompt to handover for the next claude code session."
   }
 ]
