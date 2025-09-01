@@ -7,8 +7,8 @@
 
 import SwiftUI
 
+/// Main settings window with sidebar navigation
 struct SettingsWindow: View {
-    @StateObject private var appState = AppState()
     @State private var selectedTab = "General"
     
     var body: some View {
@@ -41,17 +41,17 @@ struct SettingsWindow: View {
                 VStack(alignment: .leading, spacing: 20) {
                     switch selectedTab {
                     case "General":
-                        GeneralSettings()
+                        GeneralSettingsView()
                     case "MCP":
-                        MCPServerSettings()
+                        MCPServerSettingsView()
                     case "Appearance":
-                        AppearanceSettings()
+                        AppearanceSettingsView()
                     case "Search":
-                        SearchSettings()
+                        SearchSettingsView()
                     case "Notifications":
-                        NotificationSettings()
+                        NotificationSettingsView()
                     case "Advanced":
-                        AdvancedSettings()
+                        AdvancedSettingsView()
                     default:
                         EmptyView()
                     }
