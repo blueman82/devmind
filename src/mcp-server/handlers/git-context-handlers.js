@@ -26,7 +26,9 @@ export class GitContextHandlers extends GitBaseHandler {
         include_commit_history = true,
         include_working_status = true,
         commit_limit = 20,
-        time_range = null
+        time_range = null,
+        branch = null,
+        subdirectory = null
       } = args;
 
       const pathValidation = this.validateProjectPath(project_path);
@@ -40,7 +42,9 @@ export class GitContextHandlers extends GitBaseHandler {
         project_path: validatedProjectPath, 
         conversation_id,
         include_commit_history,
-        include_working_status
+        include_working_status,
+        branch,
+        subdirectory
       });
 
       const gitContext = {
@@ -54,7 +58,9 @@ export class GitContextHandlers extends GitBaseHandler {
           total_commits: 0,
           current_branch: null,
           last_commit_date: null,
-          working_directory_clean: null
+          working_directory_clean: null,
+          is_monorepo_subdirectory: false,
+          subdirectory_path: null
         }
       };
 
@@ -69,11 +75,16 @@ export class GitContextHandlers extends GitBaseHandler {
         git_directory: repository.gitDirectory,
         remote_url: repository.remoteUrl,
         current_branch: repository.currentBranch,
-        latest_commit: repository.latestCommit
+        latest_commit: repository.latestCommit,
+        repository_root: repository.repositoryRoot,
+        subdirectory_path: repository.subdirectoryPath,
+        is_monorepo_subdirectory: repository.isMonorepoSubdirectory
       };
 
       gitContext.summary.has_git = true;
       gitContext.summary.current_branch = repository.currentBranch;
+      gitContext.summary.is_monorepo_subdirectory = repository.isMonorepoSubdirectory;
+      gitContext.summary.subdirectory_path = repository.subdirectoryPath;
 
       if (repository.latestCommit) {
         gitContext.summary.last_commit_date = repository.latestCommit.date;
@@ -94,6 +105,19 @@ export class GitContextHandlers extends GitBaseHandler {
           if (timeRangeDate) {
             options.since = timeRangeDate.toISOString();
           }
+        }
+        
+        // Add branch parameter if specified
+        if (branch) {
+          options.branch = branch;
+        }
+        
+        // Use subdirectory from repository or parameter
+        const effectiveSubdirectory = subdirectory || 
+          (repository.isMonorepoSubdirectory ? repository.subdirectoryPath : null);
+        
+        if (effectiveSubdirectory && effectiveSubdirectory !== '.') {
+          options.subdirectory = effectiveSubdirectory;
         }
 
         const commits = await this.gitManager.getCommitHistory(validatedProjectPath, options);
