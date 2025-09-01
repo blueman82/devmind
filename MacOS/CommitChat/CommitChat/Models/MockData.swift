@@ -182,7 +182,19 @@ struct RestorePoint: Identifiable, Hashable {
     
     /// Initialize from MCP data
     init(from dict: [String: Any]) throws {
-        // Initialize all properties first with defaults
+        // First validate required fields before initializing anything
+        guard let label = dict["label"] as? String,
+              let commit = dict["commit_hash"] as? String,
+              let author = dict["author"] as? String,
+              let message = dict["message"] as? String else {
+            throw MCPClientError.invalidResponse
+        }
+        
+        // Now initialize ALL properties since we know we have valid data
+        self.label = label
+        self.commit = commit
+        self.author = author
+        self.message = message
         self.restorePointId = dict["id"] as? Int ?? Int.random(in: 1...1000)
         self.description = dict["description"] as? String
         self.filesChanged = dict["files_changed"] as? Int ?? 0
@@ -210,20 +222,6 @@ struct RestorePoint: Identifiable, Hashable {
         } else {
             self.testStatus = .unknown
         }
-        
-        // Now validate required fields and throw if needed
-        guard let label = dict["label"] as? String,
-              let commit = dict["commit_hash"] as? String,
-              let author = dict["author"] as? String,
-              let message = dict["message"] as? String else {
-            throw MCPClientError.invalidResponse
-        }
-        
-        // Set the validated required fields
-        self.label = label
-        self.commit = commit
-        self.author = author
-        self.message = message
     }
     
     enum TestStatus {
