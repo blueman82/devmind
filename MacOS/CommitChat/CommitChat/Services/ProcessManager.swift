@@ -227,7 +227,7 @@ class ProcessManager: ObservableObject {
                     print("MCP Server Output: \(output)")
                     
                     // Strip ANSI color codes before pattern matching
-                    let cleanOutput = output.replacingOccurrences(of: "\\[[0-9;]*m", with: "", options: .regularExpression)
+                    let cleanOutput = output.replacingOccurrences(of: "\\u001b\\[[0-9;]*m", with: "", options: .regularExpression)
                     print("ProcessManager: cleaned output = '\(cleanOutput)'")
                     
                     // Enhanced debugging for pattern matching
