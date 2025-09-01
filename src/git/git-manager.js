@@ -245,7 +245,9 @@ export default class GitManager {
         since = null,
         until = null,
         author = null,
-        grep = null
+        grep = null,
+        branch = null,
+        subdirectory = null
       } = options;
 
       const output = secureGitExecutor.getCommitHistory(repository.workingDirectory, {
@@ -253,7 +255,9 @@ export default class GitManager {
         since,
         until,
         author,
-        grep
+        grep,
+        branch,
+        subdirectory
       });
 
       const commits = output.trim().split('\n')
