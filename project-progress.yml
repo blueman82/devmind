@@ -2144,6 +2144,34 @@ swift_app_phase3_mcp_integration:
     expected_result: "MCP server should launch successfully without sandbox restrictions"
     rebuild_required: "App must be rebuilt to test sandbox-free execution"
   
+  nsfilehandle_crash_fix_2025_09_01:
+    status: "✅ COMPLETED"
+    date_completed: "2025-09-01T23:25:00Z"
+    issue: "App crashing with NSFileHandle writeData exception during MCP communication"
+    crash_location: "MCPClient.swift:241 - stdin.write() to broken pipe"
+    stack_trace_key_points:
+      - "_NSFileHandleRaiseOperationExceptionWhileReading in NSConcreteFileHandle writeData"
+      - "MCPClient.sendRequest method attempting to write JSON-RPC to dead process"
+      - "AppState.updateRestorePointCount triggering MCP communication"
+    root_cause: "MCP server process terminated but Swift app still attempting to write to stdin pipe"
+    solution: "Added comprehensive error handling for broken pipe scenarios"
+    files_modified:
+      - file: "MCPClient.swift"
+        lines: "241-255"
+        changes:
+          - "Added process.isRunning check before writing to stdin"
+          - "Wrapped stdin.write() in try-catch block"
+          - "Changed to stdin.write(contentsOf:) throwing method"
+          - "Added specific error handling for broken pipe exceptions"
+          - "Proper continuation.resume with descriptive error messages"
+    technical_improvements:
+      - "Process state validation before communication attempts"
+      - "Graceful error handling instead of app termination"
+      - "Descriptive error messages for debugging"
+      - "Proper cleanup of pending requests on failure"
+    expected_result: "App should handle MCP server disconnection gracefully without crashing"
+    testing_note: "App rebuild required to test crash fix effectiveness"
+  
   final_build_status: "✅ BUILD SUCCEEDED - Zero errors, zero warnings"
   
   mcp_architecture_completed:
