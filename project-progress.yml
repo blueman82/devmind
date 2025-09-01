@@ -1340,6 +1340,14 @@ git_tools_critical_limitation:
             file: "src/mcp-server/handlers/git-tool-handlers.js"
             purpose: "Return subdirectory-specific git context"
             priority: "CRITICAL"
+            status: "✅ COMPLETED"
+            date_completed: "2025-09-01T18:15:00Z"
+            implementation_details:
+              - "Added branch and subdirectory parameters to handleGetGitContext"
+              - "Automatically uses repository subdirectory for monorepo scenarios"
+              - "Updated ensureRepositoryInDatabase to store monorepo fields"
+              - "Added monorepo fields to git context response"
+              - "Filters commits to subdirectory when in monorepo"
             
           - task: "Update file change tracking for subdirectory awareness"
             file: "src/git/git-manager.js"
