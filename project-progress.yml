@@ -2443,11 +2443,30 @@ handover_continuation_session:
               - "Restructured params to use {name: 'search_conversations', arguments: toolParams}"
               - "Added nested JSON response parsing for MCP tool responses"
         validation_status: "MCP server communication now follows correct protocol"
+        
+      mcp_broken_pipe_issue:
+        status: "✅ FIXED"
+        description: "MCP requests failing after first success due to broken stdin pipe"
+        root_cause: "FileHandle.write(contentsOf:) method causing pipe closure and 'file couldn't be saved' errors"
+        solution:
+          - "Replaced write(contentsOf:) with safer write(_:) method"
+          - "Added pipe validation by checking fileDescriptor before writing"
+          - "Added stdin.synchronize() to ensure immediate data transmission"
+          - "Improved error handling for broken pipe scenarios"
+        files_modified:
+          - path: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/MCPClient.swift"
+            change: "Fixed stdin pipe management in sendRequest method"
+            lines_modified: 8
+            specific_changes:
+              - "Replaced unsafe write(contentsOf:) with write(_:)"
+              - "Added fileDescriptor validation before write operations"
+              - "Added stdin.synchronize() for immediate pipe flushing"
+        validation_status: "Resolves 'Failed to send request: The file couldn't be saved' error"
   
   build_status:
     current: "✅ SUCCESSFUL"
     compilation_errors: "0"
-    runtime_crashes: "2 fixed (WindowManager objc_retain, MCP communication)"
+    runtime_crashes: "3 fixed (WindowManager objc_retain, MCP communication, broken pipe)"
     xcode_version: "16F6"
     macos_target: "15.5"
     
