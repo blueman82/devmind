@@ -3449,3 +3449,45 @@ phase_12_1_ANSI_REGEX_CORRECTION_NEEDED:
     expected_cleaned: "'23:55:22 info [MCPServer]: MCP Server connected on stdio transport'"
     expected_match: "Pattern1 'MCP Server connected on stdio transport': true"
     expected_result: "Connection detection should finally work"
+
+phase_12_2_ANSI_REGEX_CORRECTED:
+  timestamp: "2025-09-01 23:56:00"
+  objective: "Fix ANSI regex pattern to handle \\u001b[32m format"
+  status: "✅ REGEX PATTERN CORRECTED"
+  
+  fix_implementation:
+    file_modified: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+    line_modified: "230"
+    
+    regex_correction:
+      before: "\\[[0-9;]*m"
+      after: "\\u001b\\[[0-9;]*m"
+      explanation: "Added \\u001b prefix to match actual ANSI escape sequence format"
+      
+  technical_details:
+    ansi_format_understanding:
+      raw_format: "\\u001b[32mtext\\u001b[39m"
+      breakdown:
+        - "\\u001b = ESC character (ASCII 27)"
+        - "[32m = green foreground color code"
+        - "[39m = reset foreground color"
+    
+    regex_pattern_fixed:
+      pattern: "\\u001b\\[[0-9;]*m"
+      matches: "Any ANSI escape sequence: \\u001b[number;number;...]m"
+      replacement: "Empty string (complete removal)"
+      
+  expected_behavior_after_fix:
+    raw_input: "'23:55:22 \\u001b[32minfo\\u001b[39m [MCPServer]: \\u001b[32mMCP Server connected on stdio transport\\u001b[39m'"
+    cleaned_output: "'23:55:22 info [MCPServer]: MCP Server connected on stdio transport'"
+    pattern_match: "Pattern1 'MCP Server connected on stdio transport': true"
+    status_change: "serverStatus: Starting... → Running"
+    connection_result: "MCPClient isConnected: false → true"
+    
+  validation_criteria:
+    success_logs:
+      - "ProcessManager: cleaned output = '23:55:22 info [MCPServer]: MCP Server connected on stdio transport'"
+      - "ProcessManager: ✅ PATTERN MATCHED! Detected MCP server startup via output"
+      - "ProcessManager: ✅ Setting serverStatus to .running via output detection"
+      - "MCPClient connection status updated: false → true"
+      - "Search UI shows 'MCP Server Connected'"
