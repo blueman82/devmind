@@ -163,6 +163,59 @@ struct RestorePoint: Identifiable, Hashable {
     let deletions: Int
     let testStatus: TestStatus
     
+    /// Traditional initializer for mock data
+    init(label: String, commit: String, date: Date, author: String, message: String, filesChanged: Int, insertions: Int, deletions: Int, testStatus: TestStatus) {
+        self.label = label
+        self.commit = commit
+        self.date = date
+        self.author = author
+        self.message = message
+        self.filesChanged = filesChanged
+        self.insertions = insertions
+        self.deletions = deletions
+        self.testStatus = testStatus
+    }
+    
+    /// Initialize from MCP data
+    init(from dict: [String: Any]) throws {
+        guard let label = dict["label"] as? String,
+              let commit = dict["commit_hash"] as? String,
+              let author = dict["author"] as? String,
+              let message = dict["message"] as? String else {
+            throw MCPClientError.invalidResponse
+        }
+        
+        self.label = label
+        self.commit = commit
+        self.author = author
+        self.message = message
+        self.filesChanged = dict["files_changed"] as? Int ?? 0
+        self.insertions = dict["insertions"] as? Int ?? 0
+        self.deletions = dict["deletions"] as? Int ?? 0
+        
+        // Parse date
+        if let dateString = dict["date"] as? String,
+           let date = ISO8601DateFormatter().date(from: dateString) {
+            self.date = date
+        } else {
+            self.date = Date()
+        }
+        
+        // Parse test status
+        if let statusString = dict["test_status"] as? String {
+            switch statusString.lowercased() {
+            case "passing":
+                self.testStatus = .passing
+            case "failing":
+                self.testStatus = .failing
+            default:
+                self.testStatus = .unknown
+            }
+        } else {
+            self.testStatus = .unknown
+        }
+    }
+    
     enum TestStatus {
         case passing, failing, unknown
         
