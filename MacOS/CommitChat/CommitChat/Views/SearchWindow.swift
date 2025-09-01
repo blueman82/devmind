@@ -42,6 +42,22 @@ struct SearchWindow: View {
                         .onSubmit {
                             performSearch()
                         }
+                        .onChange(of: searchText) { newValue in
+                            // Debounced search - cancel previous task
+                            searchTask?.cancel()
+                            
+                            // Start new search task with 0.5 second delay
+                            searchTask = Task {
+                                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                                
+                                // Check if task wasn't cancelled
+                                if !Task.isCancelled {
+                                    await MainActor.run {
+                                        performSearch()
+                                    }
+                                }
+                            }
+                        }
                     
                     if !searchText.isEmpty {
                         Button(action: { searchText = "" }) {
