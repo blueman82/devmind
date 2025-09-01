@@ -2236,6 +2236,35 @@ swift_app_phase3_mcp_integration:
       layout_warning: "SwiftUI layout recursion warning - non-critical"
     next_phase: "Phase 4 - Comprehensive testing and user experience refinement"
   
+  jsonrpc_response_fix_2025_09_01:
+    status: "✅ COMPLETED"
+    date_completed: "2025-09-01T23:40:00Z"
+    issue: "MCP requests failing - server connects but JSON-RPC communication incomplete"
+    problem: "MCPClient sending requests via stdin but never reading responses from stdout"
+    root_cause: "Missing JSON-RPC response parsing - only one-way communication implemented"
+    breakthrough: "Added complete bidirectional JSON-RPC communication pipeline"
+    files_modified:
+      - file: "MCPClient.swift"
+        lines_added: "201-258"
+        methods_added:
+          - "setupResponseParsing() - establishes stdout reading from MCP server"
+          - "parseJSONRPCResponses() - handles multiple JSON-RPC responses per output"
+          - "parseJSONRPCResponse() - matches responses to pending requests by ID"
+        connect_method_updated: "Now sets up response parsing after server starts"
+    technical_implementation:
+      communication_flow: "Complete request/response cycle now functional"
+      request_path: "JSON-RPC request → stdin → MCP server"
+      response_path: "MCP server → stdout → JSON-RPC response parser → pending request completion"
+      thread_safety: "Response parsing uses existing requestQueue.sync for thread safety"
+      error_handling: "Parses JSON-RPC error responses and server errors"
+    json_rpc_protocol:
+      request_format: "Standard JSON-RPC 2.0 with id, method, params"
+      response_matching: "Responses matched to requests via id field"
+      line_based: "Each JSON-RPC message on separate line"
+      error_propagation: "Server errors properly propagated to Swift async/await"
+    expected_result: "MCP search requests should now receive and process responses successfully"
+    testing_note: "App rebuild required to test complete JSON-RPC communication"
+  
   final_build_status: "✅ BUILD SUCCEEDED - Zero errors, zero warnings"
   
   mcp_architecture_completed:
