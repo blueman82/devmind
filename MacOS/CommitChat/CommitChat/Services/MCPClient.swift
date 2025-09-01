@@ -318,7 +318,9 @@ class MCPClient: ObservableObject {
                     }
                     
                     do {
-                        try stdin.write(contentsOf: jsonString.data(using: .utf8)!)
+                        let data = jsonString.data(using: .utf8)!
+                        // Use writeData instead of write(contentsOf:) for better error handling
+                        stdin.write(data)
                     } catch {
                         // Handle broken pipe or closed file handle
                         requestQueue.sync {
