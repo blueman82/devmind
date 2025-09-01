@@ -516,14 +516,19 @@ class MCPClient: ObservableObject {
     
     /// Preview restore changes
     func previewRestore(projectPath: String, restorePointId: Int) async throws -> RestorePreview {
-        let params: [String: Any] = [
+        let toolParams: [String: Any] = [
             "project_path": projectPath,
             "restore_point_id": restorePointId,
             "include_file_contents": false,
             "max_files": 100
         ]
         
-        let response: [String: Any] = try await sendRequest(method: "preview_restore", params: params)
+        let params: [String: Any] = [
+            "name": "preview_restore",
+            "arguments": toolParams
+        ]
+        
+        let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
         return try RestorePreview(from: response)
     }
