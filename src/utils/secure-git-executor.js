@@ -21,7 +21,7 @@ export class SecureGitExecutor {
     this.allowedSubcommands = new Map([
       ['remote', new Set(['get-url'])],
       ['branch', new Set(['--show-current'])],
-      ['log', new Set(['-1', '--format=%H|%ad|%an|%ae|%s|%P', '--date=iso', '--since', '--until', '--author', '--grep', '--stat'])],
+      ['log', new Set(['-1', '--format=%H|%ad|%an|%ae|%s|%P', '--date=iso', '--since', '--until', '--author', '--grep', '--stat', '--'])],
       ['show', new Set(['--format=%H|%ad|%an|%ae|%s|%P', '--format=', '--name-status', '--stat'])],
       ['status', new Set(['--porcelain'])],
       ['rev-parse', new Set(['--show-toplevel', '--git-dir', 'HEAD'])],
