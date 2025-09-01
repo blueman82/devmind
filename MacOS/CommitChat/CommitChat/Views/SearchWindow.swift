@@ -11,6 +11,7 @@ struct SearchWindow: View {
     @StateObject private var appState = AppState()
     @State private var searchText = ""
     @State private var selectedFilter = "All Projects"
+    @State private var searchTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
     
     let filters = ["All Projects", "Current Project", "Last 7 Days", "Has Code", "Has Errors"]
