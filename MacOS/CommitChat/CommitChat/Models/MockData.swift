@@ -191,6 +191,7 @@ struct RestorePoint: Identifiable, Hashable {
         }
         
         // Now initialize ALL properties since we know we have valid data
+        self.id = UUID()  // Generate new UUID for this instance
         self.label = label
         self.commit = commit
         self.author = author
