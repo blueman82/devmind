@@ -2704,3 +2704,22 @@ processmanager_timing_debug_session:
           - "Added logging for output-based status detection"
     rationale: "More reliable than timing-based approach - directly detects when server reports ready"
     validation_pending: "Need to rebuild and test both timing and output-based detection methods"
+
+  critical_debugging_escalation:
+    status: "🚨 URGENT"
+    issue: "MCPClient connection status still false despite dual detection system"
+    evidence: "Multiple 'MCPClient connection status updated: false' logs without ProcessManager logs"
+    concern: "Neither timing-based nor output-based detection is working"
+    investigation_step:
+      - "Added entry point logging to ProcessManager.startMCPServer()"
+      - "Need to determine if startMCPServer() is being called at all"
+      - "Added serverStatus logging to understand current state"
+    files_modified:
+      - path: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+        change: "Added entry point and status logging to startMCPServer method"
+        lines_modified: 3
+        specific_changes:
+          - "Added 'ProcessManager: startMCPServer() called' logging"
+          - "Added 'Current serverStatus = ...' logging"
+          - "Added early exit condition logging"
+    next_validation: "Rebuild and check if ProcessManager logs appear when app starts"
