@@ -255,17 +255,45 @@ class ProcessManager: ObservableObject {
             }
         }
         
-        // Monitor error output
+        // Monitor error output (MCP server uses console.error for startup messages)
         errorPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
+            print("ProcessManager: ERROR readabilityHandler called")
             let data = handle.availableData
+            print("ProcessManager: ERROR availableData size = \(data.count) bytes")
+            
             if !data.isEmpty {
                 let error = String(data: data, encoding: .utf8) ?? ""
+                print("ProcessManager: ERROR raw output = '\(error)'")
+                
                 DispatchQueue.main.async {
-                    let errorMessage = "MCP Server Error: \(error)"
-                    self?.lastError = errorMessage
-                    self?.serverOutput.append(errorMessage)
-                    print(errorMessage)
+                    // Check for MCP server startup message in stderr first
+                    let startupPattern = "AI Memory MCP Server running on stdio"
+                    let containsStartup = error.contains(startupPattern)
+                    
+                    print("ProcessManager: ERROR - Checking for startup pattern:")
+                    print("ProcessManager: ERROR - Pattern '\(startupPattern)': \(containsStartup)")
+                    print("ProcessManager: ERROR - Current serverStatus: \(self?.serverStatus.displayText ?? "unknown")")
+                    
+                    if containsStartup {
+                        print("ProcessManager: ✅ STDERR STARTUP DETECTED! Found MCP server startup in stderr")
+                        if self?.serverStatus != .running {
+                            self?.serverStatus = .running
+                            print("ProcessManager: ✅ Setting serverStatus to .running via STDERR detection")
+                        } else {
+                            print("ProcessManager: ⚠️  Server already marked as running via stderr")
+                        }
+                        // Don't treat startup message as an error
+                        self?.serverOutput.append("MCP Server Startup: \(error.trimmingCharacters(in: .whitespacesAndNewlines))")
+                    } else {
+                        // Regular error handling
+                        let errorMessage = "MCP Server Error: \(error)"
+                        self?.lastError = errorMessage
+                        self?.serverOutput.append(errorMessage)
+                        print(errorMessage)
+                    }
                 }
+            } else {
+                print("ProcessManager: ERROR availableData is empty, skipping")
             }
         }
     }
