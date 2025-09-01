@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SearchWindow: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @State private var searchText = ""
     @State private var selectedFilter = "All Projects"
     @FocusState private var isSearchFocused: Bool
