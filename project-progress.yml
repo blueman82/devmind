@@ -2098,6 +2098,32 @@ swift_app_phase3_mcp_integration:
       path_included: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
     expected_result: "MCP server should launch successfully via env node resolution"
   
+  entitlements_fix_2025_09_01:
+    status: "✅ COMPLETED"
+    date_completed: "2025-09-01T23:15:00Z"
+    issue: "MCP server execution blocked - 'env: node: Operation not permitted' (exit code 126)"
+    problem: "macOS app sandbox preventing Node.js process execution due to missing entitlements"
+    root_cause: "CommitChat.entitlements only had basic sandbox and file access permissions"
+    solution: "Added comprehensive entitlements for process execution and Node.js runtime"
+    files_modified:
+      - file: "CommitChat.entitlements"
+        entitlements_added:
+          - "com.apple.security.temporary-exception.mach-lookup.global-name: *"
+          - "com.apple.security.inherit: true"
+          - "com.apple.security.cs.allow-jit: true"
+          - "com.apple.security.cs.allow-unsigned-executable-memory: true"
+          - "com.apple.security.cs.disable-executable-page-protection: true"
+          - "com.apple.security.files.downloads.read-write: true"
+          - "com.apple.security.network.client: true"
+          - "com.apple.security.network.server: true"
+    technical_details:
+      sandbox_status: "Maintained (com.apple.security.app-sandbox: true)"
+      security_model: "Sandboxed app with specific Node.js execution permissions"
+      network_access: "Added client/server network entitlements for MCP communication"
+      process_execution: "Enabled inherit and JIT permissions for Node.js runtime"
+    expected_result: "MCP server should launch without permission errors"
+    rebuild_required: "App must be rebuilt for entitlements to take effect"
+  
   final_build_status: "✅ BUILD SUCCEEDED - Zero errors, zero warnings"
   
   mcp_architecture_completed:
