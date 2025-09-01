@@ -399,9 +399,12 @@ class MCPClient: ObservableObject {
         let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
         // MCP server returns tool responses in content array with nested JSON
+        // The response is already the 'result' field from JSON-RPC, not the full response
         guard let content = response["content"] as? [[String: Any]],
               let firstContent = content.first,
               let textContent = firstContent["text"] as? String else {
+            // Log the actual response structure for debugging
+            print("MCPClient: Unexpected response structure: \(response)")
             throw MCPClientError.invalidResponse
         }
         
