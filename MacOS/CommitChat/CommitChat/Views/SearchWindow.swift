@@ -155,16 +155,52 @@ struct SearchWindow: View {
             return
         }
         
-        // Simulate search delay - will be replaced with MCP call in Phase 3
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            appState.isSearching = false
-            
-            // Mock search results
-            appState.searchResults = ConversationItem.mockData
-            
-            // Uncomment to test error states:
-            // appState.searchError = .mcpServerError("Connection timeout")
-            // appState.searchError = .searchFailed("No results found for '\(searchText)'")
+        // Perform async MCP search
+        Task {
+            do {
+                // Call MCP server to search conversations
+                let searchResults = try await mcpClient.searchConversations(
+                    query: searchText,
+                    limit: 50
+                )
+                
+                // Convert MCP search results to ConversationItem
+                let conversationItems = searchResults.map { result in
+                    ConversationItem(from: result)
+                }
+                
+                // Update UI on main thread
+                await MainActor.run {
+                    appState.isSearching = false
+                    appState.searchResults = conversationItems
+                    
+                    // Show message if no results found
+                    if conversationItems.isEmpty {
+                        appState.searchError = .searchFailed("No conversations found for '\(searchText)'")
+                    }
+                }
+                
+            } catch MCPClientError.notConnected {
+                await MainActor.run {
+                    appState.isSearching = false
+                    appState.searchError = .mcpServerError("MCP server not connected. Please check connection.")
+                }
+            } catch MCPClientError.serverError(let message) {
+                await MainActor.run {
+                    appState.isSearching = false
+                    appState.searchError = .mcpServerError("Server error: \(message)")
+                }
+            } catch MCPClientError.timeout {
+                await MainActor.run {
+                    appState.isSearching = false
+                    appState.searchError = .mcpServerError("Search timed out. Please try again.")
+                }
+            } catch {
+                await MainActor.run {
+                    appState.isSearching = false
+                    appState.searchError = .searchFailed("Search failed: \(error.localizedDescription)")
+                }
+            }
         }
     }
 }
