@@ -213,23 +213,45 @@ class ProcessManager: ObservableObject {
     private func setupOutputMonitoring(outputPipe: Pipe, errorPipe: Pipe) {
         // Monitor standard output
         outputPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
+            print("ProcessManager: readabilityHandler called")
             let data = handle.availableData
+            print("ProcessManager: availableData size = \(data.count) bytes")
+            
             if !data.isEmpty {
                 let output = String(data: data, encoding: .utf8) ?? ""
+                print("ProcessManager: raw output = '\(output)'")
+                print("ProcessManager: output.isEmpty = \(output.isEmpty)")
+                
                 DispatchQueue.main.async {
                     self?.serverOutput.append(output.trimmingCharacters(in: .whitespacesAndNewlines))
                     print("MCP Server Output: \(output)")
                     
+                    // Enhanced debugging for pattern matching
+                    let pattern1 = "MCP Server connected on stdio transport"
+                    let pattern2 = "AI Memory MCP Server running on stdio"
+                    let containsPattern1 = output.contains(pattern1)
+                    let containsPattern2 = output.contains(pattern2)
+                    
+                    print("ProcessManager: Checking patterns:")
+                    print("ProcessManager:   - Pattern1 '\(pattern1)': \(containsPattern1)")
+                    print("ProcessManager:   - Pattern2 '\(pattern2)': \(containsPattern2)")
+                    print("ProcessManager:   - Current serverStatus: \(self?.serverStatus?.displayText ?? "unknown")")
+                    
                     // Alternative status detection: look for server startup messages
-                    if output.contains("MCP Server connected on stdio transport") || 
-                       output.contains("AI Memory MCP Server running on stdio") {
-                        print("ProcessManager: Detected MCP server startup via output")
+                    if containsPattern1 || containsPattern2 {
+                        print("ProcessManager: ✅ PATTERN MATCHED! Detected MCP server startup via output")
                         if self?.serverStatus != .running {
                             self?.serverStatus = .running
-                            print("ProcessManager: Setting serverStatus to .running via output detection")
+                            print("ProcessManager: ✅ Setting serverStatus to .running via output detection")
+                        } else {
+                            print("ProcessManager: ⚠️  Server already marked as running, no status change needed")
                         }
+                    } else {
+                        print("ProcessManager: ❌ No startup patterns found in this output")
                     }
                 }
+            } else {
+                print("ProcessManager: availableData is empty, skipping")
             }
         }
         
