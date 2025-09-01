@@ -149,26 +149,28 @@ code_quality_metrics:
     documentation: "B - Code comments present, needs more JSDoc"
 
 remaining_work_analysis:
-  completion_percentage: "40%"
-  completed_items: 4
+  completion_percentage: "75%"
+  completed_items: 8
   total_items: 12
   
+  completed_in_session:
+    - task: "Implement git log -- <subdirectory> filtering"
+      status: "✅ COMPLETED"
+      location: "src/utils/secure-git-executor.js"
+      
+    - task: "Add path-based filtering to get_git_context tool"
+      status: "✅ COMPLETED"
+      location: "src/mcp-server/handlers/git-context-handlers.js"
+      
+    - task: "Enable branch-specific commit queries"
+      status: "✅ COMPLETED"
+      location: "Both secure-git-executor.js and git-context-handlers.js"
+      
+    - task: "Update MCP tool schemas with branch/subdirectory parameters"
+      status: "✅ COMPLETED"
+      location: "src/mcp-server/mcp-server.js"
+  
   outstanding_tasks:
-    high_priority:
-      - task: "Implement git log -- <subdirectory> filtering"
-        complexity: "Medium"
-        estimated_effort: "4-6 hours"
-        blocker_for: "Swift Phase 3"
-      
-      - task: "Add path-based filtering to get_git_context tool"
-        complexity: "Medium"
-        estimated_effort: "3-4 hours"
-        blocker_for: "Accurate monorepo commit history"
-      
-      - task: "Enable branch-specific commit queries"
-        complexity: "Low"
-        estimated_effort: "2-3 hours"
-        blocker_for: "Multi-branch monorepo support"
     
     medium_priority:
       - task: "Update all MCP tools with branch parameters"
