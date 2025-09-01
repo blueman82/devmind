@@ -213,7 +213,7 @@ class MCPClient: ObservableObject {
         print("JSON-RPC response parsing delegated to ProcessManager's unified handler")
     }
     
-    private func parseJSONRPCResponses(_ output: String) {
+    func parseJSONRPCResponses(_ output: String) {
         // Split by newlines as each JSON-RPC response should be on a separate line
         let lines = output.components(separatedBy: .newlines)
         
