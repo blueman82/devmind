@@ -1436,9 +1436,11 @@ git_tools_critical_limitation:
         execSync_shell_issue:
           date_discovered: "2025-09-01T20:05:00Z"
           date_resolved: "2025-09-01T20:10:00Z"
+          date_verified: "2025-09-01T20:20:00Z"
           problem: "execSync was interpreting pipe characters in git format string as shell commands"
           solution: "Changed to execFileSync which doesn't use shell interpretation"
           impact: "Git commands now work correctly with complex format strings"
+          verification: "MCP tool tested and confirmed working with ketchup subdirectory"
         
       files_created_modified:
         - "src/git/git-manager.js - Enhanced with getRepositoryRoot() and monorepo support"
