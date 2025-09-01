@@ -162,6 +162,9 @@ export class GitContextHandlers extends GitBaseHandler {
         projectPath,
         workingDirectory: repository.workingDirectory,
         gitDirectory: repository.gitDirectory,
+        repositoryRoot: repository.repositoryRoot,
+        subdirectoryPath: repository.subdirectoryPath || '.',
+        isMonorepoSubdirectory: repository.isMonorepoSubdirectory || false,
         remoteUrl: repository.remoteUrl,
         currentBranch: repository.currentBranch
       };
