@@ -2172,6 +2172,37 @@ swift_app_phase3_mcp_integration:
     expected_result: "App should handle MCP server disconnection gracefully without crashing"
     testing_note: "App rebuild required to test crash fix effectiveness"
   
+  thread_safety_fix_2025_09_01:
+    status: "✅ COMPLETED"
+    date_completed: "2025-09-01T23:30:00Z"
+    issue: "Swift Dictionary crash in MCPClient - concurrent access to pendingRequests"
+    crash_location: "Swift.Dictionary._Variant.removeValue(forKey:) in MCPClient.swift:252"
+    stack_trace_key_points:
+      - "swift_isUniquelyReferenced_nonNull_native crash in Dictionary mutation"
+      - "pendingRequests.removeValue(forKey: id) called from multiple threads"
+      - "Concurrent access to dictionary without synchronization"
+    root_cause: "pendingRequests dictionary accessed concurrently from multiple threads without synchronization"
+    solution: "Added serial DispatchQueue for thread-safe dictionary access"
+    files_modified:
+      - file: "MCPClient.swift"
+        lines_changed: "44, 222-234, 243-245, 252-254, 257-259, 261-263, 205-210"
+        changes:
+          - "Added requestQueue: DispatchQueue for serialized access"
+          - "Wrapped pendingRequests[id] assignment in requestQueue.sync"
+          - "Wrapped all pendingRequests.removeValue calls in requestQueue.sync"
+          - "Protected cleanup method's pendingRequests iteration"
+    technical_improvements:
+      - "Serial queue ensures atomic dictionary operations"
+      - "Prevents race conditions during concurrent request handling"
+      - "Maintains performance with user-initiated QoS queue"
+      - "All dictionary mutations now thread-safe"
+    concurrency_protection:
+      queue_label: "com.commitchat.mcpclient.requests"
+      queue_qos: "userInitiated"
+      access_pattern: "All pendingRequests access wrapped in requestQueue.sync"
+    expected_result: "No more Dictionary crashes during concurrent MCP communication"
+    testing_note: "App rebuild required to test thread safety fix"
+  
   final_build_status: "✅ BUILD SUCCEEDED - Zero errors, zero warnings"
   
   mcp_architecture_completed:
