@@ -3615,3 +3615,29 @@ phase_14_READABILITY_HANDLER_CONFLICT:
     approach: "Combine both handlers into single readabilityHandler"
     location: "ProcessManager should handle both logging AND pass data to MCPClient"
     alternative: "Use separate pipes for logging vs JSON-RPC communication"
+
+# Phase 15: Implementing Unified Handler Solution
+phase_15_unified_handler:
+  timestamp: "2025-09-02T00:08:00"
+  objective: "Fix readabilityHandler conflict by unifying handlers in ProcessManager"
+  
+  step_1_remove_conflicting_handler:
+    file: "MCPClient.swift"
+    lines_removed: "210-229"
+    change: "Removed conflicting readabilityHandler setup from setupResponseParsing()"
+    new_implementation: |
+      private func setupResponseParsing() {
+          // Response parsing is now handled via ProcessManager's unified handler
+          // ProcessManager will call parseJSONRPCResponses() directly
+          print("JSON-RPC response parsing delegated to ProcessManager's unified handler")
+      }
+    rationale: "Can't have two handlers on same FileHandle - must use single unified approach"
+    
+  step_2_modify_processmanager:
+    status: "IN PROGRESS"
+    plan: "Add MCPClient.parseJSONRPCResponses() call within ProcessManager's handler"
+    location: "ProcessManager.swift lines 215-263"
+    changes_needed:
+      - "Access MCPClient.shared instance"
+      - "Pass data to MCPClient.parseJSONRPCResponses() after logging"
+      - "Ensure thread safety with proper dispatch queues"
