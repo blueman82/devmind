@@ -1609,6 +1609,27 @@ git_tools_critical_limitation:
                 - "Foreign key constraint testing"
                 - "Performance benchmarking for database operations"
                 - "Concurrent operation stress testing"
+            
+            git_mcp_handlers_tests:
+              file: "src/tests/git-mcp-handlers.test.js"
+              lines: 380
+              date_completed: "2025-09-01"
+              coverage_areas:
+                - "handleGetGitContext for simple and monorepo scenarios"
+                - "handleListRestorePoints with filtering and validation"
+                - "handleCreateRestorePoint with all parameter combinations"
+                - "handlePreviewRestore with restore points and commit hashes"
+                - "handleRestoreProjectState with dry run and method validation"
+                - "Parameter validation and error handling"
+                - "Concurrent MCP request handling"
+              test_features:
+                - "Complete MCP tool API validation"
+                - "JSON response format verification"
+                - "Path validation integration testing"
+                - "Database connection error handling"
+                - "Concurrent request stress testing"
+                - "All restore method validation (safe, stash, force)"
+                - "Comprehensive parameter validation coverage"
           
           planned_focused_files:
             - "✅ COMPLETED: git-database-schema.test.js - Database operations and schema validation"
