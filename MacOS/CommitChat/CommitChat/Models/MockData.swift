@@ -130,11 +130,11 @@ struct RestorePoint: Identifiable, Hashable {
             }
         }
         
-        var color: String {
+        var color: Color {
             switch self {
-            case .passing: return "green"
-            case .failing: return "red"
-            case .unknown: return "gray"
+            case .passing: return .green
+            case .failing: return .red
+            case .unknown: return .gray
             }
         }
     }
