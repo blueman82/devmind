@@ -37,7 +37,7 @@ class MCPClient: ObservableObject {
         
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-            let jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
+            _ = try container.decode(String.self, forKey: .jsonrpc) // Validate but don't use
             self.id = try container.decode(Int.self, forKey: .id)
             self.method = try container.decode(String.self, forKey: .method)
             
