@@ -3765,3 +3765,40 @@ phase_17_response_parsing:
     - "✅ MCP server receives and processes requests"
     - "✅ Server returns valid JSON-RPC responses"
     - "⚠️  Response parsing needs adjustment for actual structure"
+
+# Phase 18: Fixing Method Call Pattern
+phase_18_method_call_fix:
+  timestamp: "2025-09-02T00:40:00"
+  discovery: "All methods must be called through tools/call, not directly"
+  
+  error_pattern_found:
+    ids_1_to_5: "Method not found errors"
+    id_6_success: "Successful response using tools/call"
+    root_cause: "MCPClient was calling methods directly instead of through tools/call"
+    
+  methods_fixed:
+    - "searchConversations - already using tools/call ✅"
+    - "listRecentConversations - FIXED to use tools/call"
+    - "getConversationContext - FIXED to use tools/call"
+    - "listRestorePoints - FIXED to use tools/call"
+    - "createRestorePoint - FIXED to use tools/call"
+    - "previewRestore - FIXED to use tools/call"
+    
+  pattern_change:
+    before: |
+      let params = ["key": "value"]
+      sendRequest(method: "method_name", params: params)
+    after: |
+      let toolParams = ["key": "value"]
+      let params = ["name": "method_name", "arguments": toolParams]
+      sendRequest(method: "tools/call", params: params)
+      
+  impact: "All MCP tool calls now properly wrapped in tools/call pattern"
+  
+  complete_fix_summary:
+    phase_15: "✅ Unified readabilityHandler - resolved conflict"
+    phase_16: "✅ Fixed stdin Pipe casting - was wrong type"
+    phase_17: "✅ Discovered server IS working - returns valid JSON"
+    phase_18: "✅ Fixed all method calls to use tools/call pattern"
+    
+  ready_for_final_test: true
