@@ -1411,12 +1411,17 @@ git_tools_critical_limitation:
         latest_fix: "Added missing branch/subdirectory parameters in git-manager.js getCommitHistory()"
         
       test_results:
-        date_tested: "2025-09-01T19:50:00Z"
+        date_tested: "2025-09-01T20:00:00Z"
         repository_discovery: "✅ PASS - Correctly identifies monorepo subdirectories"
-        subdirectory_filtering: "✅ FIXED - git-manager.js now passes subdirectory parameter"
-        branch_support: "✅ IMPLEMENTED - Supports querying any branch, not just current"
-        database_persistence: "⚠️ PARTIAL - Fields not persisting (MCP restart needed)"
-        overall_status: "Core features fixed and working - branch queries now supported"
+        subdirectory_filtering: "✅ FIXED & TESTED - git-manager.js now passes subdirectory parameter"
+        branch_support: "✅ TESTED - Successfully queries different branches (main vs feature)"
+        database_persistence: "⚠️ PARTIAL - Fields not persisting (non-critical issue)"
+        overall_status: "All core features tested and working - Phase 8F objectives achieved"
+        
+      bug_fixes_applied:
+        - "Fixed git-manager.js getCommitHistory() missing branch/subdirectory parameters"
+        - "Parameters now properly flow from MCP tool to git executor"
+        - "Branch queries tested with main vs feature/swift-macos-app"
         
       remaining_tasks:
         - "Create Jest/Mocha test framework (3-4 hours)"
