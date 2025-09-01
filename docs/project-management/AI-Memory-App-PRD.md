@@ -481,7 +481,40 @@ class AIMemoryMCPServer extends Server {
 - `npm run monitor` - Real-time dashboard with interactive controls and performance testing
 - Seamless Claude Code integration via MCP protocol with full conversation memory
 
+## Testing Strategy & Framework
+
+### Modern Testing Stack (2025)
+**Framework**: Vitest - Next-generation testing framework with superior ES modules support
+- **Lightning-fast execution** with native ES modules and parallel processing
+- **Jest-compatible APIs** for familiar developer experience
+- **TypeScript support** out-of-the-box without configuration
+- **Built-in coverage** with c8 for comprehensive test reporting
+- **UI dashboard** with `--ui` flag for visual test management
+
+### Test Coverage Requirements
+- **Unit Tests**: All database operations, MCP tools, git operations
+- **Integration Tests**: Full MCP server workflow, file watcher operations
+- **Performance Tests**: Large dataset handling, memory usage validation
+- **Edge Case Tests**: Corrupted files, network failures, permission errors
+
+### Testing Commands
+```bash
+npm test                # Run all tests
+npm run test:watch      # Interactive watch mode
+npm run test:ui         # Visual test dashboard
+npm run test:coverage   # Coverage reporting
+npm run test:git        # Git tools specific tests
+```
+
 ## Development Roadmap
+
+### Phase 8F: Modern Testing Framework ✅ IN PROGRESS (2025)
+- [x] **Vitest Installation** - Modern testing framework with ES modules support
+- [x] **Configuration Setup** - Vitest config with coverage and parallel execution
+- [x] **Package Scripts** - Updated npm scripts for comprehensive testing workflows
+- [ ] **Git Tools Test Suite** - Comprehensive tests for monorepo functionality
+- [ ] **Performance Benchmarking** - Load testing with large datasets
+- [ ] **Coverage Validation** - Achieve 90%+ test coverage across all modules
 
 ### Phase 8: Performance & User Experience (Planned - 2025)
 - [ ] **Performance Benchmarking** - Test with 50k+ conversations
