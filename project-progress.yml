@@ -364,12 +364,17 @@ swift_app_development:
 
 ## Next Steps
 immediate_todos:
+  testing_and_validation:
+    - "Test settings persistence across app restarts"
+    - "Validate configurable project path functionality"
+    - "Comprehensive Phase 3+ testing in Xcode"
+    
   phase_4_swift_app:
-    - "Test Phase 3 MCP integrations in Xcode"
     - "Begin Phase 4: Advanced Features"
     - "Implement real-time conversation updates"
     - "Add advanced search filters"
     - "Create safe restore workflow"
+    - "Performance optimization for large datasets"
   
   ongoing_maintenance:
     - "✅ Maintain 500-line file limit"
