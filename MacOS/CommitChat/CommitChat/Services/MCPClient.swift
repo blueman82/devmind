@@ -352,13 +352,13 @@ class MCPClient: ObservableObject {
                         return
                     }
                 } else {
-                    requestQueue.sync {
+                    _ = requestQueue.sync {
                         pendingRequests.removeValue(forKey: id)
                     }
                     continuation.resume(throwing: MCPClientError.notConnected)
                 }
             } catch {
-                requestQueue.sync {
+                _ = requestQueue.sync {
                     pendingRequests.removeValue(forKey: id)
                 }
                 continuation.resume(throwing: error)
