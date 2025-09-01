@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @State private var hoveredItem: String? = nil
     
     var body: some View {
