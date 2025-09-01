@@ -349,6 +349,33 @@ swift_app_development:
       storage: "UserDefaults.standard"
       ui_binding: "Two-way binding with $appState properties"
       error_handling: "Graceful defaults for missing keys"
+      
+  api_modernization_fixes:
+    status: "✅ COMPLETED"
+    date_started: "2025-09-01T21:45:00Z"
+    date_completed: "2025-09-01T22:00:00Z"
+    description: "Fixed deprecated APIs for macOS 15.5 compatibility"
+    
+    deprecated_apis_fixed:
+      onChange_modifiers:
+        issue: "onChange(of:perform:) deprecated in macOS 14.0+"
+        locations:
+          - "MainBrowserWindow.swift lines 199, 202"
+          - "RestorePointsWindow.swift line 150"
+        solution: "Updated to onChange(of:initial:_:) with zero-parameter closure"
+        impact: "Eliminated deprecation warnings, future-proofed code"
+        
+      restorepoint_initializer:
+        issue: "Missing id property initialization in MCP initializer"
+        location: "MockData.swift RestorePoint.init(from:)"
+        solution: "Added explicit UUID() initialization for id property"
+        impact: "Fixed compilation error, proper struct initialization"
+        
+    technical_details:
+      swift_version: "Swift 5.9+ (Xcode 16.4)"
+      target_os: "macOS 15.5"
+      api_guidelines: "Following latest SwiftUI best practices"
+      context7_consultation: "Used SwiftUI documentation for correct API usage"
     
   session_verification:
     date: "2025-09-01T10:45:00Z"
