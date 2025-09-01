@@ -51,7 +51,7 @@ struct ContentView: View {
                     icon: "folder.badge.gearshape",
                     title: "Browse Conversations",
                     isHovered: hoveredItem == "browse",
-                    action: { openMainBrowser() },
+                    action: { windowManager.openMainBrowser() },
                     onHover: { hoveredItem = $0 ? "browse" : nil }
                 )
                 
