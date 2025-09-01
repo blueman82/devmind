@@ -31,11 +31,14 @@ export default class GitSchema {
     this.statements = {
       upsertRepo: this.db.prepare(`
         INSERT INTO git_repositories 
-        (project_path, working_directory, git_directory, remote_url, current_branch, last_scanned)
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        (project_path, working_directory, git_directory, repository_root, subdirectory_path, is_monorepo_subdirectory, remote_url, current_branch, last_scanned)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(project_path) DO UPDATE SET
           working_directory = excluded.working_directory,
           git_directory = excluded.git_directory,
+          repository_root = excluded.repository_root,
+          subdirectory_path = excluded.subdirectory_path,
+          is_monorepo_subdirectory = excluded.is_monorepo_subdirectory,
           remote_url = excluded.remote_url,
           current_branch = excluded.current_branch,
           last_scanned = CURRENT_TIMESTAMP
