@@ -22,26 +22,27 @@ struct MCPServerSettingsView: View {
             GroupBox {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("Server Path:")
-                        TextField("Path", text: $serverPath)
+                        Text("MCP Server Path:")
+                        TextField("Path", text: $appState.mcpServerPath)
                             .textFieldStyle(.squareBorder)
                         Button("Browse...") {
-                            // Open file picker
+                            // Open file picker for MCP server
                         }
                     }
                     
                     HStack {
-                        Text("Port:")
-                        TextField("Port", text: $serverPort)
+                        Text("Project Path:")
+                        TextField("Project Directory", text: $appState.projectPath)
                             .textFieldStyle(.squareBorder)
-                            .frame(width: 80)
-                        
+                        Button("Browse...") {
+                            // Open directory picker for project
+                        }
+                    }
+                    
+                    HStack {
+                        Toggle("Auto-start MCP server", isOn: $appState.autoStartServer)
                         Spacer()
-                        
-                        Text("Max Memory (MB):")
-                        TextField("Memory", text: $maxMemory)
-                            .textFieldStyle(.squareBorder)
-                            .frame(width: 80)
+                        Toggle("Show notifications", isOn: $appState.showNotifications)
                     }
                 }
                 .padding(.vertical, 4)
