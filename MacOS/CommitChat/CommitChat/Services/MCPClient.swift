@@ -202,10 +202,12 @@ class MCPClient: ObservableObject {
         outputPipe = nil
         
         // Fail all pending requests
-        for (_, completion) in pendingRequests {
-            completion(.failure(MCPClientError.disconnected))
+        requestQueue.sync {
+            for (_, completion) in pendingRequests {
+                completion(.failure(MCPClientError.disconnected))
+            }
+            pendingRequests.removeAll()
         }
-        pendingRequests.removeAll()
     }
     
     // MARK: - JSON-RPC Communication
