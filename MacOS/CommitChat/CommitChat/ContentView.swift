@@ -83,7 +83,7 @@ struct ContentView: View {
                     if let syncTime = appState.lastSyncTime {
                         Text("Last sync: \(syncTime, style: .relative)")
                             .font(.caption2)
-                            .foregroundColor(.tertiary)
+                            .foregroundColor(.secondary.opacity(0.6))
                     }
                 }
                 .padding(.horizontal)
@@ -220,7 +220,7 @@ struct MenuBarItem: View {
             if isHovered {
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.tertiary)
+                    .foregroundColor(.secondary.opacity(0.6))
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
