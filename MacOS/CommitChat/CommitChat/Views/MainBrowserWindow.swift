@@ -196,10 +196,10 @@ struct MainBrowserWindow: View {
         .onAppear {
             loadRecentConversations()
         }
-        .onChange(of: selectedProject) { _ in
+        .onChange(of: selectedProject) {
             filterConversations()
         }
-        .onChange(of: searchText) { _ in
+        .onChange(of: searchText) {
             filterConversations()
         }
     }
