@@ -32,7 +32,8 @@ export default class GitManager {
         return null;
       }
 
-      const repository = await this.findGitRoot(normalizedPath);
+      // CRITICAL FIX: Use git rev-parse --show-toplevel for proper repository discovery
+      const repository = await this.discoverRepositoryWithGitCommand(normalizedPath);
       
       if (repository) {
         this.repositoryCache.set(projectPath, {
@@ -41,7 +42,8 @@ export default class GitManager {
         });
         this.logger.debug('Repository discovered and cached', { 
           projectPath: normalizedPath,
-          gitRoot: repository.gitRoot
+          repositoryRoot: repository.repositoryRoot,
+          subdirectoryPath: repository.subdirectoryPath
         });
       }
 
@@ -52,6 +54,80 @@ export default class GitManager {
         projectPath: '[SANITIZED]', 
         error: sanitizedError,
         originalError: error.message
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Use git rev-parse --show-toplevel for accurate repository root discovery
+   * This fixes the monorepo limitation by properly finding repository root from any subdirectory
+   */
+  async discoverRepositoryWithGitCommand(projectPath) {
+    try {
+      // First, try to get the repository root using git rev-parse
+      const repositoryRoot = await this.getRepositoryRoot(projectPath);
+      if (!repositoryRoot) {
+        // Fallback to manual .git discovery
+        return await this.findGitRoot(projectPath);
+      }
+
+      // Calculate the subdirectory path relative to repository root
+      const subdirectoryPath = path.relative(repositoryRoot, projectPath);
+      
+      const repository = await this.parseRepositoryInfo(repositoryRoot, path.join(repositoryRoot, '.git'));
+      
+      if (repository) {
+        // CRITICAL: Add monorepo support fields
+        repository.repositoryRoot = repositoryRoot;
+        repository.projectPath = projectPath;
+        repository.subdirectoryPath = subdirectoryPath || '.';
+        repository.isMonorepoSubdirectory = subdirectoryPath && subdirectoryPath !== '.';
+        
+        this.logger.debug('Repository discovered with monorepo support', {
+          repositoryRoot,
+          projectPath,
+          subdirectoryPath: repository.subdirectoryPath,
+          isMonorepo: repository.isMonorepoSubdirectory
+        });
+      }
+
+      return repository;
+    } catch (error) {
+      this.logger.debug('Git command repository discovery failed, falling back to manual discovery', {
+        error: error.message
+      });
+      return await this.findGitRoot(projectPath);
+    }
+  }
+
+  /**
+   * Get repository root using git rev-parse --show-toplevel
+   * CRITICAL FIX for monorepo support
+   */
+  async getRepositoryRoot(projectPath) {
+    try {
+      const result = secureGitExecutor.executeGitCommand(
+        'rev-parse',
+        ['--show-toplevel'],
+        { cwd: projectPath, timeout: 5000 }
+      );
+
+      const repositoryRoot = result.trim();
+      if (!repositoryRoot || repositoryRoot.includes('fatal')) {
+        return null;
+      }
+
+      // Verify the path exists and is absolute
+      if (path.isAbsolute(repositoryRoot) && fs.existsSync(repositoryRoot)) {
+        return repositoryRoot;
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.debug('Could not get repository root with git rev-parse', {
+        projectPath,
+        error: error.message
       });
       return null;
     }
