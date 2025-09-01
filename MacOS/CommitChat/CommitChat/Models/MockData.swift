@@ -189,10 +189,12 @@ struct RestorePoint: Identifiable, Hashable {
             throw MCPClientError.invalidResponse
         }
         
+        self.restorePointId = dict["id"] as? Int ?? Int.random(in: 1...1000)
         self.label = label
         self.commit = commit
         self.author = author
         self.message = message
+        self.description = dict["description"] as? String
         self.filesChanged = dict["files_changed"] as? Int ?? 0
         self.insertions = dict["insertions"] as? Int ?? 0
         self.deletions = dict["deletions"] as? Int ?? 0
