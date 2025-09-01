@@ -317,21 +317,33 @@ class MCPClient: ObservableObject {
                         return
                     }
                     
-                    // Safe write with pipe validation
+                    // Safe write with comprehensive pipe validation
                     let data = jsonString.data(using: .utf8)!
-                    do {
-                        // Check if the file handle is still valid
-                        let _ = stdin.fileDescriptor
-                        stdin.write(data)
-                        
-                        // Ensure data is sent immediately
-                        try stdin.synchronize()
-                    } catch {
-                        // Handle broken pipe or closed file handle
+                    
+                    // Validate file descriptor is still open before attempting write
+                    let fd = stdin.fileDescriptor
+                    var statBuf = stat()
+                    
+                    // Check if file descriptor is valid using fstat
+                    if fstat(fd, &statBuf) == -1 {
                         requestQueue.sync {
                             pendingRequests.removeValue(forKey: id)
                         }
-                        continuation.resume(throwing: MCPClientError.serverError("Failed to send request: \(error.localizedDescription)"))
+                        continuation.resume(throwing: MCPClientError.serverError("Failed to send request: File descriptor is invalid"))
+                        return
+                    }
+                    
+                    // Use low-level write to avoid NSFileHandleOperationException
+                    let writeResult = data.withUnsafeBytes { bytes in
+                        write(fd, bytes.baseAddress, bytes.count)
+                    }
+                    
+                    if writeResult == -1 {
+                        let error = String(cString: strerror(errno))
+                        requestQueue.sync {
+                            pendingRequests.removeValue(forKey: id)
+                        }
+                        continuation.resume(throwing: MCPClientError.serverError("Failed to send request: \(error)"))
                         return
                     }
                 } else {
