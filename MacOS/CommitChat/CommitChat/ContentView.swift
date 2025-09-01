@@ -59,7 +59,7 @@ struct ContentView: View {
                     icon: "clock.arrow.circlepath",
                     title: "Restore Points",
                     isHovered: hoveredItem == "restore",
-                    action: { openRestorePoints() },
+                    action: { windowManager.openRestorePoints() },
                     onHover: { hoveredItem = $0 ? "restore" : nil }
                 )
                 
