@@ -198,7 +198,7 @@ struct RestorePointPreview: View {
                         title: "Test Status",
                         value: String(describing: point.testStatus).capitalized,
                         icon: point.testStatus.icon,
-                        color: point.testStatus.color
+                        color: Color(point.testStatus.color)
                     )
                 }
                 
