@@ -1415,6 +1415,34 @@ git_tools_critical_limitation:
         remaining_files: 3
         estimated_completion_time: "2-3 hours remaining"
         
+        critical_testing_framework_issue:
+          date_discovered: "2025-09-01T23:30:00Z"
+          issue: "Vitest testing framework completely broken due to npm optional dependency bug"
+          error: "Cannot find module @rollup/rollup-darwin-arm64"
+          npm_bug_reference: "https://github.com/npm/cli/issues/4828"
+          impact: "ALL tests fail to execute - affects entire testing framework"
+          scope: "System-wide issue, not isolated to new test files"
+          
+          attempted_fixes:
+            - "Clean npm install after removing node_modules and package-lock.json"
+            - "Explicit installation of @rollup/rollup-darwin-arm64 package"
+            - "Multiple npm reinstall attempts"
+            - "Standard npm troubleshooting procedures"
+          
+          root_cause_analysis:
+            primary: "npm CLI bug with optional dependencies (issue #4828)"
+            secondary: "Vitest → Rollup → Native Binary dependency chain failure"
+            technical: "ARM64 Mac requires @rollup/rollup-darwin-arm64 but npm fails to properly install it"
+            manifestation: "Package shows as installed but fails at require() time"
+          
+          workaround_strategy:
+            approach: "Continue creating test files with proper logic - they will work once framework is fixed"
+            reasoning: "Test code is sound, issue is infrastructure not implementation"
+            alternative: "Could switch to Jest or Node.js native test runner if needed"
+            documentation: "Record comprehensive test coverage for later execution validation"
+          
+          status: "DOCUMENTED - Test files created, execution blocked by framework issue"
+        
       test_results:
         date_tested: "2025-09-01T20:20:00Z"
         repository_discovery: "✅ PASS - Correctly identifies monorepo subdirectories"
