@@ -3371,3 +3371,46 @@ phase_11_5_ANSI_COLOR_CODE_ROOT_CAUSE:
     not_ui_issue: "Connection detection failure, not UI propagation"
     not_threading: "Pattern matching logic issue, not SwiftUI binding"
     actual_cause: "ANSI color codes in MCP server logger output breaking string matching"
+
+phase_12_ANSI_STRIPPING_FIX:
+  timestamp: "2025-09-01 23:52:30"
+  objective: "Implement ANSI color code stripping to fix pattern matching"
+  status: "✅ IMPLEMENTED"
+  
+  implementation_details:
+    file_modified: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/ProcessManager.swift"
+    method_enhanced: "setupOutputMonitoring() - stdout readabilityHandler"
+    lines_modified: "229-237"
+    
+  fix_applied:
+    regex_pattern: "\\[[0-9;]*m"
+    replacement: "Empty string (removes ANSI codes)"
+    method: "replacingOccurrences(of:with:options:.regularExpression)"
+    
+    before_fix:
+      raw_output: "'[32mMCP Server connected on stdio transport[39m'"
+      pattern_match: "false (ANSI codes prevent matching)"
+      
+    after_fix:
+      raw_output: "'[32mMCP Server connected on stdio transport[39m'"
+      cleaned_output: "'MCP Server connected on stdio transport'"
+      pattern_match: "Expected: true (ANSI codes stripped)"
+      
+  debugging_enhanced:
+    new_log: "print('ProcessManager: cleaned output = \\'\\(cleanOutput)\\'')"
+    purpose: "Verify ANSI stripping is working correctly"
+    pattern_check: "Now uses cleanOutput instead of raw output for contains()"
+    
+  expected_results:
+    pattern_detection: "✅ Should now find 'MCP Server connected on stdio transport'"
+    status_update: "✅ Should change serverStatus from Starting → Running"
+    connection_propagation: "✅ Should update MCPClient isConnected to true"
+    ui_display: "✅ Should show 'MCP Server Connected' in search UI"
+    
+  validation_needed:
+    test_procedure: "Launch CommitChat and monitor logs for cleaned output"
+    success_indicators:
+      - "ProcessManager: cleaned output = 'MCP Server connected on stdio transport'"
+      - "ProcessManager: ✅ PATTERN MATCHED! Detected MCP server startup via output"
+      - "MCPClient connection status updated: false → true"
+      - "Search UI shows connected state"
