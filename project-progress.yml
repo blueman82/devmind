@@ -2778,3 +2778,53 @@ final_resolution_session:
     mcp_integration: "✅ STABLE AND RELIABLE" 
     user_experience: "✅ PROPER CONNECTION STATUS DISPLAY"
     development_confidence: "✅ HIGH - All critical infrastructure working"
+
+## Phase 9+++++ UI STATUS DISCREPANCY INVESTIGATION 🔍
+ui_status_discrepancy_session:
+  date: "2025-09-01"
+  status: "🚨 CRITICAL DISCREPANCY"
+  issue: "User reports 'MCP server not connected' despite successful connection logs"
+  
+  contradiction_analysis:
+    evidence_of_success:
+      - "ProcessManager: process.isRunning = true"
+      - "ProcessManager: Setting serverStatus to .running"
+      - "MCPClient connection status updated: true"
+    user_report: "Still get the error mcp server not connected"
+    discrepancy: "Logs show success but UI displays failure"
+    
+  possible_root_causes:
+    ui_refresh_failure:
+      description: "SwiftUI views not updating despite @Published property changes"
+      likelihood: "High - common SwiftUI reactivity issue"
+    status_reversion:
+      description: "Connection status briefly true then reverts to false"
+      likelihood: "Medium - could indicate process crash or status reset"
+    multiple_status_sources:
+      description: "Different UI components checking different connection sources"
+      likelihood: "Medium - architectural issue"
+    timing_race_condition:
+      description: "UI reads status before Publisher update propagates"
+      likelihood: "Low - main thread dispatch should prevent this"
+      
+  debugging_enhancement:
+    status: "🔄 IMPLEMENTED"
+    enhancement: "Added previous → current status transition logging"
+    implementation:
+      - "MCPClient now logs status changes as: false → true"
+      - "Added isConnected property value confirmation logging"
+      - "Will help identify if status reverts after initial success"
+    files_modified:
+      - path: "/Users/harrison/Documents/Github/devmind/MacOS/CommitChat/CommitChat/Services/MCPClient.swift"
+        change: "Enhanced status transition logging in setupProcessMonitoring"
+        lines_modified: 2
+        specific_changes:
+          - "Added previousStatus tracking and transition logging"
+          - "Added isConnected property value confirmation"
+    validation_pending: "Need to rebuild and observe detailed status transitions"
+    
+  investigation_next_steps:
+    step_1: "Rebuild app with enhanced status tracking"
+    step_2: "Observe detailed status transition logs"
+    step_3: "Test actual MCP functionality despite UI showing disconnected"
+    step_4: "Identify UI component showing incorrect status"
