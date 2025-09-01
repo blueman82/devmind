@@ -1422,6 +1422,8 @@ git_tools_critical_limitation:
         - "Fixed git-manager.js getCommitHistory() missing branch/subdirectory parameters"
         - "Parameters now properly flow from MCP tool to git executor"
         - "Branch queries tested with main vs feature/swift-macos-app"
+        - "Fixed execSync shell interpretation - pipes in format string were being misinterpreted"
+        - "Changed to execFileSync to avoid shell command injection issues"
         
       remaining_tasks:
         - "Debug MCP tool empty commit history issue (2 hours)"
