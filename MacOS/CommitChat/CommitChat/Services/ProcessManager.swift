@@ -149,7 +149,8 @@ class ProcessManager: ObservableObject {
         DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
             if let process = self.mcpProcess, process.isRunning {
                 print("Force killing MCP server process")
-                process.kill()
+                // Send SIGKILL signal to force termination
+                kill(process.processIdentifier, SIGKILL)
             }
         }
     }
