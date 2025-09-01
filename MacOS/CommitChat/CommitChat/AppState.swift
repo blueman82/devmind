@@ -8,34 +8,68 @@
 import SwiftUI
 import Combine
 
+/// Central state management for the CommitChat application.
+/// Manages window visibility, MCP server connection status, and application settings.
 class AppState: ObservableObject {
-    // Window visibility states
+    // MARK: - Window Visibility
+    
+    /// Controls visibility of the search conversations window
     @Published var showSearchWindow = false
+    
+    /// Controls visibility of the main conversation browser window
     @Published var showMainBrowser = false
+    
+    /// Controls visibility of the restore points window
     @Published var showRestorePoints = false
+    
+    /// Controls visibility of the settings window
     @Published var showSettings = false
     
-    // Menu bar status
+    // MARK: - MCP Server Status
+    
+    /// Indicates whether the app is connected to the MCP server
     @Published var isConnected = false
+    
+    /// Timestamp of the last successful sync with the MCP server
     @Published var lastSyncTime: Date?
+    
+    /// Total number of indexed conversations
     @Published var conversationCount = 0
+    
+    /// Total number of available restore points
     @Published var restorePointCount = 0
     
-    // Search state
+    // MARK: - Search State
+    
+    /// Current search query text
     @Published var searchQuery = ""
+    
+    /// Array of conversation search results
     @Published var searchResults: [ConversationItem] = []
+    
+    /// Indicates if a search operation is in progress
     @Published var isSearching = false
     
-    // Settings
+    // MARK: - Settings
+    
+    /// Path to the MCP server installation
     @Published var mcpServerPath = "~/.claude/ai-memory"
+    
+    /// Whether to automatically start the MCP server on app launch
     @Published var autoStartServer = true
+    
+    /// Whether to show system notifications
     @Published var showNotifications = true
+    
+    // MARK: - Initialization
     
     init() {
         // Initialize state
         setupInitialState()
     }
     
+    /// Sets up initial application state with mock data (Phase 2)
+    /// - Note: In Phase 3, this will connect to the actual MCP server
     private func setupInitialState() {
         // TODO: In Phase 3, this will connect to MCP server
         // For now, use mock data
@@ -45,7 +79,9 @@ class AppState: ObservableObject {
         lastSyncTime = Date()
     }
     
-    // Window management functions
+    // MARK: - Window Management
+    
+    /// Opens the search conversations window
     func openSearchWindow() {
         showSearchWindow = true
     }
