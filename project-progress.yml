@@ -1417,8 +1417,13 @@ git_tools_critical_limitation:
         
       files_created_modified:
         - "src/git/git-manager.js - Enhanced with getRepositoryRoot() and monorepo support"
+        - "src/utils/secure-git-executor.js - Added subdirectory and branch filtering"
+        - "src/mcp-server/handlers/git-context-handlers.js - MCP tool monorepo support"
+        - "src/database/git-schema.js - Database schema extended for monorepo fields"
+        - "src/mcp-server/mcp-server.js - Tool schemas updated with new parameters"
         - "test-repo-discovery.js - Validation script for monorepo scenario testing"
         - "project-progress.yml - Progress tracking and implementation details"
+        - "docs/reviews/code-quality/phase-8f-git-monorepo-review.yml - Code review (75%)"
 
 ## Phase 8E: Swift macOS App Development ✅ READY TO RESUME
 swift_app_development:
