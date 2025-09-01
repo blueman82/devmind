@@ -217,6 +217,16 @@ class ProcessManager: ObservableObject {
                 DispatchQueue.main.async {
                     self?.serverOutput.append(output.trimmingCharacters(in: .whitespacesAndNewlines))
                     print("MCP Server Output: \(output)")
+                    
+                    // Alternative status detection: look for server startup messages
+                    if output.contains("MCP Server connected on stdio transport") || 
+                       output.contains("AI Memory MCP Server running on stdio") {
+                        print("ProcessManager: Detected MCP server startup via output")
+                        if self?.serverStatus != .running {
+                            self?.serverStatus = .running
+                            print("ProcessManager: Setting serverStatus to .running via output detection")
+                        }
+                    }
                 }
             }
         }
