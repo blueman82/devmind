@@ -189,10 +189,18 @@ remaining_work_analysis:
       
       - task: "Performance testing with large repositories"
         complexity: "Low"
-        estimated_effort: "4-5 hours"
+        estimated_effort: "2-3 hours"
+        priority: "MEDIUM"
       
-      - task: "Performance testing with large repositories"
+      - task: "Edge case testing (nested subdirs, symlinks)"
+        complexity: "Medium"
+        estimated_effort: "2-3 hours"
+        priority: "MEDIUM"
+      
+      - task: "Integration testing with real monorepos"
         complexity: "Low"
+        estimated_effort: "1-2 hours"
+        priority: "HIGH"
         estimated_effort: "2-3 hours"
 
 security_considerations:
