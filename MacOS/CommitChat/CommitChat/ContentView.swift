@@ -43,7 +43,7 @@ struct ContentView: View {
                     icon: "magnifyingglass",
                     title: "Search Conversations",
                     isHovered: hoveredItem == "search",
-                    action: { openSearchWindow() },
+                    action: { windowManager.openSearchWindow() },
                     onHover: { hoveredItem = $0 ? "search" : nil }
                 )
                 
