@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MainBrowserWindow: View {
-    @StateObject private var appState = AppState.shared
+    @StateObject private var appState = AppState()
     @State private var selectedProject: String? = nil
     @State private var searchText = ""
     @State private var selectedConversation: ConversationItem?
