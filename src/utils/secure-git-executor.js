@@ -100,7 +100,8 @@ export class SecureGitExecutor {
         command: validatedCommand,
         argsCount: validatedArgs.length,
         workingDirectory: '[SANITIZED]',
-        timeout: execOptions.timeout
+        timeout: execOptions.timeout,
+        fullCommand: fullCommand // Add this for debugging
       });
 
       const startTime = Date.now();
