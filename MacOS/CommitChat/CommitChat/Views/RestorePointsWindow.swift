@@ -228,7 +228,7 @@ struct RestorePointsWindow: View {
         Task {
             do {
                 let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short)
-                let newPoint = try await mcpClient.createRestorePoint(
+                _ = try await mcpClient.createRestorePoint(
                     projectPath: projectPath,
                     label: "Manual restore point - \(timestamp)",
                     description: "Created from RestorePointsWindow"
