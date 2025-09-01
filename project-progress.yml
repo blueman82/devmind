@@ -3720,3 +3720,48 @@ phase_16_stdin_pipe_fix:
     - "Start MCP server"
     - "Test Search UI - should now work consistently"
     - "Verify JSON-RPC requests appear in logs"
+
+# Phase 17: Response Parsing Investigation
+phase_17_response_parsing:
+  timestamp: "2025-09-02T00:30:00"
+  user_report: "Search UI now shows 'Invalid response from MCP Server'"
+  progress: "Major improvement - requests ARE being sent and responses received!"
+  
+  log_analysis:
+    key_discoveries:
+      - "Line 110: 'Passed output to MCPClient for JSON-RPC parsing' ✅"
+      - "Line 117: Server responds with error for id:1 'Method not found'"
+      - "Line 154: Server responds with error for id:4 'Method not found'"
+      - "Line 187: Server responds with error for id:6 'Method not found'"
+      - "Line 309: SUCCESS! Full search results returned for id:7"
+      - "Line 361: Another SUCCESS! Full search results returned"
+    
+  server_status: "✅ MCP server IS WORKING and returning valid JSON-RPC responses"
+  
+  response_structure_discovered:
+    format: |
+      {
+        "jsonrpc": "2.0",
+        "id": 7,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{JSON string with search results}"
+            }
+          ]
+        }
+      }
+  
+  parsing_issue:
+    location: "MCPClient.swift line 403-408"
+    problem: "Response parsing expects specific structure"
+    note: "Added debugging log to see actual response structure"
+    status: "Investigation ongoing"
+    
+  what_works_now:
+    - "✅ ProcessManager unified handler passes data correctly"
+    - "✅ MCPClient sends requests through stdin pipe"
+    - "✅ MCP server receives and processes requests"
+    - "✅ Server returns valid JSON-RPC responses"
+    - "⚠️  Response parsing needs adjustment for actual structure"
