@@ -24,6 +24,10 @@ class ConversationIndexer: ObservableObject {
     private var processedFiles = Set<String>()
     private var isInitialScanComplete = false
     
+    // Debug logging to file
+    private let debugLogPath = FileManager.default.temporaryDirectory
+        .appendingPathComponent("conversation_indexer_debug.log").path
+    
     private let claudeProjectsPath: String = {
         let homeDirectory = FileManager.default.homeDirectoryForCurrentUser
         return homeDirectory.appendingPathComponent(".claude/projects").path
