@@ -75,6 +75,17 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     private func initializeDatabase() {
         // Open SQLite database
         if sqlite3_open(databaseURL.path, &db) == SQLITE_OK {
+            // Log SQLite version for debugging
+            let versionQuery = "SELECT sqlite_version();"
+            var statement: OpaquePointer?
+            if sqlite3_prepare_v2(db, versionQuery, -1, &statement, nil) == SQLITE_OK {
+                if sqlite3_step(statement) == SQLITE_ROW {
+                    let version = String(cString: sqlite3_column_text(statement, 0))
+                    print("🔍 SQLite version in use: \(version)")
+                }
+                sqlite3_finalize(statement)
+            }
+            
             createTables()
             checkAndRepairDatabase()
             isInitialized = true
