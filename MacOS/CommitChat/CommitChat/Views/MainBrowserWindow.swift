@@ -364,6 +364,11 @@ struct ConversationCard: View {
 
 struct ConversationDetailView: View {
     let item: ConversationItem
+    @State private var conversationContent: ConversationContext?
+    @State private var isLoadingContent = false
+    @State private var loadError: String?
+    
+    private let mcpClient = MCPClient.shared
     
     var body: some View {
         ScrollView {
@@ -375,7 +380,9 @@ struct ConversationDetailView: View {
                 HStack {
                     Label(item.project, systemImage: "folder")
                     Label("\(item.messageCount) messages", systemImage: "message")
-                    Label("2.3k tokens", systemImage: "number")
+                    if let content = conversationContent {
+                        Label("\(content.totalMessages) total", systemImage: "number")
+                    }
                 }
                 .foregroundColor(.secondary)
                 
@@ -384,11 +391,39 @@ struct ConversationDetailView: View {
                 Text("Conversation Preview")
                     .font(.headline)
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    MessageBubble(role: "User", content: "How do I implement authentication?")
-                    MessageBubble(role: "Assistant", content: "I'll help you implement authentication. Let me show you a secure approach...")
-                    MessageBubble(role: "User", content: "Can we use JWT tokens?")
-                    MessageBubble(role: "Assistant", content: "Yes, JWT tokens are a good choice. Here's how to implement them...")
+                if isLoadingContent {
+                    HStack {
+                        ProgressView()
+                        Text("Loading conversation...")
+                    }
+                    .padding()
+                } else if let error = loadError {
+                    VStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(.orange)
+                        Text("Failed to load conversation")
+                            .font(.headline)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                } else if let content = conversationContent {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(Array(content.messages.prefix(10).enumerated()), id: \.offset) { index, message in
+                            MessageBubble(role: message.role, content: String(message.content.prefix(200)) + (message.content.count > 200 ? "..." : ""))
+                        }
+                        if content.messages.count > 10 {
+                            Text("... and \(content.messages.count - 10) more messages")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.top)
+                        }
+                    }
+                } else {
+                    Text("No conversation content available")
+                        .foregroundColor(.secondary)
+                        .padding()
                 }
                 
                 Spacer()
@@ -396,6 +431,46 @@ struct ConversationDetailView: View {
             .padding()
         }
         .frame(minWidth: 400)
+        .onAppear {
+            loadConversationContent()
+        }
+        .onChange(of: item.id) { _, _ in
+            loadConversationContent()
+        }
+    }
+    
+    private func loadConversationContent() {
+        // Extract session ID - we need to get it from the item
+        // For now, let's add a property to ConversationItem to store the sessionId
+        print("🔍 DEBUG: ConversationDetailView.loadConversationContent() called for item: \(item.title)")
+        
+        isLoadingContent = true
+        loadError = nil
+        conversationContent = nil
+        
+        Task {
+            do {
+                // We need the sessionId from the conversation item
+                // For now, use a placeholder - this needs to be fixed in the data model
+                let sessionId = "placeholder-session-id" // TODO: Get actual sessionId from item
+                
+                let content = try await mcpClient.getConversationContext(
+                    sessionId: sessionId,
+                    page: 1,
+                    pageSize: 50
+                )
+                
+                await MainActor.run {
+                    self.conversationContent = content
+                    self.isLoadingContent = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.loadError = error.localizedDescription
+                    self.isLoadingContent = false
+                }
+            }
+        }
     }
 }
 
