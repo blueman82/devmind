@@ -162,7 +162,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Get conversation context from local database
     /// Replaces: mcpClient.getConversationContext()
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
-        return try await Task { [weak self] in
+        return await Task { [weak self] in
             guard let self = self else {
                 throw AIMemoryError.databaseError("Database manager deallocated")
             }
