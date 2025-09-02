@@ -325,7 +325,10 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         let selectSql = "SELECT id FROM conversations WHERE session_id = ?"
         var selectStmt: OpaquePointer?
         if sqlite3_prepare_v2(db, selectSql, -1, &selectStmt, nil) == SQLITE_OK {
-            sqlite3_bind_text(selectStmt, 1, sessionIdToUse, -1, nil)
+            // Use withCString to ensure string validity during binding
+            _ = sessionIdToUse.withCString { cString in
+                sqlite3_bind_text(selectStmt, 1, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             if sqlite3_step(selectStmt) == SQLITE_ROW {
                 conversationId = sqlite3_column_int64(selectStmt, 0)
             }
@@ -361,14 +364,29 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             
             defer { sqlite3_finalize(updateStmt) }
             
-            sqlite3_bind_text(updateStmt, 1, projectHash, -1, nil)
-            sqlite3_bind_text(updateStmt, 2, projectName, -1, nil)
-            sqlite3_bind_text(updateStmt, 3, conversation.projectPath, -1, nil)
-            sqlite3_bind_text(updateStmt, 4, nowString, -1, nil)
+            // Use withCString for all text bindings
+            _ = projectHash.withCString { cString in
+                sqlite3_bind_text(updateStmt, 1, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = projectName.withCString { cString in
+                sqlite3_bind_text(updateStmt, 2, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = conversation.projectPath.withCString { cString in
+                sqlite3_bind_text(updateStmt, 3, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = nowString.withCString { cString in
+                sqlite3_bind_text(updateStmt, 4, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(updateStmt, 5, Int32(conversation.messages.count))
-            sqlite3_bind_text(updateStmt, 6, fileRefsString, -1, nil)
-            sqlite3_bind_text(updateStmt, 7, topicsString, -1, nil)
-            sqlite3_bind_text(updateStmt, 8, keywordsString, -1, nil)
+            _ = (fileRefsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(updateStmt, 6, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (topicsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(updateStmt, 7, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (keywordsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(updateStmt, 8, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(updateStmt, 9, Int32(totalTokens))
             sqlite3_bind_int64(updateStmt, 10, conversationId)
             
@@ -399,15 +417,32 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                 sqlite3_bind_text(insertStmt, 1, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
             }
             print("🔍 DEBUG INSERT: sqlite3_bind_text result = \(result) (SQLITE_OK=\(SQLITE_OK))")
-            sqlite3_bind_text(insertStmt, 2, projectHash, -1, nil)
-            sqlite3_bind_text(insertStmt, 3, projectName, -1, nil)
-            sqlite3_bind_text(insertStmt, 4, conversation.projectPath, -1, nil)
-            sqlite3_bind_text(insertStmt, 5, nowString, -1, nil)
-            sqlite3_bind_text(insertStmt, 6, nowString, -1, nil)
+            // Use withCString for all text bindings
+            _ = projectHash.withCString { cString in
+                sqlite3_bind_text(insertStmt, 2, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = projectName.withCString { cString in
+                sqlite3_bind_text(insertStmt, 3, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = conversation.projectPath.withCString { cString in
+                sqlite3_bind_text(insertStmt, 4, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = nowString.withCString { cString in
+                sqlite3_bind_text(insertStmt, 5, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = nowString.withCString { cString in
+                sqlite3_bind_text(insertStmt, 6, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(insertStmt, 7, Int32(conversation.messages.count))
-            sqlite3_bind_text(insertStmt, 8, fileRefsString, -1, nil)
-            sqlite3_bind_text(insertStmt, 9, topicsString, -1, nil)
-            sqlite3_bind_text(insertStmt, 10, keywordsString, -1, nil)
+            _ = (fileRefsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(insertStmt, 8, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (topicsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(insertStmt, 9, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (keywordsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(insertStmt, 10, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(insertStmt, 11, Int32(totalTokens))
             
             guard sqlite3_step(insertStmt) == SQLITE_DONE else {
