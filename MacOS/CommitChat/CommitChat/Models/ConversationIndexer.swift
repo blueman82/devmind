@@ -166,7 +166,7 @@ class ConversationIndexer: ObservableObject {
             
             if let error = indexingError {
                 print("Database indexing failed for \(path): \(error)")
-                await MainActor.run {
+                DispatchQueue.main.async {
                     self.filesProcessed += 1
                 }
             } else {
@@ -175,7 +175,7 @@ class ConversationIndexer: ObservableObject {
             
         } catch {
             print("Failed to parse conversation at \(path): \(error)")
-            await MainActor.run {
+            DispatchQueue.main.async {
                 self.filesProcessed += 1
             }
         }
