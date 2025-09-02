@@ -27,7 +27,9 @@ All notable changes to the AI Memory App project will be documented in this file
 - Fixed Swift compilation errors requiring explicit 'self' references in closures
 
 ### Clean Rebuild Test
-- Database deleted for fresh verification
+- **ISSUE FOUND**: Two CommitChat processes running simultaneously causing database lock conflicts
+- **RESOLUTION**: Killed processes (PIDs 58696, 62445), deleted database and WAL/SHM files
+- **STATUS**: Ready for clean single-instance rebuild
 - Expected outcome: 655 unique conversations with valid sessionIds
 - Validation: `sqlite3 ~/.claude/ai-memory/conversations.db 'SELECT COUNT(*) FROM conversations;'`
 
