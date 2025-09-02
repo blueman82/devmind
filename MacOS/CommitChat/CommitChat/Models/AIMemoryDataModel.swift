@@ -645,7 +645,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
             }
         }
         
-        return Array(keywords).prefix(20).map(String.init)  // Limit to 20 keywords
+        return Array(keywords.prefix(20))  // Limit to 20 keywords
     }
     
     private func buildTimeframeFilter(_ timeframe: String) -> String {
