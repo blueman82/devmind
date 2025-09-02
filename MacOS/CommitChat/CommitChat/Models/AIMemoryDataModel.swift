@@ -320,7 +320,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     return
                 }
                 
-                do {
                 var stmt: OpaquePointer?
                 
                 let sql = """
@@ -363,9 +362,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     let error = String(cString: sqlite3_errmsg(self.db))
                     sqlite3_finalize(stmt)
                     continuation.resume(throwing: AIMemoryError.databaseError(error))
-                }
-                } catch {
-                    continuation.resume(throwing: error)
                 }
             }
         }
