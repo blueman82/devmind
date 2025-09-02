@@ -472,6 +472,8 @@ class MCPClient: ObservableObject {
     /// - Returns: Array of conversation items with metadata
     /// - Throws: `MCPClientError` for connection or server failures
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
+        print("🔍 DEBUG: listRecentConversations called with limit=\(limit), timeframe='\(timeframe)'")
+        
         let toolParams: [String: Any] = [
             "limit": limit,
             "timeframe": timeframe
@@ -482,15 +484,25 @@ class MCPClient: ObservableObject {
             "arguments": toolParams
         ]
         
+        print("🔍 DEBUG: Sending request with params: \(params)")
+        
         let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
+        
+        print("🔍 DEBUG: Received response keys: \(response.keys)")
+        print("🔍 DEBUG: Full response: \(response)")
         
         // The server returns results directly, not wrapped in "conversations"
         guard let results = response["results"] as? [[String: Any]] else {
+            print("🔍 DEBUG: Failed to extract 'results' array from response")
+            print("🔍 DEBUG: Response structure: \(type(of: response))")
             throw MCPClientError.invalidResponse
         }
         
+        print("🔍 DEBUG: Found \(results.count) conversation results")
+        
         return try results.map { conv in
-            try ConversationItem(from: conv)
+            print("🔍 DEBUG: Processing conversation: \(conv)")
+            return try ConversationItem(from: conv)
         }
     }
     
