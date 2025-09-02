@@ -56,47 +56,43 @@ class JSONLParser {
             
             do {
                 if let json = try JSONSerialization.jsonObject(with: lineData) as? [String: Any] {
-                    // Parse based on the type of JSON object
-                    if let type = json["type"] as? String {
-                        switch type {
-                        case "conversation.create":
-                            sessionId = json["id"] as? String
-                            if let metadata = json["metadata"] as? [String: Any] {
-                                title = metadata["title"] as? String ?? title
-                                projectPath = metadata["project_path"] as? String ?? projectPath
+                    // Parse Claude Code JSONL format
+                    // Extract session ID from first line if available
+                    if sessionId == nil {
+                        sessionId = json["sessionId"] as? String
+                    }
+                    
+                    // Extract working directory for project path
+                    if let cwd = json["cwd"] as? String {
+                        // Use the last component of working directory as project name
+                        let projectName = URL(fileURLWithPath: cwd).lastPathComponent
+                        if !projectName.isEmpty && projectName != "/" {
+                            projectPath = projectName
+                        }
+                    }
+                    
+                    // Parse timestamp
+                    if let timestampString = json["timestamp"] as? String {
+                        if let date = parseDate(from: timestampString) {
+                            if createdAt == Date() { // Only set if not already set
+                                createdAt = date
                             }
-                            if let timestamp = json["timestamp"] as? TimeInterval {
-                                createdAt = Date(timeIntervalSince1970: timestamp)
-                            }
+                            updatedAt = date
+                        }
+                    }
+                    
+                    // Parse message content
+                    if let message = json["message"] as? [String: Any] {
+                        if let messageObj = parseClaudeCodeMessage(from: json, message: message) {
+                            messages.append(messageObj)
                             
-                        case "message":
-                            if let message = parseMessage(from: json) {
-                                messages.append(message)
-                                
-                                // Extract file references from content
-                                let refs = extractFileReferences(from: message.content)
-                                fileReferences.formUnion(refs)
-                                
-                                // Extract topics from content
-                                let messageTopics = extractTopics(from: message.content)
-                                topics.formUnion(messageTopics)
-                                
-                                updatedAt = message.timestamp
-                            }
+                            // Extract file references from content
+                            let refs = extractFileReferences(from: messageObj.content)
+                            fileReferences.formUnion(refs)
                             
-                        case "tool_use":
-                            if let toolUse = json["tool_use"] as? [String: Any],
-                               let name = toolUse["name"] as? String {
-                                // Track file operations
-                                if ["read_file", "write_file", "edit_file"].contains(name),
-                                   let input = toolUse["input"] as? [String: Any],
-                                   let filePath = input["file_path"] as? String {
-                                    fileReferences.insert(filePath)
-                                }
-                            }
-                            
-                        default:
-                            break
+                            // Extract topics from content
+                            let messageTopics = extractTopics(from: messageObj.content)
+                            topics.formUnion(messageTopics)
                         }
                     }
                 }
@@ -128,6 +124,31 @@ class JSONLParser {
             messages: messages,
             topics: Array(topics),
             fileReferences: Array(fileReferences)
+        )
+    }
+    
+    private func parseClaudeCodeMessage(from json: [String: Any], message: [String: Any]) -> IndexableMessage? {
+        guard let id = json["uuid"] as? String else {
+            return nil
+        }
+        
+        let role = message["role"] as? String ?? "unknown"
+        let content = message["content"] as? String ?? ""
+        
+        var timestamp = Date()
+        if let timestampString = json["timestamp"] as? String {
+            timestamp = parseDate(from: timestampString) ?? Date()
+        }
+        
+        // Tool calls are not directly available in this format
+        let toolCalls: [String] = []
+        
+        return IndexableMessage(
+            id: id,
+            role: role,
+            content: content,
+            timestamp: timestamp,
+            toolCalls: toolCalls
         )
     }
     
