@@ -541,25 +541,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     }
 }
 
-// MARK: - Supporting Types
-
-enum AIMemoryError: Error, LocalizedError {
-    case conversationNotFound
-    case invalidData
-    case databaseError(String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .conversationNotFound:
-            return "Conversation not found in local database"
-        case .invalidData:
-            return "Invalid data format"
-        case .databaseError(let message):
-            return "Database error: \(message)"
-        }
-    }
-}
-
 // MARK: - Supporting Data Types
 // Note: Using existing types from ConversationIndexer.swift and MCPClient.swift
 // - IndexableConversation, IndexableMessage: defined in ConversationIndexer.swift
