@@ -701,18 +701,34 @@ struct ConversationContext {
     let totalPages: Int
     
     init(from dict: [String: Any]) throws {
-        guard let sessionId = dict["session_id"] as? String,
-              let messagesData = dict["messages"] as? [[String: Any]],
-              let totalMessages = dict["total_messages"] as? Int,
-              let currentPage = dict["current_page"] as? Int,
-              let totalPages = dict["total_pages"] as? Int else {
+        // Handle the actual MCP response format
+        guard let sessionId = dict["sessionId"] as? String,
+              let messagesData = dict["messages"] as? [[String: Any]] else {
+            print("🔍 DEBUG: ConversationContext missing required fields - sessionId or messages")
             throw MCPClientError.invalidResponse
         }
         
         self.sessionId = sessionId
-        self.totalMessages = totalMessages
-        self.currentPage = currentPage
-        self.totalPages = totalPages
+        
+        // Handle pagination data
+        if let pagination = dict["pagination"] as? [String: Any] {
+            // Extract from pagination object
+            self.totalMessages = pagination["totalMessages"] as? Int ?? 0
+            // Handle page field that might be boolean true instead of number
+            if let pageNum = pagination["page"] as? Int {
+                self.currentPage = pageNum
+            } else if let pageBoolean = pagination["page"] as? Bool, pageBoolean {
+                self.currentPage = 1 // Default to 1 if page is true
+            } else {
+                self.currentPage = 1
+            }
+            self.totalPages = pagination["totalPages"] as? Int ?? 1
+        } else {
+            // Fallback to direct fields
+            self.totalMessages = dict["totalMessages"] as? Int ?? 0
+            self.currentPage = 1
+            self.totalPages = 1
+        }
         
         self.messages = try messagesData.map { messageData in
             try ConversationMessage(from: messageData)
