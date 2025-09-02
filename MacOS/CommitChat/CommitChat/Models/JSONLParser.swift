@@ -148,15 +148,35 @@ class JSONLParser {
         }
         
         let role = message["role"] as? String ?? "unknown"
-        let content = message["content"] as? String ?? ""
+        
+        // Parse Claude Code content format: content: [{"type":"text","text":"..."}]
+        var content = ""
+        if let contentArray = message["content"] as? [[String: Any]] {
+            var textParts: [String] = []
+            for contentItem in contentArray {
+                if let type = contentItem["type"] as? String {
+                    if type == "text", let text = contentItem["text"] as? String {
+                        textParts.append(text)
+                    } else if type == "tool_use", let name = contentItem["name"] as? String {
+                        textParts.append("[Tool: \(name)]")
+                    }
+                }
+            }
+            content = textParts.joined(separator: "\n")
+        } else if let contentString = message["content"] as? String {
+            // Fallback for string format
+            content = contentString
+        }
         
         var timestamp = Date()
         if let timestampString = json["timestamp"] as? String {
             timestamp = parseDate(from: timestampString) ?? Date()
         }
         
-        // Tool calls are not directly available in this format
+        // Tool calls are not directly available in this format, but we can detect them
         let toolCalls: [String] = []
+        
+        print("🔍 Parsed message: ID=\(id), Role=\(role), Content length=\(content.count)")
         
         return IndexableMessage(
             id: id,
