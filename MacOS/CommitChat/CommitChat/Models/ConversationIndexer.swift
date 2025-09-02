@@ -186,11 +186,23 @@ class ConversationIndexer: ObservableObject {
             guard let self = self else { return }
             
             print("🔍 Starting initial scan of JSONL files...")
+            print("🗂️ Scanning path: \(self.claudeProjectsPath)")
             let fileManager = FileManager.default
             
             // Check if the Claude projects directory exists
             guard fileManager.fileExists(atPath: self.claudeProjectsPath) else {
-                print("Claude projects directory not found: \(self.claudeProjectsPath)")
+                print("❌ Claude projects directory not found: \(self.claudeProjectsPath)")
+                return
+            }
+            
+            print("✅ Claude projects directory found")
+            
+            // Test directory access
+            do {
+                let testContents = try fileManager.contentsOfDirectory(atPath: self.claudeProjectsPath)
+                print("📁 Directory accessible - found \(testContents.count) items")
+            } catch {
+                print("❌ Error accessing directory: \(error)")
                 return
             }
             
