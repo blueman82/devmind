@@ -284,9 +284,45 @@ struct MainBrowserWindow: View {
         }
     }
     
+    private func loadAvailableProjectsFromFileSystem() {
+        print("🔍 DEBUG: Loading projects from ~/.claude/projects filesystem")
+        
+        Task {
+            do {
+                let homeURL = FileManager.default.homeDirectoryForCurrentUser
+                let claudeProjectsURL = homeURL.appendingPathComponent(".claude/projects")
+                
+                let projectDirs = try FileManager.default.contentsOfDirectory(at: claudeProjectsURL, includingPropertiesForKeys: nil)
+                
+                var projectNames = Set<String>()
+                projectNames.insert("All Projects")
+                
+                for projectDir in projectDirs {
+                    let dirName = projectDir.lastPathComponent
+                    if dirName.hasPrefix("-Users-harrison-Documents-Github-") {
+                        let projectName = String(dirName.dropFirst("-Users-harrison-Documents-Github-".count))
+                        projectNames.insert(projectName)
+                    } else if !dirName.starts(with: ".") {
+                        projectNames.insert(dirName)
+                    }
+                }
+                
+                let sortedProjects = Array(projectNames.subtracting(["All Projects"])).sorted()
+                
+                await MainActor.run {
+                    self.availableProjects = ["All Projects"] + sortedProjects
+                    print("🔍 DEBUG: Loaded projects from filesystem: \(self.availableProjects)")
+                }
+                
+            } catch {
+                print("🔍 DEBUG: Failed to load projects from filesystem: \(error)")
+                // Keep default ["All Projects"] if filesystem read fails
+            }
+        }
+    }
+    
     private func updateAvailableProjects(from conversations: [ConversationItem]) {
-        var projectSet = Set<String>()
-        projectSet.insert("All Projects") // Always include this option
+        var projectSet = Set<String>(availableProjects) // Start with filesystem projects
         
         for conversation in conversations {
             projectSet.insert(conversation.project)
@@ -295,7 +331,7 @@ struct MainBrowserWindow: View {
         let sortedProjects = Array(projectSet.subtracting(["All Projects"])).sorted()
         self.availableProjects = ["All Projects"] + sortedProjects
         
-        print("🔍 DEBUG: Updated available projects: \(self.availableProjects)")
+        print("🔍 DEBUG: Updated available projects from conversations: \(self.availableProjects)")
     }
     
     private func filterConversations() {
