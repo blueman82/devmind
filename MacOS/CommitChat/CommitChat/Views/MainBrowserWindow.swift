@@ -107,10 +107,8 @@ struct ConversationCard: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
-                            .buttonStyle(.borderedProminent)
-                        }
-                        .padding(50)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+struct ConversationDetailView: View {
                     } else if filteredConversations.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: "tray")
