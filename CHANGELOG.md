@@ -2,6 +2,22 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-02] - Swift Logging Implementation & SessionId Database Fix
+
+### Changed
+- Converted all debug print statements to use Swift's os.log Logger framework
+- Replaced NSLog calls with logger.debug/error/warning for better debugging
+- Fixed Swift compilation errors requiring explicit 'self' references in closures
+
+### Fixed  
+- Added sessionIdToUse variable in insertOrUpdateConversation to handle empty sessionIds
+- Fixed database insertion logic to use consistent sessionId throughout INSERT/UPDATE
+- Prevents all conversations from overwriting single record due to empty sessionId
+
+### Known Issue
+- SessionId is still not persisting correctly to database despite fixes
+- Need to investigate why sessionId becomes empty between JSONLParser and database
+
 ## [2025-09-02] - DEBUGGING EMPTY SESSIONID - Issue Persists
 
 ### Debug Logging Added
