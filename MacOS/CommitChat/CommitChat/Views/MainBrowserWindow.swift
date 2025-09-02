@@ -134,14 +134,8 @@ struct MessageBubble: View {
     var body: some View {
         Text("Message Bubble - TODO: Restore full implementation")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .foregroundColor(.secondary)
-                            
-                            Text("No conversations found")
-                                .font(.headline)
-                            
-                            Text("Start a new conversation in Claude Code to see it here")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+    }
+}
                             
                             Button("Refresh") {
                                 loadRecentConversations()
