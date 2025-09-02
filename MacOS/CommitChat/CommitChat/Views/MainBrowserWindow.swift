@@ -17,17 +17,8 @@ struct MainBrowserWindow: View {
     @State private var conversationError: MCPClientError?
     
     private let mcpClient = MCPClient.shared
-    // Dynamic projects based on actual conversations
-    var projects: [String] {
-        var allProjects = Set<String>()
-        for conversation in recentConversations {
-            allProjects.insert(conversation.project)
-        }
-        var sortedProjects = Array(allProjects).sorted()
-        sortedProjects.insert("All Projects", at: 0)
-        print("🔍 DEBUG: Dynamic projects list: \(sortedProjects)")
-        return sortedProjects
-    }
+    // Static projects list (dynamic version caused performance issues)
+    let projects = ["All Projects", "devmind", "camp-ops-tools-emea", "ketchup", "api-server", "CommitChat", "web-app", "docs"]
     
     var body: some View {
         NavigationSplitView {
