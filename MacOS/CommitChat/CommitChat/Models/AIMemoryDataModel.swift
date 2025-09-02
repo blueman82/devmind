@@ -334,7 +334,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     // MARK: - Indexing Methods
     
     func indexConversation(_ conversation: IndexableConversation) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             databaseQueue.async { [weak self] in
                 guard let self = self else {
                     continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
