@@ -72,7 +72,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             print("❌ AIMemoryDataManagerFixed: Failed to create directory: \(error)")
         }
         
-        databaseURL = appDirectory.appendingPathComponent("conversations_fixed.db")
+        databaseURL = appDirectory.appendingPathComponent("conversations.db")
         print("🔧 AIMemoryDataManagerFixed: Database URL: \(databaseURL.path)")
         
         initializeDatabase()
