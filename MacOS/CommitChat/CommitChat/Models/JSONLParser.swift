@@ -129,7 +129,23 @@ class JSONLParser {
             let components = projectPath.components(separatedBy: "/.claude/projects/")
             if components.count > 1 {
                 let projectName = components[1].components(separatedBy: "/").first ?? "unknown"
-                projectPath = projectName
+                // Clean up the project name (remove URL encoding)
+                projectPath = projectName.replacingOccurrences(of: "-", with: " ")
+            }
+        }
+        
+        // Generate title from first user message or project name
+        if title.isEmpty {
+            if let firstUserMessage = messages.first(where: { $0.role == "user" }) {
+                // Take first 50 chars of first user message as title
+                let content = firstUserMessage.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                title = String(content.prefix(50))
+                if content.count > 50 {
+                    title += "..."
+                }
+            } else {
+                // Fallback to project name
+                title = "Conversation: \(projectPath)"
             }
         }
         
