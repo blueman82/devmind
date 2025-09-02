@@ -111,6 +111,11 @@ class ConversationIndexer: ObservableObject {
     }
     
     private func handleFileChange(_ path: String) {
+        // Skip if we've already processed this file during initial scan
+        guard !processedFiles.contains(path) || isInitialScanComplete else {
+            return
+        }
+        
         print("Detected change in: \(path)")
         
         queue.async { [weak self] in
