@@ -394,9 +394,8 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             print("🔍 DEBUG INSERT: About to bind sessionId = '\(sessionIdToUse)' length=\(sessionIdToUse.count) at position 1")
             Self.logger.debug("🔍 INSERT: Binding sessionId = '\(sessionIdToUse)' at position 1")
             
-            // Convert to C string explicitly
-            let cString = (sessionIdToUse as NSString).utf8String
-            let result = sqlite3_bind_text(insertStmt, 1, cString, -1, nil)
+            // Use SQLITE_TRANSIENT to copy the string
+            let result = sqlite3_bind_text(insertStmt, 1, sessionIdToUse, -1, SQLITE_TRANSIENT)
             print("🔍 DEBUG INSERT: sqlite3_bind_text result = \(result) (SQLITE_OK=\(SQLITE_OK))")
             sqlite3_bind_text(insertStmt, 2, projectHash, -1, nil)
             sqlite3_bind_text(insertStmt, 3, projectName, -1, nil)
