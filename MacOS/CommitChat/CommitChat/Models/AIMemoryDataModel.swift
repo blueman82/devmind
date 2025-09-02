@@ -622,6 +622,32 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     
     // MARK: - Helper Methods
     
+    private func extractKeywords(from conversation: IndexableConversation) -> [String] {
+        var keywords = Set<String>()
+        
+        // Extract from title/project name
+        let projectName = conversation.title.lowercased()
+        keywords.formUnion(projectName.split(separator: " ").map(String.init))
+        
+        // Extract from topics
+        keywords.formUnion(conversation.topics.map { $0.lowercased() })
+        
+        // Extract common programming terms from messages
+        let programmingTerms = ["function", "class", "method", "variable", "database", 
+                               "api", "bug", "fix", "feature", "implement", "refactor"]
+        
+        for message in conversation.messages {
+            let lowercased = message.content.lowercased()
+            for term in programmingTerms {
+                if lowercased.contains(term) {
+                    keywords.insert(term)
+                }
+            }
+        }
+        
+        return Array(keywords).prefix(20).map(String.init)  // Limit to 20 keywords
+    }
+    
     private func buildTimeframeFilter(_ timeframe: String) -> String {
         let calendar = Calendar.current
         let now = Date()
