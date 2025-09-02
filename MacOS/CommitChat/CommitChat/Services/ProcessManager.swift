@@ -7,10 +7,12 @@
 
 import Foundation
 import Combine
+import os
 
 /// Manages the lifecycle of the Node.js MCP server process
 class ProcessManager: ObservableObject {
     static let shared = ProcessManager()
+    private static let logger = Logger(subsystem: "com.commitchat", category: "ProcessManager")
     
     @Published var serverStatus: ServerStatus = .stopped
     @Published var serverOutput: [String] = []
@@ -53,10 +55,10 @@ class ProcessManager: ObservableObject {
     
     /// Start the MCP server process
     func startMCPServer() {
-        print("ProcessManager: startMCPServer() called")
-        print("ProcessManager: Current serverStatus = \(serverStatus)")
+        Self.logger.debug("startMCPServer() called")
+        Self.logger.debug("Current serverStatus = \(serverStatus)")
         guard serverStatus != .running && serverStatus != .starting else {
-            print("ProcessManager: MCP server is already running or starting - exiting early")
+            Self.logger.debug("MCP server is already running or starting - exiting early")
             return
         }
         
@@ -99,12 +101,12 @@ class ProcessManager: ObservableObject {
                 DispatchQueue.main.async {
                     if process.terminationStatus == 0 {
                         self?.serverStatus = .stopped
-                        print("MCP server stopped normally")
+                        Self.logger.debug("MCP server stopped normally")
                     } else {
                         let error = "MCP server crashed with exit code \(process.terminationStatus)"
                         self?.serverStatus = .error(error)
                         self?.lastError = error
-                        print(error)
+                        Self.logger.error("\(error.localizedDescription)")
                     }
                     
                     self?.mcpProcess = nil
@@ -115,8 +117,8 @@ class ProcessManager: ObservableObject {
             
             // Give process time to start
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                print("ProcessManager: Checking process status after 1 second delay")
-                print("ProcessManager: process.isRunning = \(process.isRunning)")
+                Self.logger.debug("Checking process status after 1 second delay")
+                Self.logger.debug("process.isRunning = \(process.isRunning)")
                 if process.isRunning {
                     self.serverStatus = .running
                     print("ProcessManager: Setting serverStatus to .running")
