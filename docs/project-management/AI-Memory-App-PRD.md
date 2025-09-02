@@ -167,6 +167,7 @@ CREATE VIRTUAL TABLE conversation_search USING fts5(
 - **Main Window** - Conversation browser and search
 - **Settings Panel** - Configuration and preferences
 - **Restore Interface** - Git restore point management
+- **Indexing Progress Display** - Real-time database building status with progress indicators
 
 ### MCP Server (Node.js/TypeScript)
 
