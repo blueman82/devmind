@@ -37,7 +37,16 @@ class JSONLParser {
         }
         
         let data = try Data(contentsOf: url)
-        let content = String(data: data, encoding: .utf8) ?? ""
+        // Handle Unicode errors gracefully by using replacement characters
+        var content = ""
+        if let validString = String(data: data, encoding: .utf8) {
+            content = validString
+        } else {
+            // Fallback: try with lossy conversion to handle corrupt Unicode
+            print("Warning: Unicode corruption in \(path), using lossy conversion")
+            content = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
+        }
+        
         let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
         
         var messages: [IndexableMessage] = []
@@ -96,8 +105,14 @@ class JSONLParser {
                         }
                     }
                 }
-            } catch {
-                print("Failed to parse JSON at line \(index + 1): \(error)")
+            } catch let jsonError {
+                // Skip corrupted JSON lines with detailed logging
+                print("Skipping corrupted JSON at line \(index + 1) in \(path): \(jsonError.localizedDescription)")
+                if let nsError = jsonError as NSError?,
+                   nsError.domain == "NSCocoaErrorDomain" && nsError.code == 3840 {
+                    print("Unicode corruption detected - this line will be skipped")
+                }
+                continue
             }
         }
         
