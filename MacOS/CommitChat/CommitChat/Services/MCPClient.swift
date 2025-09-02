@@ -443,11 +443,12 @@ class MCPClient: ObservableObject {
         
         let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
-        guard let conversations = response["conversations"] as? [[String: Any]] else {
+        // The server returns results directly, not wrapped in "conversations"
+        guard let results = response["results"] as? [[String: Any]] else {
             throw MCPClientError.invalidResponse
         }
         
-        return try conversations.map { conv in
+        return try results.map { conv in
             try ConversationItem(from: conv)
         }
     }
