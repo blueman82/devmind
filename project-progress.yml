@@ -4634,3 +4634,42 @@ phase_35_immediate_project_discovery:
     syntax_check: "xcodebuild compilation successful"
     ux_improvement: "✅ Immediate project availability for commercial users"
     expected_result: "All projects from ~/.claude/projects visible instantly on app launch"
+
+# CRITICAL ARCHITECTURE DISCOVERY
+# Date: 2025-09-02 02:01:00
+# Status: 🚨 ARCHITECTURE ISSUE IDENTIFIED
+
+architecture_correction_needed:
+  status: "🚨 CRITICAL ISSUE IDENTIFIED"
+  
+  current_wrong_architecture:
+    flow: "Mac app → MCP Client → ai-memory MCP server → SQLite"
+    problems:
+      - "Mac app making slow JSON-RPC calls for local data"
+      - "Network overhead for what should be local operations"
+      - "External dependency for core functionality"
+      - "Performance bottleneck by design"
+      
+  correct_architecture_per_prd:
+    flow: "External tools → MCP → Mac app (local data owner)"
+    design_principle: "Mac app builds the data, MCP talks to it"
+    benefits:
+      - "Fast local database access for Mac app UI"
+      - "Mac app owns and controls its conversation data"
+      - "MCP serves as API layer for external tool access"
+      - "No network overhead for local operations"
+      
+  performance_implications:
+    current_slowness_cause: "Remote JSON-RPC calls for every UI operation"
+    correct_approach: "Local SQLite/CoreData for Mac app, MCP as external API"
+    performance_gain_potential: "10x+ improvement for local operations"
+    
+  next_steps_required:
+    priority_1: "Implement local conversation database in Mac app"
+    priority_2: "Create MCP server that queries Mac app's local data"
+    priority_3: "Remove external MCP dependency for core UI operations"
+    
+  impact_assessment:
+    current_session_work: "Fixed symptoms but not root cause"
+    architecture_redesign: "Required for proper performance and design"
+    commercial_viability: "Current architecture not suitable for production"
