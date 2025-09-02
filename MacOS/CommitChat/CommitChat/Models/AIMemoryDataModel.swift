@@ -9,6 +9,25 @@ import Foundation
 import SQLite3
 import Combine
 
+// MARK: - Supporting Types
+
+enum AIMemoryError: Error, LocalizedError {
+    case conversationNotFound
+    case invalidData
+    case databaseError(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .conversationNotFound:
+            return "Conversation not found in local database"
+        case .invalidData:
+            return "Invalid data format"
+        case .databaseError(let message):
+            return "Database error: \(message)"
+        }
+    }
+}
+
 /// Local SQLite database manager for conversation and git history storage
 /// 
 /// Implements the PRD's SQLite schema for local-first architecture.
