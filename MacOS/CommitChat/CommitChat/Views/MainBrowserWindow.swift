@@ -17,8 +17,20 @@ struct MainBrowserWindow: View {
     @State private var conversationError: MCPClientError?
     
     private let mcpClient = MCPClient.shared
-    // Static projects list (dynamic version caused performance issues)
-    let projects = ["All Projects", "devmind", "camp-ops-tools-emea", "ketchup", "api-server", "CommitChat", "web-app", "docs"]
+    // Static projects list based on actual ~/.claude/projects
+    let projects = [
+        "All Projects",
+        "devmind", 
+        "camp-ops-tools-emea-ketchup",
+        "camp-ops-tools-emea",
+        "clipforge-ai",
+        "harrison", 
+        "ketchup",
+        "api-server", 
+        "CommitChat", 
+        "web-app", 
+        "docs"
+    ]
     
     var body: some View {
         NavigationSplitView {
