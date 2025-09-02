@@ -270,15 +270,16 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         
                         let lastUpdated = formatter.date(from: lastUpdatedString) ?? Date()
                         
-                        let result = ConversationSearchResult(
-                            sessionId: sessionId,
-                            title: title,
-                            project: project,
-                            date: lastUpdated,
-                            messageCount: 0, // Would need separate query for exact count
-                            snippet: summary,
-                            hasErrors: false // Placeholder
-                        )
+                        let resultDict: [String: Any] = [
+                            "sessionId": sessionId,
+                            "title": title,
+                            "project": project,
+                            "date": ISO8601DateFormatter().string(from: lastUpdated),
+                            "messageCount": 0, // Would need separate query for exact count
+                            "snippet": summary,
+                            "hasErrors": false // Placeholder
+                        ]
+                        let result = try! ConversationSearchResult(from: resultDict)
                         results.append(result)
                     }
                     
