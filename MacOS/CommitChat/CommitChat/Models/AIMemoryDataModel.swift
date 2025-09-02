@@ -374,6 +374,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             
             defer { sqlite3_finalize(insertStmt) }
             
+            print("🔍 DEBUG INSERT: Binding sessionId = '\(conversation.sessionId)' at position 1")
             sqlite3_bind_text(insertStmt, 1, conversation.sessionId, -1, nil)
             sqlite3_bind_text(insertStmt, 2, projectHash, -1, nil)
             sqlite3_bind_text(insertStmt, 3, projectName, -1, nil)
