@@ -226,7 +226,7 @@ class ConversationIndexer: ObservableObject {
                     }
                 }
                 
-                await MainActor.run {
+                DispatchQueue.main.async {
                     self.totalFilesFound = allJsonlFiles.count
                 }
                 
