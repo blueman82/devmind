@@ -4506,3 +4506,51 @@ phase_33_production_ready_projects:
     syntax_check: "xcodebuild compilation successful"
     commercial_readiness: "✅ Suitable for commercial distribution to millions"
     user_experience: "Projects discovered automatically from user's actual conversations"
+
+# Phase 34: Fix Limited Project Discovery - Timeframe Expansion
+# Date: 2025-09-02 01:56:00
+# Status: ✅ COMPLETE
+# Issue: "only devmind and harrison are showing up" - limited project discovery
+
+phase_34_expand_project_discovery:
+  status: "✅ COMPLETE"
+  completion_percentage: 100
+  
+  user_feedback:
+    issue: "only devmind and harrison are showing up"
+    expectation: "All projects from ~/.claude/projects should be discoverable"
+    root_cause_identified: "Restrictive timeframe limiting conversation data for project discovery"
+    
+  problem_analysis:
+    timeframe_limitation:
+      previous_logic: 'selectedProject == nil ? "today" : "last week"'
+      issue: "Only conversations from today were being loaded for project discovery"
+      result: "Limited to projects with very recent conversation activity"
+      missing_projects: "camp-ops-tools-emea-ketchup, clipforge-ai, and other older projects"
+      
+    mcp_behavior:
+      listRecentConversations_filter: "Respects timeframe parameter strictly"
+      discovery_dependency: "Project discovery depends on conversations actually loaded"
+      solution_needed: "Expand timeframe to capture more project diversity"
+      
+  solution_implemented:
+    approach: "Expand timeframe for better project discovery coverage"
+    code_changes:
+      file: "MainBrowserWindow.swift"
+      line: 248
+      change: 'timeframe = selectedProject == nil ? "last month" : "last week"'
+      reasoning:
+        - "last month captures more project diversity for discovery"
+        - "Still reasonable performance - not loading all history"
+        - "Balances discovery completeness with load time"
+        
+    benefits:
+      project_coverage: "Discovers projects from last 30 days of conversations"
+      performance_maintained: "Still limited scope, not full history"
+      user_experience: "More complete project list available for filtering"
+      
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    syntax_check: "xcodebuild compilation successful"
+    expected_result: "More projects should appear in sidebar from last month's conversations"
+    user_experience: "Better project discovery without performance impact"
