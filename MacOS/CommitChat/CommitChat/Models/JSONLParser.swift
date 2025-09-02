@@ -151,9 +151,13 @@ class JSONLParser {
         }
         
         // CRITICAL FIX: Handle empty string sessionId (not just nil)
-        print("🔍 DEBUG: sessionId before fix: '\(sessionId ?? "nil")', isEmpty: \(sessionId?.isEmpty ?? true)")
+        #if DEBUG
+        NSLog("🔍 DEBUG: sessionId before fix: '%@', isEmpty: %@", sessionId ?? "nil", String(sessionId?.isEmpty ?? true))
+        #endif
         let finalSessionId = (sessionId?.isEmpty ?? true) ? UUID().uuidString : sessionId!
-        print("🔍 DEBUG: finalSessionId after fix: '\(finalSessionId)'")
+        #if DEBUG
+        NSLog("🔍 DEBUG: finalSessionId after fix: '%@'", finalSessionId)
+        #endif
         
         return IndexableConversation(
             sessionId: finalSessionId,
