@@ -428,6 +428,7 @@ struct ConversationDetailView: View {
     @State private var loadError: String?
     
     private let mcpClient = MCPClient.shared
+    private let dataManager = AIMemoryDataManager.shared
     
     var body: some View {
         ScrollView {
