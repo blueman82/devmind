@@ -285,14 +285,14 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         results.append(result)
                     }
                     
-                    continuation.resume(returning: results)
+                    sqlite3_finalize(stmt)
+                    return results
                 } else {
                     let error = String(cString: sqlite3_errmsg(self.db))
-                    continuation.resume(throwing: AIMemoryError.databaseError(error))
+                    sqlite3_finalize(stmt)
+                    throw AIMemoryError.databaseError(error)
                 }
-                
-                sqlite3_finalize(stmt)
-            }
+            }.value
         }
     }
     
