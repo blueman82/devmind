@@ -114,7 +114,7 @@ struct SearchWindow: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 1) {
-                        ForEach(ConversationItem.mockData) { item in
+                        ForEach(appState.searchResults) { item in
                             ConversationRow(item: item)
                         }
                     }
