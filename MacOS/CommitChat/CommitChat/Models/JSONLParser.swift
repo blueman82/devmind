@@ -52,7 +52,7 @@ class JSONLParser {
         var messages: [IndexableMessage] = []
         var sessionId: String?
         var projectPath = url.deletingLastPathComponent().path
-        let title = "Untitled Conversation"
+        var title = ""  // Will be extracted from messages or project name
         var createdAt = Date()
         var updatedAt = Date()
         var fileReferences = Set<String>()
