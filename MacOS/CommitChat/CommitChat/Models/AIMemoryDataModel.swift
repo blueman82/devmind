@@ -312,9 +312,12 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     func indexConversation(_ conversation: IndexableConversation) async throws {
         try await withCheckedThrowingContinuation { continuation in
             databaseQueue.async { [weak self] in
-            guard let self = self else {
-                throw AIMemoryError.databaseError("Database manager deallocated")
-            }
+                guard let self = self else {
+                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
+                    return
+                }
+                
+                do {
                 // Begin transaction
                 var beginStmt: OpaquePointer?
                 if sqlite3_prepare_v2(self.db, "BEGIN TRANSACTION", -1, &beginStmt, nil) == SQLITE_OK {
