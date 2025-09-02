@@ -418,7 +418,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             sqlite3_finalize(deleteStmt)
         }
         
-        print("📝 CORRUPTION-FIX: Inserting \(messages.count) messages in batches of \(BATCH_SIZE)...")
+        Self.logger.debug("📝 CORRUPTION-FIX: Inserting \(messages.count) messages in batches of \(BATCH_SIZE)...")
         
         // Process messages in batches to prevent corruption
         let batches = messages.chunked(into: BATCH_SIZE)
@@ -431,10 +431,10 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                 do {
                     try insertMessageBatch(conversationId: conversationId, batch: batch, batchIndex: batchIndex)
                     batchSuccess = true
-                    print("✅ BATCH \(batchIndex + 1)/\(batches.count) completed: \(batch.count) messages")
+                    Self.logger.debug("✅ BATCH \(batchIndex + 1)/\(batches.count) completed: \(batch.count) messages")
                 } catch {
                     retryCount += 1
-                    print("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(MAX_RETRIES)): \(error)")
+                    Self.logger.warning("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(MAX_RETRIES)): \(error.localizedDescription)")
                     
                     if retryCount >= MAX_RETRIES {
                         throw AIMemoryError.databaseError("Failed to insert message batch after \(MAX_RETRIES) retries: \(error)")
@@ -446,7 +446,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             }
         }
         
-        print("🎉 CORRUPTION-FIX: All \(messages.count) messages inserted successfully in \(batches.count) batches")
+        Self.logger.debug("🎉 CORRUPTION-FIX: All \(messages.count) messages inserted successfully in \(batches.count) batches")
     }
     
     private func insertMessageBatch(conversationId: Int64, batch: [IndexableMessage], batchIndex: Int) throws {
