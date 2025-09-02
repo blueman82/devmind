@@ -155,14 +155,18 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     }
                     
                     sqlite3_finalize(stmt)
-                    return conversations
+                    continuation.resume(returning: conversations)
                 } else {
                     let error = String(cString: sqlite3_errmsg(self.db))
                     sqlite3_finalize(stmt)
-                    throw AIMemoryError.databaseError(error)
+                    continuation.resume(throwing: AIMemoryError.databaseError(error))
                 }
-            }.value
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
         }
+    }
     
     /// Get conversation context from local database
     /// Replaces: mcpClient.getConversationContext()
