@@ -13,6 +13,11 @@ All notable changes to the AI Memory App project will be documented in this file
 
 ### Phase 2: Conversation Indexing (IN PROGRESS)
 
+#### Current Tasks
+- [ ] Creating ConversationIndexer.swift with FSEvents monitoring 
+- [ ] Implementing JSONL parser for conversation extraction
+- [ ] Adding indexConversation method to populate database
+
 #### Added
 - `AIMemoryDataModel.swift` - Local SQLite database manager (368 lines)
   - Direct SQLite3 implementation for optimal performance
