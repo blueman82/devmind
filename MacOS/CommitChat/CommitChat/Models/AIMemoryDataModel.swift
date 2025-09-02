@@ -102,16 +102,17 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
         let createConversationsTable = """
             CREATE TABLE IF NOT EXISTS conversations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id TEXT UNIQUE NOT NULL,
-                title TEXT NOT NULL,
-                project_path TEXT NOT NULL,
+                session_id TEXT NOT NULL UNIQUE,
+                project_hash TEXT,
+                project_name TEXT,
+                project_path TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 message_count INTEGER DEFAULT 0,
-                topics TEXT,
-                summary TEXT,
-                has_code BOOLEAN DEFAULT FALSE,
-                has_errors BOOLEAN DEFAULT FALSE
+                file_references TEXT, -- JSON array of file paths referenced
+                topics TEXT, -- JSON array of extracted topics
+                keywords TEXT, -- JSON array of keywords for search
+                total_tokens INTEGER DEFAULT 0
             );
         """
         
