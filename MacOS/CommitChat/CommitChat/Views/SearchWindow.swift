@@ -124,7 +124,7 @@ struct SearchWindow: View {
             
             // Footer with token count
             HStack {
-                Text("\(ConversationItem.mockData.count) results")
+                Text("\(appState.searchResults.count) results")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
