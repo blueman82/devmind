@@ -305,14 +305,25 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         let now = Date()
         
         // Check if conversation exists
-        #if DEBUG
         Self.logger.debug("🔍 insertOrUpdate: sessionId = '\(conversation.sessionId)', length = \(conversation.sessionId.count)")
-        #endif
+        
+        // CRITICAL DEBUG: Log the actual bytes of sessionId
+        if conversation.sessionId.isEmpty {
+            Self.logger.error("❌ CRITICAL: Empty sessionId detected in insertOrUpdate!")
+            Self.logger.error("❌ Conversation title: \(conversation.title)")
+            Self.logger.error("❌ Project path: \(conversation.projectPath)")
+            // Generate a unique sessionId to prevent overwriting
+            let generatedId = UUID().uuidString
+            Self.logger.debug("🔧 Generated replacement sessionId: \(generatedId)")
+        }
+        
         var conversationId: Int64 = -1
         let selectSql = "SELECT id FROM conversations WHERE session_id = ?"
         var selectStmt: OpaquePointer?
         if sqlite3_prepare_v2(db, selectSql, -1, &selectStmt, nil) == SQLITE_OK {
-            sqlite3_bind_text(selectStmt, 1, conversation.sessionId, -1, nil)
+            // Use the sessionId or generate one if empty
+            let sessionIdToUse = conversation.sessionId.isEmpty ? UUID().uuidString : conversation.sessionId
+            sqlite3_bind_text(selectStmt, 1, sessionIdToUse, -1, nil)
             if sqlite3_step(selectStmt) == SQLITE_ROW {
                 conversationId = sqlite3_column_int64(selectStmt, 0)
             }
@@ -434,10 +445,10 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                     Self.logger.debug("✅ BATCH \(batchIndex + 1)/\(batches.count) completed: \(batch.count) messages")
                 } catch {
                     retryCount += 1
-                    Self.logger.warning("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(MAX_RETRIES)): \(error)")
+                    Self.logger.warning("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(self.MAX_RETRIES)): \(error)")
                     
                     if retryCount >= MAX_RETRIES {
-                        throw AIMemoryError.databaseError("Failed to insert message batch after \(MAX_RETRIES) retries: \(error)")
+                        throw AIMemoryError.databaseError("Failed to insert message batch after \(self.MAX_RETRIES) retries: \(error)")
                     }
                     
                     // Brief delay before retry
