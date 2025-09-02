@@ -74,7 +74,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         
         // ARCHITECTURE: Swift App owns database, MCP Server queries it
         // Use the same database location as MCP server for unified data
-        let claudeAIMemoryDir = homeDir.appendingPathComponent(".claude/ai-memory")
+        let claudeAIMemoryDir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude/ai-memory")
         try? FileManager.default.createDirectory(at: claudeAIMemoryDir, withIntermediateDirectories: true)
         databaseURL = claudeAIMemoryDir.appendingPathComponent("conversations.db")
         print("🔧 AIMemoryDataManagerFixed: Database URL: \(databaseURL.path)")
