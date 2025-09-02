@@ -157,30 +157,31 @@ class ConversationIndexer: ObservableObject {
         
         do {
             // Parse the conversation file
+            self.debugLog("🔍 Starting JSONL parsing for: \(path)")
             let conversation = try self.jsonlParser.parseConversation(at: path)
-            print("📊 Parsed conversation: \(conversation.sessionId) with \(conversation.messages.count) messages")
+            self.debugLog("📊 Parsed conversation: \(conversation.sessionId) with \(conversation.messages.count) messages")
             
             // Index to database synchronously using async/await
-            print("🔄 Starting database indexing for: \(conversation.sessionId)")
+            self.debugLog("🔄 Starting database indexing for: \(conversation.sessionId)")
             let semaphore = DispatchSemaphore(value: 0)
             var indexingError: Error?
             
             Task {
                 do {
-                    print("🗄️ Database indexing started for: \(conversation.sessionId)")
+                    self.debugLog("🗄️ Database indexing started for: \(conversation.sessionId)")
                     try await self.dataManager.indexConversation(conversation)
-                    print("✅ Database indexing successful for: \(conversation.sessionId)")
+                    self.debugLog("✅ Database indexing successful for: \(conversation.sessionId)")
                     
                     await MainActor.run {
                         self.indexedCount += 1
                         self.filesProcessed += 1
                         self.lastIndexedTime = Date()
-                        print("📈 Progress: \(self.filesProcessed)/\(self.totalFilesFound) files processed, \(self.indexedCount) conversations indexed")
+                        self.debugLog("📈 Progress: \(self.filesProcessed)/\(self.totalFilesFound) files processed, \(self.indexedCount) conversations indexed")
                     }
                 } catch {
-                    print("❌ Failed to index conversation: \(conversation.sessionId)")
-                    print("❌ Error details: \(error)")
-                    print("❌ Error type: \(type(of: error))")
+                    self.debugLog("❌ Failed to index conversation: \(conversation.sessionId)")
+                    self.debugLog("❌ Error details: \(error)")
+                    self.debugLog("❌ Error type: \(type(of: error))")
                     indexingError = error
                 }
                 semaphore.signal()
