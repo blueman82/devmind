@@ -237,29 +237,29 @@ class ConversationIndexer: ObservableObject {
             do {
                 // Get all project directories
                 let projectDirs = try fileManager.contentsOfDirectory(atPath: self.claudeProjectsPath)
-                print("📁 Found \(projectDirs.count) project directories")
+                self.debugLog("📁 Found \(projectDirs.count) project directories")
                 
                 for projectDir in projectDirs {
                     let projectPath = (self.claudeProjectsPath as NSString).appendingPathComponent(projectDir)
+                    self.debugLog("🔍 Processing project directory: \(projectDir)")
                     
                     // Skip if not a directory
                     var isDirectory: ObjCBool = false
                     guard fileManager.fileExists(atPath: projectPath, isDirectory: &isDirectory),
                           isDirectory.boolValue else {
+                        self.debugLog("⚠️ Skipping non-directory: \(projectDir)")
                         continue
                     }
                     
                     // Look for JSONL files in the project directory
                     let projectContents = try fileManager.contentsOfDirectory(atPath: projectPath)
                     let jsonlFiles = projectContents.filter { $0.hasSuffix(".jsonl") }
+                    self.debugLog("📂 \(projectDir): found \(projectContents.count) items, \(jsonlFiles.count) JSONL files")
                     
                     for file in jsonlFiles {
                         let filePath = (projectPath as NSString).appendingPathComponent(file)
                         allJsonlFiles.append(filePath)
-                    }
-                    
-                    if !jsonlFiles.isEmpty {
-                        print("📂 \(projectDir): \(jsonlFiles.count) JSONL files")
+                        self.debugLog("📄 Added JSONL file: \(filePath)")
                     }
                 }
                 
