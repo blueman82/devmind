@@ -203,11 +203,12 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                                 let timestampString = String(cString: sqlite3_column_text(stmt, 2))
                                 let timestamp = formatter.date(from: timestampString) ?? Date()
                                 
-                                let message = ConversationMessage(
-                                    role: role,
-                                    content: content,
-                                    timestamp: timestamp
-                                )
+                                let messageDict: [String: Any] = [
+                                    "role": role,
+                                    "content": content,
+                                    "timestamp": ISO8601DateFormatter().string(from: timestamp)
+                                ]
+                                let message = try! ConversationMessage(from: messageDict)
                                 messages.append(message)
                             }
                             
