@@ -308,14 +308,18 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     }
                     
                     sqlite3_finalize(stmt)
-                    return results
+                    continuation.resume(returning: results)
                 } else {
                     let error = String(cString: sqlite3_errmsg(self.db))
                     sqlite3_finalize(stmt)
-                    throw AIMemoryError.databaseError(error)
+                    continuation.resume(throwing: AIMemoryError.databaseError(error))
                 }
-            }.value
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
         }
+    }
     
     // MARK: - Data Indexing (FSEvents Integration)
     
