@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import os
 
 class JSONLParser {
+    private static let logger = Logger(subsystem: "com.commitchat", category: "JSONLParser")
     
     enum ParserError: LocalizedError {
         case fileNotFound(String)
@@ -43,7 +45,7 @@ class JSONLParser {
             content = validString
         } else {
             // Fallback: try with lossy conversion to handle corrupt Unicode
-            print("Warning: Unicode corruption in \(path), using lossy conversion")
+            Self.logger.warning("Unicode corruption in \(path), using lossy conversion")
             content = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
         }
         
@@ -62,7 +64,7 @@ class JSONLParser {
             // Pre-process line to fix Unicode issues
             let sanitizedLine = sanitizeUnicodeInJSON(line)
             guard let lineData = sanitizedLine.data(using: .utf8) else {
-                print("Warning: Could not convert line \(index + 1) to UTF-8 data")
+                Self.logger.warning("Could not convert line \(index + 1) to UTF-8 data")
                 continue
             }
             
@@ -111,10 +113,10 @@ class JSONLParser {
                 }
             } catch let jsonError {
                 // Skip corrupted JSON lines with detailed logging
-                print("Skipping corrupted JSON at line \(index + 1) in \(path): \(jsonError.localizedDescription)")
+                Self.logger.error("Skipping corrupted JSON at line \(index + 1) in \(path): \(jsonError.localizedDescription)")
                 if let nsError = jsonError as NSError?,
                    nsError.domain == "NSCocoaErrorDomain" && nsError.code == 3840 {
-                    print("Unicode corruption detected - this line will be skipped")
+                    Self.logger.error("Unicode corruption detected - this line will be skipped")
                 }
                 continue
             }
@@ -151,13 +153,9 @@ class JSONLParser {
         }
         
         // CRITICAL FIX: Handle empty string sessionId (not just nil)
-        #if DEBUG
-        NSLog("🔍 DEBUG: sessionId before fix: '%@', isEmpty: %@", sessionId ?? "nil", String(sessionId?.isEmpty ?? true))
-        #endif
+        Self.logger.debug("🔍 sessionId before fix: '\(sessionId ?? "nil")', isEmpty: \(sessionId?.isEmpty ?? true)")
         let finalSessionId = (sessionId?.isEmpty ?? true) ? UUID().uuidString : sessionId!
-        #if DEBUG
-        NSLog("🔍 DEBUG: finalSessionId after fix: '%@'", finalSessionId)
-        #endif
+        Self.logger.debug("🔍 finalSessionId after fix: '\(finalSessionId)'")
         
         return IndexableConversation(
             sessionId: finalSessionId,
@@ -205,7 +203,7 @@ class JSONLParser {
         // Tool calls are not directly available in this format, but we can detect them
         let toolCalls: [String] = []
         
-        print("🔍 Parsed message: ID=\(id), Role=\(role), Content length=\(content.count)")
+        Self.logger.debug("🔍 Parsed message: ID=\(id), Role=\(role), Content length=\(content.count)")
         
         return IndexableMessage(
             id: id,
