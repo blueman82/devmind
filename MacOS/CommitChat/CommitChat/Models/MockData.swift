@@ -43,20 +43,28 @@ struct ConversationItem: Identifiable {
     
     /// Initialize from MCP conversation data
     init(from dict: [String: Any]) throws {
-        guard let title = dict["title"] as? String,
-              let project = dict["project"] as? String,
-              let messageCount = dict["message_count"] as? Int else {
+        // Handle both old and new field formats for compatibility
+        guard let project = dict["project"] as? String,
+              let messageCount = (dict["messageCount"] ?? dict["message_count"]) as? Int else {
             throw MCPClientError.invalidResponse
         }
         
-        self.title = title
+        // Generate title from sessionId if not provided
+        if let title = dict["title"] as? String {
+            self.title = title
+        } else if let sessionId = dict["sessionId"] as? String {
+            self.title = "Conversation \(sessionId.prefix(8))..."
+        } else {
+            self.title = "Untitled Conversation"
+        }
+        
         self.project = project
         self.messageCount = messageCount
         self.hasErrors = dict["has_errors"] as? Bool ?? false
         self.hasCode = dict["has_code"] as? Bool ?? false
         
-        // Parse date
-        if let dateString = dict["date"] as? String,
+        // Parse date from multiple possible fields
+        if let dateString = (dict["startTime"] ?? dict["date"]) as? String,
            let date = ISO8601DateFormatter().date(from: dateString) {
             self.date = date
         } else {
