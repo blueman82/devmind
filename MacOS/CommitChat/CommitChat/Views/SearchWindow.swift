@@ -14,7 +14,7 @@ struct SearchWindow: View {
     @State private var searchTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
     
-    private let mcpClient = MCPClient.shared
+    private let dataManager = AIMemoryDataManager.shared
     
     let filters = ["All Projects", "Current Project", "Last 7 Days", "Has Code", "Has Errors"]
     
@@ -160,7 +160,7 @@ struct SearchWindow: View {
         Task {
             do {
                 // Call MCP server to search conversations
-                let searchResults = try await mcpClient.searchConversations(
+                let searchResults = try await dataManager.searchConversations(
                     query: searchText,
                     limit: 50
                 )
