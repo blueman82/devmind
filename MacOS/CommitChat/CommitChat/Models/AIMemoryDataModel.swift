@@ -388,18 +388,17 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     sqlite3_bind_text(conversationStmt, 1, conversation.sessionId, -1, nil)
                     sqlite3_bind_text(conversationStmt, 2, conversation.projectPath, -1, nil)
                     sqlite3_bind_text(conversationStmt, 3, conversation.title, -1, nil)
-                    sqlite3_bind_double(conversationStmt, 4, conversation.createdAt.timeIntervalSince1970)
-                    sqlite3_bind_double(conversationStmt, 5, conversation.updatedAt.timeIntervalSince1970)
-                    sqlite3_bind_int(conversationStmt, 6, Int32(conversation.messages.count))
+                    sqlite3_bind_double(conversationStmt, 4, conversation.updatedAt.timeIntervalSince1970)
+                    sqlite3_bind_int(conversationStmt, 5, Int32(conversation.messages.count))
                     
                     let topicsString = conversation.topics.joined(separator: ", ")
-                    sqlite3_bind_text(conversationStmt, 7, topicsString, -1, nil)
+                    sqlite3_bind_text(conversationStmt, 6, topicsString, -1, nil)
                     
                     // Check for code and errors in messages
                     let hasCode = conversation.messages.contains { !$0.toolCalls.isEmpty }
                     let hasErrors = conversation.messages.contains { $0.content.lowercased().contains("error") }
-                    sqlite3_bind_int(conversationStmt, 8, hasCode ? 1 : 0)
-                    sqlite3_bind_int(conversationStmt, 9, hasErrors ? 1 : 0)
+                    sqlite3_bind_int(conversationStmt, 7, hasCode ? 1 : 0)
+                    sqlite3_bind_int(conversationStmt, 8, hasErrors ? 1 : 0)
                     
                     guard sqlite3_step(conversationStmt) == SQLITE_DONE else {
                         throw AIMemoryError.databaseError("Failed to insert conversation")
