@@ -167,6 +167,7 @@ CREATE VIRTUAL TABLE conversation_search USING fts5(
 - **Main Window** - Conversation browser and search
 - **Settings Panel** - Configuration and preferences
 - **Restore Interface** - Git restore point management
+- **Indexing Progress Display** - Real-time database building status with progress indicators
 
 ### MCP Server (Node.js/TypeScript)
 
@@ -380,13 +381,15 @@ class AIMemoryMCPServer extends Server {
 
 ### Daily Usage
 1. **Transparent operation** - App runs in background, indexing automatically
-2. **AI interactions** - Claude/Cursor automatically gain conversation memory
-3. **Search & resume** - Find and resume previous development sessions
-4. **Disaster recovery** - One-click restore to working states
-5. **Cross-project learning** - AI suggests solutions from other projects
+2. **Progress visibility** - Users can see indexing progress in real-time UI
+3. **AI interactions** - Claude/Cursor automatically gain conversation memory
+4. **Search & resume** - Find and resume previous development sessions
+5. **Disaster recovery** - One-click restore to working states
+6. **Cross-project learning** - AI suggests solutions from other projects
 
 ### Menu Bar Interface
 - **Status indicator** - Shows indexing status and recent activity
+- **Progress display** - Real-time indexing progress (X/Y files processed)
 - **Quick search** - Instant search across all conversations
 - **Recent conversations** - Quick access to recent development sessions
 - **Restore points** - List of tagged working states
@@ -531,6 +534,7 @@ npm run test:git        # Git tools specific tests
 
 ### Phase 10: macOS Application (Optional)
 - [ ] **Native macOS App** - Menu bar interface (Swift/SwiftUI)
+- [ ] **Indexing Progress UI** - Real-time progress indicators for database building
 - [ ] **Visual Conversation Browser** - Rich UI for conversation management
 - [ ] **Advanced Search Interface** - Visual filters and result presentation
 - [ ] **Team Collaboration** - Shared conversation indices

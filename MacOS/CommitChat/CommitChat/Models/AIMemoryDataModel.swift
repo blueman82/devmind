@@ -9,6 +9,7 @@
 import Foundation
 import SQLite3
 import Combine
+import os
 
 // MARK: - Supporting Types
 
@@ -40,6 +41,7 @@ enum AIMemoryError: Error, LocalizedError {
 /// 6. Proper index management
 class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
     static let shared = AIMemoryDataManagerFixed()
+    private static let logger = Logger(subsystem: "com.commitchat", category: "AIMemoryDataManager")
     
     @Published var isInitialized: Bool = false
     @Published var lastError: String?
@@ -57,19 +59,19 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
     // MARK: - Initialization with Corruption Fixes
     
     private init() {
-        print("🔧 AIMemoryDataManagerFixed: Starting initialization with corruption fixes...")
+        Self.logger.debug("🔧 Starting initialization with corruption fixes...")
         
         // Store database in Application Support directory
         let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let appDirectory = appSupportURL.appendingPathComponent("CommitChat")
-        print("🔧 AIMemoryDataManagerFixed: App directory: \(appDirectory.path)")
+        Self.logger.debug("🔧 App directory: \(appDirectory.path)")
         
         // Create directory if needed
         do {
             try FileManager.default.createDirectory(at: appDirectory, withIntermediateDirectories: true)
-            print("🔧 AIMemoryDataManagerFixed: Directory created/verified")
+            Self.logger.debug("🔧 Directory created/verified")
         } catch {
-            print("❌ AIMemoryDataManagerFixed: Failed to create directory: \(error)")
+            Self.logger.error("❌ Failed to create directory: \(error)")
         }
         
         // ARCHITECTURE: Swift App owns database, MCP Server queries it
@@ -77,7 +79,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         let claudeAIMemoryDir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude/ai-memory")
         try? FileManager.default.createDirectory(at: claudeAIMemoryDir, withIntermediateDirectories: true)
         databaseURL = claudeAIMemoryDir.appendingPathComponent("conversations.db")
-        print("🔧 AIMemoryDataManagerFixed: Database URL: \(databaseURL.path)")
+        Self.logger.debug("🔧 Database URL: \(self.databaseURL.path)")
         
         initializeDatabase()
     }
@@ -91,7 +93,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             if sqlite3_prepare_v2(db, versionQuery, -1, &statement, nil) == SQLITE_OK {
                 if sqlite3_step(statement) == SQLITE_ROW {
                     let version = String(cString: sqlite3_column_text(statement, 0))
-                    print("🔍 SQLite version: \(version)")
+                    Self.logger.debug("🔍 SQLite version: \(version)")
                 }
                 sqlite3_finalize(statement)
             }
@@ -101,11 +103,11 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             createTables()
             checkAndRepairDatabase()
             isInitialized = true
-            print("✅ AIMemoryDataManagerFixed initialized with corruption fixes at: \(databaseURL.path)")
+            Self.logger.debug("✅ AIMemoryDataManagerFixed initialized with corruption fixes at: \(self.databaseURL.path)")
         } else {
             let error = String(cString: sqlite3_errmsg(db))
             lastError = "Failed to open database: \(error)"
-            print("❌ Database error: \(error)")
+            Self.logger.error("❌ Database error: \(error)")
         }
     }
     
@@ -127,7 +129,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         executeSQL("PRAGMA cache_size = 10000;") // Reasonable cache size
         executeSQL("PRAGMA temp_store = MEMORY;") // Use memory for temp storage
         
-        print("✅ Database configured with corruption-resistant settings")
+        Self.logger.debug("✅ Database configured with corruption-resistant settings")
     }
     
     private func createTables() {
@@ -180,13 +182,13 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         executeSQL(createMessagesTable) 
         executeSQL(createIndexes)
         
-        print("✅ Tables created with corruption-resistant schema")
+        Self.logger.debug("✅ Tables created with corruption-resistant schema")
     }
     
     private func executeSQL(_ sql: String) {
         if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
             let error = String(cString: sqlite3_errmsg(db))
-            print("❌ SQL error: \(error)")
+            Self.logger.error("❌ SQL error: \(error)")
         }
     }
     
@@ -197,18 +199,18 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             if sqlite3_step(stmt) == SQLITE_ROW {
                 let result = String(cString: sqlite3_column_text(stmt, 0))
                 if result != "ok" {
-                    print("⚠️ Database integrity issues detected: \(result)")
-                    print("🔧 Rebuilding database indexes...")
+                    Self.logger.warning("⚠️ Database integrity issues detected: \(result)")
+                    Self.logger.debug("🔧 Rebuilding database indexes...")
                     
                     // Rebuild all indexes
                     if sqlite3_exec(db, "REINDEX", nil, nil, nil) == SQLITE_OK {
-                        print("✅ Database indexes rebuilt successfully")
+                        Self.logger.debug("✅ Database indexes rebuilt successfully")
                     } else {
                         let error = String(cString: sqlite3_errmsg(db))
-                        print("❌ Failed to rebuild indexes: \(error)")
+                        Self.logger.error("❌ Failed to rebuild indexes: \(error)")
                     }
                 } else {
-                    print("✅ Database integrity check passed")
+                    Self.logger.debug("✅ Database integrity check passed")
                 }
             }
             sqlite3_finalize(stmt)
@@ -276,7 +278,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             var commitStmt: OpaquePointer?
             if sqlite3_prepare_v2(db, "COMMIT TRANSACTION", -1, &commitStmt, nil) == SQLITE_OK {
                 if sqlite3_step(commitStmt) == SQLITE_DONE {
-                    print("✅ Conversation indexed successfully: \(conversation.sessionId)")
+                    Self.logger.debug("✅ Conversation indexed successfully: \(conversation.sessionId)")
                 } else {
                     throw AIMemoryError.databaseError("Failed to commit transaction")
                 }
@@ -290,7 +292,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                 sqlite3_step(rollbackStmt)
                 sqlite3_finalize(rollbackStmt)
             }
-            print("❌ Transaction rolled back due to error: \(error)")
+            Self.logger.error("❌ Transaction rolled back due to error: \(error)")
             throw error
         }
     }
@@ -302,12 +304,31 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         
         let now = Date()
         
+        print("🔍 DEBUG insertOrUpdateConversation: incoming sessionId = '\(conversation.sessionId)', length = \(conversation.sessionId.count)")
+        
+        // CRITICAL FIX: Handle empty sessionId to prevent all conversations overwriting each other
+        let sessionIdToUse: String
+        if conversation.sessionId.isEmpty {
+            sessionIdToUse = UUID().uuidString
+            print("❌ CRITICAL: Empty sessionId detected! Generated: \(sessionIdToUse)")
+            print("❌ Title: \(conversation.title), Project: \(conversation.projectPath)")
+            Self.logger.error("❌ CRITICAL: Empty sessionId detected! Generated: \(sessionIdToUse)")
+            Self.logger.error("❌ Title: \(conversation.title), Project: \(conversation.projectPath)")
+        } else {
+            sessionIdToUse = conversation.sessionId
+            print("✅ Using sessionId: '\(sessionIdToUse)'")
+            Self.logger.debug("✅ Using sessionId: '\(sessionIdToUse)'")
+        }
+        
         // Check if conversation exists
         var conversationId: Int64 = -1
         let selectSql = "SELECT id FROM conversations WHERE session_id = ?"
         var selectStmt: OpaquePointer?
         if sqlite3_prepare_v2(db, selectSql, -1, &selectStmt, nil) == SQLITE_OK {
-            sqlite3_bind_text(selectStmt, 1, conversation.sessionId, -1, nil)
+            // Use withCString to ensure string validity during binding
+            _ = sessionIdToUse.withCString { cString in
+                sqlite3_bind_text(selectStmt, 1, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             if sqlite3_step(selectStmt) == SQLITE_ROW {
                 conversationId = sqlite3_column_int64(selectStmt, 0)
             }
@@ -343,14 +364,29 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             
             defer { sqlite3_finalize(updateStmt) }
             
-            sqlite3_bind_text(updateStmt, 1, projectHash, -1, nil)
-            sqlite3_bind_text(updateStmt, 2, projectName, -1, nil)
-            sqlite3_bind_text(updateStmt, 3, conversation.projectPath, -1, nil)
-            sqlite3_bind_text(updateStmt, 4, nowString, -1, nil)
+            // Use withCString for all text bindings
+            _ = projectHash.withCString { cString in
+                sqlite3_bind_text(updateStmt, 1, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = projectName.withCString { cString in
+                sqlite3_bind_text(updateStmt, 2, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = conversation.projectPath.withCString { cString in
+                sqlite3_bind_text(updateStmt, 3, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = nowString.withCString { cString in
+                sqlite3_bind_text(updateStmt, 4, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(updateStmt, 5, Int32(conversation.messages.count))
-            sqlite3_bind_text(updateStmt, 6, fileRefsString, -1, nil)
-            sqlite3_bind_text(updateStmt, 7, topicsString, -1, nil)
-            sqlite3_bind_text(updateStmt, 8, keywordsString, -1, nil)
+            _ = (fileRefsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(updateStmt, 6, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (topicsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(updateStmt, 7, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (keywordsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(updateStmt, 8, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(updateStmt, 9, Int32(totalTokens))
             sqlite3_bind_int64(updateStmt, 10, conversationId)
             
@@ -373,16 +409,40 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             
             defer { sqlite3_finalize(insertStmt) }
             
-            sqlite3_bind_text(insertStmt, 1, conversation.sessionId, -1, nil)
-            sqlite3_bind_text(insertStmt, 2, projectHash, -1, nil)
-            sqlite3_bind_text(insertStmt, 3, projectName, -1, nil)
-            sqlite3_bind_text(insertStmt, 4, conversation.projectPath, -1, nil)
-            sqlite3_bind_text(insertStmt, 5, nowString, -1, nil)
-            sqlite3_bind_text(insertStmt, 6, nowString, -1, nil)
+            print("🔍 DEBUG INSERT: About to bind sessionId = '\(sessionIdToUse)' length=\(sessionIdToUse.count) at position 1")
+            Self.logger.debug("🔍 INSERT: Binding sessionId = '\(sessionIdToUse)' at position 1")
+            
+            // Use withCString to ensure string stays valid during binding
+            let result = sessionIdToUse.withCString { cString in
+                sqlite3_bind_text(insertStmt, 1, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            print("🔍 DEBUG INSERT: sqlite3_bind_text result = \(result) (SQLITE_OK=\(SQLITE_OK))")
+            // Use withCString for all text bindings
+            _ = projectHash.withCString { cString in
+                sqlite3_bind_text(insertStmt, 2, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = projectName.withCString { cString in
+                sqlite3_bind_text(insertStmt, 3, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = conversation.projectPath.withCString { cString in
+                sqlite3_bind_text(insertStmt, 4, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = nowString.withCString { cString in
+                sqlite3_bind_text(insertStmt, 5, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = nowString.withCString { cString in
+                sqlite3_bind_text(insertStmt, 6, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(insertStmt, 7, Int32(conversation.messages.count))
-            sqlite3_bind_text(insertStmt, 8, fileRefsString, -1, nil)
-            sqlite3_bind_text(insertStmt, 9, topicsString, -1, nil)
-            sqlite3_bind_text(insertStmt, 10, keywordsString, -1, nil)
+            _ = (fileRefsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(insertStmt, 8, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (topicsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(insertStmt, 9, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
+            _ = (keywordsString ?? "[]").withCString { cString in
+                sqlite3_bind_text(insertStmt, 10, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+            }
             sqlite3_bind_int(insertStmt, 11, Int32(totalTokens))
             
             guard sqlite3_step(insertStmt) == SQLITE_DONE else {
@@ -410,7 +470,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             sqlite3_finalize(deleteStmt)
         }
         
-        print("📝 CORRUPTION-FIX: Inserting \(messages.count) messages in batches of \(BATCH_SIZE)...")
+        Self.logger.debug("📝 CORRUPTION-FIX: Inserting \(messages.count) messages in batches of \(self.BATCH_SIZE)...")
         
         // Process messages in batches to prevent corruption
         let batches = messages.chunked(into: BATCH_SIZE)
@@ -423,13 +483,13 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                 do {
                     try insertMessageBatch(conversationId: conversationId, batch: batch, batchIndex: batchIndex)
                     batchSuccess = true
-                    print("✅ BATCH \(batchIndex + 1)/\(batches.count) completed: \(batch.count) messages")
+                    Self.logger.debug("✅ BATCH \(batchIndex + 1)/\(batches.count) completed: \(batch.count) messages")
                 } catch {
                     retryCount += 1
-                    print("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(MAX_RETRIES)): \(error)")
+                    Self.logger.warning("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(self.MAX_RETRIES)): \(error)")
                     
                     if retryCount >= MAX_RETRIES {
-                        throw AIMemoryError.databaseError("Failed to insert message batch after \(MAX_RETRIES) retries: \(error)")
+                        throw AIMemoryError.databaseError("Failed to insert message batch after \(self.MAX_RETRIES) retries: \(error)")
                     }
                     
                     // Brief delay before retry
@@ -438,7 +498,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             }
         }
         
-        print("🎉 CORRUPTION-FIX: All \(messages.count) messages inserted successfully in \(batches.count) batches")
+        Self.logger.debug("🎉 CORRUPTION-FIX: All \(messages.count) messages inserted successfully in \(batches.count) batches")
     }
     
     private func insertMessageBatch(conversationId: Int64, batch: [IndexableMessage], batchIndex: Int) throws {
@@ -463,17 +523,38 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             sqlite3_reset(messageStmt)
             sqlite3_bind_int64(messageStmt, 1, conversationId)
             sqlite3_bind_int64(messageStmt, 2, Int64(index)) // message_index
-            sqlite3_bind_text(messageStmt, 3, message.id, -1, nil) // uuid
-            sqlite3_bind_text(messageStmt, 4, message.role, -1, nil) // role
-            sqlite3_bind_text(messageStmt, 5, "text", -1, nil) // content_type
-            sqlite3_bind_text(messageStmt, 6, message.content, -1, nil) // content
+            
+            // Use withCString to ensure string validity during binding
+            _ = message.id.withCString { cString in
+                sqlite3_bind_text(messageStmt, 3, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // uuid
+            }
+            
+            _ = message.role.withCString { cString in
+                sqlite3_bind_text(messageStmt, 4, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // role
+            }
+            
+            _ = "text".withCString { cString in
+                sqlite3_bind_text(messageStmt, 5, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // content_type
+            }
+            
+            _ = message.content.withCString { cString in
+                sqlite3_bind_text(messageStmt, 6, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // content
+            }
             
             let timestampString = ISO8601DateFormatter().string(from: message.timestamp)
-            sqlite3_bind_text(messageStmt, 7, timestampString, -1, nil) // timestamp
+            _ = timestampString.withCString { cString in
+                sqlite3_bind_text(messageStmt, 7, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // timestamp
+            }
             
             let toolCallsJson = message.toolCalls.joined(separator: ",")
-            sqlite3_bind_text(messageStmt, 8, toolCallsJson, -1, nil) // tool_calls
-            sqlite3_bind_text(messageStmt, 9, "[]", -1, nil) // file_references (empty JSON array)
+            _ = toolCallsJson.withCString { cString in
+                sqlite3_bind_text(messageStmt, 8, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // tool_calls
+            }
+            
+            _ = "[]".withCString { cString in
+                sqlite3_bind_text(messageStmt, 9, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // file_references
+            }
+            
             sqlite3_bind_int(messageStmt, 10, Int32(message.content.count)) // tokens (approximate)
             
             let stepResult = sqlite3_step(messageStmt)
@@ -512,7 +593,10 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             for filePath in fileReferences {
                 sqlite3_reset(fileStmt)
                 sqlite3_bind_int64(fileStmt, 1, conversationId)
-                sqlite3_bind_text(fileStmt, 2, filePath, -1, nil)
+                // Use withCString to ensure string validity during binding
+                _ = filePath.withCString { cString in
+                    sqlite3_bind_text(fileStmt, 2, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+                }
                 sqlite3_step(fileStmt)
             }
         }

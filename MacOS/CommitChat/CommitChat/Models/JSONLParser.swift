@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import os
 
 class JSONLParser {
+    private static let logger = Logger(subsystem: "com.commitchat", category: "JSONLParser")
     
     enum ParserError: LocalizedError {
         case fileNotFound(String)
@@ -43,7 +45,7 @@ class JSONLParser {
             content = validString
         } else {
             // Fallback: try with lossy conversion to handle corrupt Unicode
-            print("Warning: Unicode corruption in \(path), using lossy conversion")
+            Self.logger.debug("Unicode corruption in \(path), using lossy conversion")
             content = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
         }
         
@@ -62,16 +64,17 @@ class JSONLParser {
             // Pre-process line to fix Unicode issues
             let sanitizedLine = sanitizeUnicodeInJSON(line)
             guard let lineData = sanitizedLine.data(using: .utf8) else {
-                print("Warning: Could not convert line \(index + 1) to UTF-8 data")
+                Self.logger.debug("Could not convert line \(index + 1) to UTF-8 data")
                 continue
             }
             
             do {
                 if let json = try JSONSerialization.jsonObject(with: lineData) as? [String: Any] {
                     // Parse Claude Code JSONL format
-                    // Extract session ID from first line if available
-                    if sessionId == nil {
-                        sessionId = json["sessionId"] as? String
+                    // BUG FIX: Extract session ID from EVERY line, should be consistent within file
+                    // All lines in a JSONL file should have the same sessionId
+                    if let currentSessionId = json["sessionId"] as? String {
+                        sessionId = currentSessionId
                     }
                     
                     // Extract working directory for project path
@@ -110,10 +113,10 @@ class JSONLParser {
                 }
             } catch let jsonError {
                 // Skip corrupted JSON lines with detailed logging
-                print("Skipping corrupted JSON at line \(index + 1) in \(path): \(jsonError.localizedDescription)")
+                Self.logger.debug("Skipping corrupted JSON at line \(index + 1) in \(path): \(jsonError.localizedDescription)")
                 if let nsError = jsonError as NSError?,
                    nsError.domain == "NSCocoaErrorDomain" && nsError.code == 3840 {
-                    print("Unicode corruption detected - this line will be skipped")
+                    Self.logger.debug("Unicode corruption detected - this line will be skipped")
                 }
                 continue
             }
@@ -149,8 +152,13 @@ class JSONLParser {
             }
         }
         
+        // CRITICAL FIX: Handle empty string sessionId (not just nil)
+        print("🔍 DEBUG JSONLParser: sessionId before fix: '\(sessionId ?? "nil")', isEmpty: \(sessionId?.isEmpty ?? true)")
+        let finalSessionId = (sessionId?.isEmpty ?? true) ? UUID().uuidString : sessionId!
+        print("🔍 DEBUG JSONLParser: finalSessionId after fix: '\(finalSessionId)' length=\(finalSessionId.count)")
+        
         return IndexableConversation(
-            sessionId: sessionId ?? UUID().uuidString,
+            sessionId: finalSessionId,
             projectPath: projectPath,
             title: title,
             createdAt: createdAt,
@@ -195,7 +203,7 @@ class JSONLParser {
         // Tool calls are not directly available in this format, but we can detect them
         let toolCalls: [String] = []
         
-        print("🔍 Parsed message: ID=\(id), Role=\(role), Content length=\(content.count)")
+        Self.logger.debug("🔍 Parsed message: ID=\(id), Role=\(role), Content length=\(content.count)")
         
         return IndexableMessage(
             id: id,

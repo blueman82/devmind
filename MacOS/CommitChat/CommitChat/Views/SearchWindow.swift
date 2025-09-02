@@ -114,7 +114,7 @@ struct SearchWindow: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 1) {
-                        ForEach(ConversationItem.mockData) { item in
+                        ForEach(appState.searchResults) { item in
                             ConversationRow(item: item)
                         }
                     }
@@ -124,7 +124,7 @@ struct SearchWindow: View {
             
             // Footer with token count
             HStack {
-                Text("\(ConversationItem.mockData.count) results")
+                Text("\(appState.searchResults.count) results")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 

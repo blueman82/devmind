@@ -7,18 +7,28 @@
 
 import Foundation
 import CoreServices
+import os
 
 class ConversationIndexer: ObservableObject {
     static let shared = ConversationIndexer()
+    private static let logger = Logger(subsystem: "com.commitchat", category: "ConversationIndexer")
     
     @Published var isMonitoring = false
     @Published var lastIndexedTime: Date?
     @Published var indexedCount = 0
+    @Published var totalFilesFound = 0
+    @Published var filesProcessed = 0
     
     private var eventStream: FSEventStreamRef?
     private let queue = DispatchQueue(label: "com.commitchat.conversation.indexer", qos: .background)
     private let dataManager = AIMemoryDataManagerFixed.shared
     private let jsonlParser = JSONLParser()
+    private var processedFiles = Set<String>()
+    private var isInitialScanComplete = false
+    
+    // Debug logging to file
+    private let debugLogPath = FileManager.default.temporaryDirectory
+        .appendingPathComponent("conversation_indexer_debug.log").path
     
     private let claudeProjectsPath: String = {
         let homeDirectory = FileManager.default.homeDirectoryForCurrentUser
@@ -26,6 +36,27 @@ class ConversationIndexer: ObservableObject {
     }()
     
     private init() {}
+    
+    private func debugLog(_ message: String) {
+        let timestamp = DateFormatter().string(from: Date())
+        let logEntry = "[\(timestamp)] \(message)\n"
+        
+        // Print to console (may not be visible in terminal)
+        Self.logger.debug("\(message)")
+        
+        // Also write to file
+        if let data = logEntry.data(using: .utf8) {
+            if !FileManager.default.fileExists(atPath: debugLogPath) {
+                FileManager.default.createFile(atPath: debugLogPath, contents: data, attributes: nil)
+            } else {
+                if let fileHandle = FileHandle(forWritingAtPath: debugLogPath) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            }
+        }
+    }
     
     func startMonitoring() {
         guard !isMonitoring else { return }
@@ -59,7 +90,7 @@ class ConversationIndexer: ObservableObject {
         )
         
         guard let stream = eventStream else {
-            print("Failed to create FSEvent stream")
+            Self.logger.error("Failed to create FSEvent stream")
             return
         }
         
@@ -68,7 +99,7 @@ class ConversationIndexer: ObservableObject {
         
         isMonitoring = true
         
-        print("Started monitoring: \(claudeProjectsPath)")
+        Self.logger.debug("Started monitoring: \(self.claudeProjectsPath)")
         
         // Initial scan of existing conversations
         performInitialScan()
@@ -86,7 +117,7 @@ class ConversationIndexer: ObservableObject {
             self.isMonitoring = false
         }
         
-        print("Stopped monitoring")
+        Self.logger.debug("Stopped monitoring")
     }
     
     private func handleEvents(numEvents: Int, eventPaths: UnsafeMutableRawPointer, eventFlags: UnsafePointer<FSEventStreamEventFlags>) {
@@ -107,40 +138,73 @@ class ConversationIndexer: ObservableObject {
     }
     
     private func handleFileChange(_ path: String) {
-        print("Detected change in: \(path)")
+        // Skip if we've already processed this file during initial scan
+        guard !processedFiles.contains(path) || isInitialScanComplete else {
+            return
+        }
+        
+        Self.logger.debug("Detected change in: \(path)")
         
         queue.async { [weak self] in
             guard let self = self else { return }
             
-            do {
-                // Parse the conversation file
-                let conversation = try self.jsonlParser.parseConversation(at: path)
-                print("📊 Parsed conversation: \(conversation.sessionId) with \(conversation.messages.count) messages")
-                
-                // Index to database
-                print("🔄 Starting database indexing task for: \(conversation.sessionId)")
-                Task {
-                    print("🗄️ Database indexing task started for: \(conversation.sessionId)")
-                    do {
-                        print("🔍 Calling dataManager.indexConversation for: \(conversation.sessionId)")
-                        try await self.dataManager.indexConversation(conversation)
-                        
-                        print("✅ Database indexing successful for: \(conversation.sessionId)")
-                        await MainActor.run {
-                            self.indexedCount += 1
-                            self.lastIndexedTime = Date()
-                            print("📈 Updated indexedCount to: \(self.indexedCount)")
-                        }
-                        
-                        print("Indexed conversation: \(conversation.sessionId)")
-                    } catch {
-                        print("❌ Failed to index conversation: \(conversation.sessionId)")
-                        print("❌ Error details: \(error)")
-                        print("❌ Error type: \(type(of: error))")
+            // Process file synchronously to avoid concurrent database writes
+            self.processFileSync(path)
+        }
+    }
+    
+    private func processFileSync(_ path: String) {
+        // Track processed files to avoid duplicates
+        processedFiles.insert(path)
+        
+        do {
+            // Parse the conversation file
+            self.debugLog("🔍 Starting JSONL parsing for: \(path)")
+            let conversation = try self.jsonlParser.parseConversation(at: path)
+            self.debugLog("📊 Parsed conversation: \(conversation.sessionId) with \(conversation.messages.count) messages")
+            
+            // Index to database synchronously using async/await
+            self.debugLog("🔄 Starting database indexing for: \(conversation.sessionId)")
+            let semaphore = DispatchSemaphore(value: 0)
+            var indexingError: Error?
+            
+            Task.detached {
+                do {
+                    self.debugLog("🗄️ Database indexing started for: \(conversation.sessionId)")
+                    try await self.dataManager.indexConversation(conversation)
+                    self.debugLog("✅ Database indexing successful for: \(conversation.sessionId)")
+                    
+                    await MainActor.run {
+                        self.indexedCount += 1
+                        self.filesProcessed += 1
+                        self.lastIndexedTime = Date()
+                        self.debugLog("📈 Progress: \(self.filesProcessed)/\(self.totalFilesFound) files processed, \(self.indexedCount) conversations indexed")
                     }
+                } catch {
+                    self.debugLog("❌ Failed to index conversation: \(conversation.sessionId)")
+                    self.debugLog("❌ Error details: \(error)")
+                    self.debugLog("❌ Error type: \(type(of: error))")
+                    indexingError = error
                 }
-            } catch {
-                print("Failed to parse conversation at \(path): \(error)")
+                semaphore.signal()
+            }
+            
+            // Wait for async database operation to complete
+            semaphore.wait()
+            
+            if let error = indexingError {
+                Self.logger.error("Database indexing failed for \(path): \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.filesProcessed += 1
+                }
+            } else {
+                Self.logger.debug("✅ Successfully indexed conversation from: \(path)")
+            }
+            
+        } catch {
+            Self.logger.error("Failed to parse conversation at \(path): \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                self.filesProcessed += 1
             }
         }
     }
@@ -149,42 +213,79 @@ class ConversationIndexer: ObservableObject {
         queue.async { [weak self] in
             guard let self = self else { return }
             
+            self.debugLog("🔍 Starting initial scan of JSONL files...")
+            self.debugLog("🗂️ Scanning path: \(self.claudeProjectsPath)")
             let fileManager = FileManager.default
             
             // Check if the Claude projects directory exists
             guard fileManager.fileExists(atPath: self.claudeProjectsPath) else {
-                print("Claude projects directory not found: \(self.claudeProjectsPath)")
+                self.debugLog("❌ Claude projects directory not found: \(self.claudeProjectsPath)")
                 return
             }
+            
+            self.debugLog("✅ Claude projects directory found")
+            
+            // Test directory access
+            do {
+                let testContents = try fileManager.contentsOfDirectory(atPath: self.claudeProjectsPath)
+                self.debugLog("📁 Directory accessible - found \(testContents.count) items")
+            } catch {
+                self.debugLog("❌ Error accessing directory: \(error)")
+                return
+            }
+            
+            // First pass: count all JSONL files
+            var allJsonlFiles: [String] = []
             
             do {
                 // Get all project directories
                 let projectDirs = try fileManager.contentsOfDirectory(atPath: self.claudeProjectsPath)
+                self.debugLog("📁 Found \(projectDirs.count) project directories")
                 
                 for projectDir in projectDirs {
                     let projectPath = (self.claudeProjectsPath as NSString).appendingPathComponent(projectDir)
+                    self.debugLog("🔍 Processing project directory: \(projectDir)")
                     
                     // Skip if not a directory
                     var isDirectory: ObjCBool = false
                     guard fileManager.fileExists(atPath: projectPath, isDirectory: &isDirectory),
                           isDirectory.boolValue else {
+                        self.debugLog("⚠️ Skipping non-directory: \(projectDir)")
                         continue
                     }
                     
                     // Look for JSONL files in the project directory
                     let projectContents = try fileManager.contentsOfDirectory(atPath: projectPath)
+                    let jsonlFiles = projectContents.filter { $0.hasSuffix(".jsonl") }
+                    self.debugLog("📂 \(projectDir): found \(projectContents.count) items, \(jsonlFiles.count) JSONL files")
                     
-                    for file in projectContents {
-                        if file.hasSuffix(".jsonl") {
-                            let filePath = (projectPath as NSString).appendingPathComponent(file)
-                            self.handleFileChange(filePath)
-                        }
+                    for file in jsonlFiles {
+                        let filePath = (projectPath as NSString).appendingPathComponent(file)
+                        allJsonlFiles.append(filePath)
+                        self.debugLog("📄 Added JSONL file: \(filePath)")
                     }
                 }
                 
-                print("Initial scan completed")
+                DispatchQueue.main.async {
+                    self.totalFilesFound = allJsonlFiles.count
+                }
+                
+                self.debugLog("📊 Total JSONL files found: \(allJsonlFiles.count)")
+                self.debugLog("🚀 Starting sequential processing...")
+                
+                // Second pass: process all files sequentially
+                for (index, filePath) in allJsonlFiles.enumerated() {
+                    self.debugLog("🔄 Processing file \(index + 1)/\(allJsonlFiles.count): \(filePath)")
+                    self.processFileSync(filePath)
+                }
+                
+                DispatchQueue.main.async {
+                    self.isInitialScanComplete = true
+                }
+                
+                self.debugLog("✅ Initial scan completed - processed \(allJsonlFiles.count) files")
             } catch {
-                print("Error during initial scan: \(error)")
+                Self.logger.error("❌ Error during initial scan: \(error.localizedDescription)")
             }
         }
     }
