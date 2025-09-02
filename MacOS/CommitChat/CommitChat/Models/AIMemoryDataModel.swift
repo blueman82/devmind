@@ -451,9 +451,9 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         sqlite3_finalize(deleteStmt)
                     }
                     
-                    // Insert messages
+                    // Insert messages (use INSERT OR REPLACE to handle duplicate IDs)
                     let messageSql = """
-                        INSERT INTO messages (
+                        INSERT OR REPLACE INTO messages (
                             id, conversation_id, role, content, timestamp, tool_calls
                         ) VALUES (?, ?, ?, ?, ?, ?)
                     """
