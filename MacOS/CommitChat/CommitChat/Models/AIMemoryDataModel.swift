@@ -465,7 +465,8 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     
                     defer { sqlite3_finalize(messageStmt) }
                     
-                    for message in conversation.messages {
+                    print("📝 Inserting \(conversation.messages.count) messages for conversation: \(conversation.sessionId)")
+                    for (index, message) in conversation.messages.enumerated() {
                         sqlite3_reset(messageStmt)
                         sqlite3_bind_text(messageStmt, 1, message.id, -1, nil)
                         sqlite3_bind_text(messageStmt, 2, conversation.sessionId, -1, nil)
@@ -476,9 +477,21 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         let toolCallsJson = message.toolCalls.joined(separator: ",")
                         sqlite3_bind_text(messageStmt, 6, toolCallsJson, -1, nil)
                         
-                        guard sqlite3_step(messageStmt) == SQLITE_DONE else {
-                            throw AIMemoryError.databaseError("Failed to insert message")
+                        print("💬 Inserting message \(index + 1)/\(conversation.messages.count): ID=\(message.id), Role=\(message.role), Content=\(String(message.content.prefix(50)))...")
+                        
+                        let stepResult = sqlite3_step(messageStmt)
+                        if stepResult != SQLITE_DONE {
+                            let errorMessage = String(cString: sqlite3_errmsg(self.db))
+                            print("❌ Message insertion failed at index \(index + 1):")
+                            print("   SQLite Error Code: \(stepResult)")
+                            print("   SQLite Error Message: \(errorMessage)")
+                            print("   Message ID: \(message.id)")
+                            print("   Message Role: \(message.role)")
+                            print("   Content Length: \(message.content.count)")
+                            print("   Tool Calls: \(message.toolCalls.count)")
+                            throw AIMemoryError.databaseError("Failed to insert message \(index + 1): \(errorMessage)")
                         }
+                        print("✅ Message \(index + 1) inserted successfully")
                     }
                     
                     // Delete existing file references
