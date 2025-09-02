@@ -108,7 +108,11 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Replaces: mcpClient.listRecentConversations()
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
+                    return
+                }
                 var stmt: OpaquePointer?
                 
                 let timeframeFilter = self.buildTimeframeFilter(timeframe)
@@ -162,7 +166,11 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Replaces: mcpClient.getConversationContext()
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
+                    return
+                }
                 var stmt: OpaquePointer?
                 
                 // First get conversation info
@@ -239,7 +247,11 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Replaces: mcpClient.searchConversations()
     func searchConversations(query: String, limit: Int = 10) async throws -> [ConversationSearchResult] {
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
+                    return
+                }
                 var stmt: OpaquePointer?
                 
                 let sql = """
@@ -300,7 +312,11 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     
     func indexConversation(_ conversation: IndexableConversation) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .background).async {
+            DispatchQueue.global(qos: .background).async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
+                    return
+                }
                 // Begin transaction
                 var beginStmt: OpaquePointer?
                 if sqlite3_prepare_v2(self.db, "BEGIN TRANSACTION", -1, &beginStmt, nil) == SQLITE_OK {
@@ -500,18 +516,52 @@ enum AIMemoryError: Error, LocalizedError {
     }
 }
 
-// MARK: - Core Data Extensions
+// MARK: - Supporting Data Types for JSONL parsing
 
-extension Conversation {
-    var topicsArray: [String] {
-        guard let topicsString = topics else { return [] }
-        return topicsString.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-    }
+/// Represents a conversation parsed from JSONL file
+struct IndexableConversation {
+    let sessionId: String
+    let projectPath: String
+    let title: String
+    let createdAt: Date
+    let updatedAt: Date
+    let messages: [IndexableMessage]
+    let fileReferences: [String]
+    let topics: [String]
 }
 
-extension Message {
-    var toolCallsArray: [String] {
-        guard let toolCallsString = toolCalls else { return [] }
-        return toolCallsString.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-    }
+/// Represents a message within a conversation
+struct IndexableMessage {
+    let id: String
+    let role: String
+    let content: String
+    let timestamp: Date
+    let toolCalls: [String]
+}
+
+/// Search result structure
+struct ConversationSearchResult {
+    let sessionId: String
+    let title: String
+    let project: String
+    let date: Date
+    let messageCount: Int
+    let snippet: String
+    let hasErrors: Bool
+}
+
+/// Context structure for conversation details
+struct ConversationContext {
+    let sessionId: String
+    let messages: [ConversationMessage]
+    let totalMessages: Int
+    let currentPage: Int
+    let totalPages: Int
+}
+
+/// Individual message in conversation context
+struct ConversationMessage {
+    let role: String
+    let content: String
+    let timestamp: Date
 }
