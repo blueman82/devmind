@@ -215,14 +215,54 @@ class MCPClient: ObservableObject {
     }
     
     func parseJSONRPCResponses(_ output: String) {
-        // Split by newlines as each JSON-RPC response should be on a separate line
-        let lines = output.components(separatedBy: .newlines)
+        // Buffer the incoming data as large responses may be chunked
+        responseBuffer += output
         
-        for line in lines {
-            let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmedLine.isEmpty && trimmedLine.hasPrefix("{") {
-                parseJSONRPCResponse(trimmedLine)
+        // Try to extract complete JSON objects from the buffer
+        var processedLength = 0
+        var openBraces = 0
+        var inString = false
+        var escapeNext = false
+        var startIndex = 0
+        
+        for (index, char) in responseBuffer.enumerated() {
+            if escapeNext {
+                escapeNext = false
+                continue
             }
+            
+            if char == "\\" && inString {
+                escapeNext = true
+                continue
+            }
+            
+            if char == "\"" && !escapeNext {
+                inString.toggle()
+                continue
+            }
+            
+            if !inString {
+                if char == "{" {
+                    if openBraces == 0 {
+                        startIndex = index
+                    }
+                    openBraces += 1
+                } else if char == "}" {
+                    openBraces -= 1
+                    if openBraces == 0 {
+                        // Found complete JSON object
+                        let endIndex = index + 1
+                        let jsonString = String(responseBuffer[responseBuffer.index(responseBuffer.startIndex, offsetBy: startIndex)..<responseBuffer.index(responseBuffer.startIndex, offsetBy: endIndex)])
+                        parseJSONRPCResponse(jsonString)
+                        processedLength = endIndex
+                    }
+                }
+            }
+        }
+        
+        // Remove processed data from buffer
+        if processedLength > 0 {
+            responseBuffer = String(responseBuffer.dropFirst(processedLength))
         }
     }
     
