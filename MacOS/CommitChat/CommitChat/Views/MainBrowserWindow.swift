@@ -182,6 +182,7 @@ struct MainBrowserWindow: View {
         .navigationTitle("Conversations")
     }
     
+@ViewBuilder
     private var detailView: some View {
         if let conversation = selectedConversation {
             ConversationDetailView(conversation: conversation)
@@ -294,7 +295,7 @@ struct ConversationCard: View {
                     .clipShape(Capsule())
             }
             
-            Text(item.lastMessage)
+            Text("Last updated: \(item.date.formatted(.dateTime))")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(3)
@@ -302,7 +303,7 @@ struct ConversationCard: View {
             Spacer()
             
             HStack {
-                Text(item.lastUpdated.formatted(.dateTime))
+                Text(item.date.formatted(.dateTime))
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
