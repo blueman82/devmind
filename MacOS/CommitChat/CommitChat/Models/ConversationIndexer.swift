@@ -267,11 +267,12 @@ class ConversationIndexer: ObservableObject {
                     self.totalFilesFound = allJsonlFiles.count
                 }
                 
-                print("📊 Total JSONL files found: \(allJsonlFiles.count)")
-                print("🚀 Starting sequential processing...")
+                self.debugLog("📊 Total JSONL files found: \(allJsonlFiles.count)")
+                self.debugLog("🚀 Starting sequential processing...")
                 
                 // Second pass: process all files sequentially
-                for filePath in allJsonlFiles {
+                for (index, filePath) in allJsonlFiles.enumerated() {
+                    self.debugLog("🔄 Processing file \(index + 1)/\(allJsonlFiles.count): \(filePath)")
                     self.processFileSync(filePath)
                 }
                 
@@ -279,7 +280,7 @@ class ConversationIndexer: ObservableObject {
                     self.isInitialScanComplete = true
                 }
                 
-                print("✅ Initial scan completed - processed \(allJsonlFiles.count) files")
+                self.debugLog("✅ Initial scan completed - processed \(allJsonlFiles.count) files")
             } catch {
                 print("❌ Error during initial scan: \(error)")
             }
