@@ -88,10 +88,6 @@ struct MainBrowserWindow: View {
         Text("Detail View - TODO: Move detail content here") 
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-                    }
-                    .padding(8)
-                    .background(Color(NSColor.controlBackgroundColor))
-                    .cornerRadius(8)
                     .frame(maxWidth: 300)
                     
                     Spacer()
