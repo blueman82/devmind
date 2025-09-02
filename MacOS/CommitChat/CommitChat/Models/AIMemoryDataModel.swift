@@ -9,6 +9,7 @@
 import Foundation
 import SQLite3
 import Combine
+import os
 
 // MARK: - Supporting Types
 
@@ -40,6 +41,7 @@ enum AIMemoryError: Error, LocalizedError {
 /// 6. Proper index management
 class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
     static let shared = AIMemoryDataManagerFixed()
+    private static let logger = Logger(subsystem: "com.commitchat", category: "AIMemoryDataManager")
     
     @Published var isInitialized: Bool = false
     @Published var lastError: String?
@@ -57,19 +59,19 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
     // MARK: - Initialization with Corruption Fixes
     
     private init() {
-        print("🔧 AIMemoryDataManagerFixed: Starting initialization with corruption fixes...")
+        Self.logger.debug("🔧 Starting initialization with corruption fixes...")
         
         // Store database in Application Support directory
         let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let appDirectory = appSupportURL.appendingPathComponent("CommitChat")
-        print("🔧 AIMemoryDataManagerFixed: App directory: \(appDirectory.path)")
+        Self.logger.debug("🔧 App directory: \(appDirectory.path)")
         
         // Create directory if needed
         do {
             try FileManager.default.createDirectory(at: appDirectory, withIntermediateDirectories: true)
-            print("🔧 AIMemoryDataManagerFixed: Directory created/verified")
+            Self.logger.debug("🔧 Directory created/verified")
         } catch {
-            print("❌ AIMemoryDataManagerFixed: Failed to create directory: \(error)")
+            Self.logger.error("❌ Failed to create directory: \(error.localizedDescription)")
         }
         
         // ARCHITECTURE: Swift App owns database, MCP Server queries it
@@ -77,7 +79,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         let claudeAIMemoryDir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude/ai-memory")
         try? FileManager.default.createDirectory(at: claudeAIMemoryDir, withIntermediateDirectories: true)
         databaseURL = claudeAIMemoryDir.appendingPathComponent("conversations.db")
-        print("🔧 AIMemoryDataManagerFixed: Database URL: \(databaseURL.path)")
+        Self.logger.debug("🔧 Database URL: \(databaseURL.path)")
         
         initializeDatabase()
     }
@@ -91,7 +93,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             if sqlite3_prepare_v2(db, versionQuery, -1, &statement, nil) == SQLITE_OK {
                 if sqlite3_step(statement) == SQLITE_ROW {
                     let version = String(cString: sqlite3_column_text(statement, 0))
-                    print("🔍 SQLite version: \(version)")
+                    Self.logger.debug("🔍 SQLite version: \(version)")
                 }
                 sqlite3_finalize(statement)
             }
@@ -101,11 +103,11 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             createTables()
             checkAndRepairDatabase()
             isInitialized = true
-            print("✅ AIMemoryDataManagerFixed initialized with corruption fixes at: \(databaseURL.path)")
+            Self.logger.debug("✅ AIMemoryDataManagerFixed initialized with corruption fixes at: \(databaseURL.path)")
         } else {
             let error = String(cString: sqlite3_errmsg(db))
             lastError = "Failed to open database: \(error)"
-            print("❌ Database error: \(error)")
+            Self.logger.error("❌ Database error: \(error.localizedDescription)")
         }
     }
     
@@ -127,7 +129,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         executeSQL("PRAGMA cache_size = 10000;") // Reasonable cache size
         executeSQL("PRAGMA temp_store = MEMORY;") // Use memory for temp storage
         
-        print("✅ Database configured with corruption-resistant settings")
+        Self.logger.debug("✅ Database configured with corruption-resistant settings")
     }
     
     private func createTables() {
@@ -180,13 +182,13 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         executeSQL(createMessagesTable) 
         executeSQL(createIndexes)
         
-        print("✅ Tables created with corruption-resistant schema")
+        Self.logger.debug("✅ Tables created with corruption-resistant schema")
     }
     
     private func executeSQL(_ sql: String) {
         if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
             let error = String(cString: sqlite3_errmsg(db))
-            print("❌ SQL error: \(error)")
+            Self.logger.error("❌ SQL error: \(error.localizedDescription)")
         }
     }
     
@@ -197,18 +199,18 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             if sqlite3_step(stmt) == SQLITE_ROW {
                 let result = String(cString: sqlite3_column_text(stmt, 0))
                 if result != "ok" {
-                    print("⚠️ Database integrity issues detected: \(result)")
-                    print("🔧 Rebuilding database indexes...")
+                    Self.logger.warning("⚠️ Database integrity issues detected: \(result)")
+                    Self.logger.debug("🔧 Rebuilding database indexes...")
                     
                     // Rebuild all indexes
                     if sqlite3_exec(db, "REINDEX", nil, nil, nil) == SQLITE_OK {
-                        print("✅ Database indexes rebuilt successfully")
+                        Self.logger.debug("✅ Database indexes rebuilt successfully")
                     } else {
                         let error = String(cString: sqlite3_errmsg(db))
-                        print("❌ Failed to rebuild indexes: \(error)")
+                        Self.logger.error("❌ Failed to rebuild indexes: \(error.localizedDescription)")
                     }
                 } else {
-                    print("✅ Database integrity check passed")
+                    Self.logger.debug("✅ Database integrity check passed")
                 }
             }
             sqlite3_finalize(stmt)
@@ -276,7 +278,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             var commitStmt: OpaquePointer?
             if sqlite3_prepare_v2(db, "COMMIT TRANSACTION", -1, &commitStmt, nil) == SQLITE_OK {
                 if sqlite3_step(commitStmt) == SQLITE_DONE {
-                    print("✅ Conversation indexed successfully: \(conversation.sessionId)")
+                    Self.logger.debug("✅ Conversation indexed successfully: \(conversation.sessionId)")
                 } else {
                     throw AIMemoryError.databaseError("Failed to commit transaction")
                 }
@@ -290,7 +292,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                 sqlite3_step(rollbackStmt)
                 sqlite3_finalize(rollbackStmt)
             }
-            print("❌ Transaction rolled back due to error: \(error)")
+            Self.logger.error("❌ Transaction rolled back due to error: \(error.localizedDescription)")
             throw error
         }
     }
@@ -304,7 +306,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         
         // Check if conversation exists
         #if DEBUG
-        NSLog("🔍 DEBUG insertOrUpdate: sessionId = '%@', length = %d", conversation.sessionId, conversation.sessionId.count)
+        Self.logger.debug("🔍 insertOrUpdate: sessionId = '\(conversation.sessionId)', length = \(conversation.sessionId.count)")
         #endif
         var conversationId: Int64 = -1
         let selectSql = "SELECT id FROM conversations WHERE session_id = ?"
@@ -377,7 +379,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             defer { sqlite3_finalize(insertStmt) }
             
             #if DEBUG
-            NSLog("🔍 DEBUG INSERT: Binding sessionId = '%@' at position 1", conversation.sessionId)
+            Self.logger.debug("🔍 INSERT: Binding sessionId = '\(conversation.sessionId)' at position 1")
             #endif
             sqlite3_bind_text(insertStmt, 1, conversation.sessionId, -1, nil)
             sqlite3_bind_text(insertStmt, 2, projectHash, -1, nil)
