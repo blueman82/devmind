@@ -450,9 +450,8 @@ struct ConversationDetailView: View {
         
         Task {
             do {
-                // We need the sessionId from the conversation item
-                // For now, use a placeholder - this needs to be fixed in the data model
-                let sessionId = "placeholder-session-id" // TODO: Get actual sessionId from item
+                // Use the actual sessionId from the conversation item
+                let sessionId = item.sessionId
                 
                 let content = try await mcpClient.getConversationContext(
                     sessionId: sessionId,
