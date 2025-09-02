@@ -3950,3 +3950,50 @@ phase_21_search_ui_bug:
       - "Better user experience"
     
   validation_status: "Ready for user testing"
+
+# Phase 22: Conversation Browse Loading Bug Fix
+phase_22_browse_loading_bug:
+  timestamp: "2025-09-02T01:20:00"
+  milestone: "Fixed 'Loading conversations' stuck issue in browse UI"
+  
+  user_report:
+    symptom: "Browsing conversations stuck on 'Loading conversations...'"
+    context: "MCP server returns data but UI doesn't display results"
+    
+  root_cause_analysis:
+    server_response: "Returns conversation data in 'results' array, not 'conversations'"
+    field_mismatch:
+      server_provides:
+        - "sessionId (string)"
+        - "project (string)" 
+        - "startTime (ISO date)"
+        - "messageCount (number)"
+      client_expected:
+        - "title (string)"
+        - "message_count (number)"
+        - "date (ISO date)"
+    
+  fixes_applied:
+    mcpclient_response_parsing:
+      file: "MCPClient.swift"
+      lines: "444-453"
+      change: "Updated to read 'results' instead of 'conversations' key"
+      code: |
+        guard let results = response["results"] as? [[String: Any]] else {
+            throw MCPClientError.invalidResponse
+        }
+        
+    conversationitem_field_mapping:
+      file: "MockData.swift" 
+      lines: "45-73"
+      change: "Added fallback logic for server field names"
+      improvements:
+        - "messageCount || message_count fallback"
+        - "startTime || date for date parsing"
+        - "Generate title from sessionId if not provided"
+        - "Handle missing title gracefully"
+      
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    syntax_check: "Swift compilation successful"
+    ready_for_testing: "Browse UI should now load conversations"
