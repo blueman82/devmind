@@ -14,6 +14,7 @@ import SwiftUI
 /// - Note: Will be replaced with actual MCP data models in Phase 3
 struct ConversationItem: Identifiable {
     let id = UUID()
+    let sessionId: String
     let title: String
     let project: String
     let date: Date
