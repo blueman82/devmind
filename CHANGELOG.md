@@ -4,12 +4,17 @@ All notable changes to the AI Memory App project will be documented in this file
 
 ## [Unreleased] - 2025-09-02
 
-### CRITICAL ISSUE - Database Corruption
-- **Problem**: SQLite 3.43.2 btree corruption at line 106515 persists
-- **Schema**: Successfully migrated to match MCP server schema
-- **Status**: Database corrupts during bulk insertions ("database disk image is malformed")
-- **Impact**: Only 1 conversation stored, 0 messages despite processing hundreds
-- **Root Cause**: System SQLite 3.43.2 has known corruption bug, need 3.44.0+
+### CRITICAL ISSUE - Database Corruption in Swift App
+- **Problem**: SQLite 3.43.2 btree corruption at line 106515 during bulk inserts
+- **Architecture Clarification**: 
+  - Swift App should OWN the database (this is the product to sell)
+  - MCP Server should QUERY the app's database (free companion tool)
+  - Current issue: Swift `import SQLite3` forces use of system SQLite 3.43.2
+- **Solution Options**:
+  1. SQLite.swift - Swift-native wrapper with bundled SQLite
+  2. FMDB - Battle-tested Objective-C wrapper
+  3. Core Data - Apple's solution (but uses same system SQLite)
+- **Business Model**: App is the paid product with database, MCP is bonus feature
 
 ### Summary
 **Phases Completed**: 2 of 4 (50% of total implementation) ⚠️ Database issues blocking progress
