@@ -389,6 +389,7 @@ class AIMemoryMCPServer extends Server {
 
 ### Menu Bar Interface
 - **Status indicator** - Shows indexing status and recent activity
+- **Progress display** - Real-time indexing progress (X/Y files processed)
 - **Quick search** - Instant search across all conversations
 - **Recent conversations** - Quick access to recent development sessions
 - **Restore points** - List of tagged working states
