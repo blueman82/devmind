@@ -25,6 +25,10 @@ All notable changes to the AI Memory App project will be documented in this file
 - [🔨] Adding indexConversation method to populate database - IN PROGRESS
 
 #### Added
+- `JSONLParser.swift` - JSONL conversation parser (250 lines)
+  - Parses Claude Code conversation files in JSONL format
+  - Extracts messages, metadata, and file references
+  - Topic extraction and date parsing utilities
 - `ConversationIndexer.swift` - Real-time conversation file monitor (200 lines)
   - FSEvents-based monitoring for ~/.claude/projects/
   - Automatic detection of new/modified JSONL files
