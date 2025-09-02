@@ -6,39 +6,42 @@
 //
 
 import SwiftUI
+import os
 
 @main
 struct CommitChatApp: App {
+    private static let logger = Logger(subsystem: "com.commitchat", category: "CommitChatApp")
+    
     init() {
-        print("🚀 CommitChat App initializing...")
+        Self.logger.debug("🚀 CommitChat App initializing...")
         
         // Initialize database with detailed logging
-        print("🗄️ Initializing AIMemoryDataManagerFixed...")
+        Self.logger.debug("🗄️ Initializing AIMemoryDataManagerFixed...")
         let dataManager = AIMemoryDataManagerFixed.shared
-        print("✅ AIMemoryDataManager initialized: \(dataManager)")
+        Self.logger.debug("✅ AIMemoryDataManager initialized: \(dataManager)")
         
         // Start conversation monitoring with detailed status
-        print("👀 Starting ConversationIndexer...")
+        Self.logger.debug("👀 Starting ConversationIndexer...")
         ConversationIndexer.shared.startMonitoring()
         
         // Verify indexer status
         let isMonitoring = ConversationIndexer.shared.isMonitoring
         let indexedCount = ConversationIndexer.shared.indexedCount
-        print("📊 ConversationIndexer Status:")
-        print("   - isMonitoring: \(isMonitoring)")
-        print("   - indexedCount: \(indexedCount)")
-        print("   - lastIndexedTime: \(ConversationIndexer.shared.lastIndexedTime?.description ?? "never")")
+        Self.logger.debug("📊 ConversationIndexer Status:")
+        Self.logger.debug("   - isMonitoring: \(isMonitoring)")
+        Self.logger.debug("   - indexedCount: \(indexedCount)")
+        Self.logger.debug("   - lastIndexedTime: \(ConversationIndexer.shared.lastIndexedTime?.description ?? "never")")
         
         // Check if Claude projects directory exists
         let homeDir = FileManager.default.homeDirectoryForCurrentUser
         let claudeProjectsURL = homeDir.appendingPathComponent(".claude/projects")
         let claudeProjectsExists = FileManager.default.fileExists(atPath: claudeProjectsURL.path)
-        print("📁 Claude projects directory exists: \(claudeProjectsExists) at \(claudeProjectsURL.path)")
+        Self.logger.debug("📁 Claude projects directory exists: \(claudeProjectsExists) at \(claudeProjectsURL.path)")
         
         if claudeProjectsExists {
             do {
                 let contents = try FileManager.default.contentsOfDirectory(atPath: claudeProjectsURL.path)
-                print("📁 Found \(contents.count) project directories")
+                Self.logger.debug("📁 Found \(contents.count) project directories")
                 
                 // Count total JSONL files
                 var totalJSONLFiles = 0
@@ -48,17 +51,17 @@ struct CommitChatApp: App {
                         let jsonlFiles = projectContents.filter { $0.hasSuffix(".jsonl") }
                         totalJSONLFiles += jsonlFiles.count
                         if !jsonlFiles.isEmpty {
-                            print("   - \(projectDir): \(jsonlFiles.count) JSONL files")
+                            Self.logger.debug("   - \(projectDir): \(jsonlFiles.count) JSONL files")
                         }
                     }
                 }
-                print("📊 Total JSONL files found (sample): \(totalJSONLFiles)")
+                Self.logger.debug("📊 Total JSONL files found (sample): \(totalJSONLFiles)")
             } catch {
-                print("❌ Error reading Claude projects directory: \(error)")
+                Self.logger.error("❌ Error reading Claude projects directory: \(error.localizedDescription)")
             }
         }
         
-        print("🧠 AI Memory App started - monitoring conversations")
+        Self.logger.debug("🧠 AI Memory App started - monitoring conversations")
     }
     
     var body: some Scene {
