@@ -4720,3 +4720,30 @@ architecture_redesign:
     - "MCP becomes external API layer for other tools"
     - "10x+ performance improvement for UI operations"
     - "Commercial viability restored with proper architecture"
+  
+  competitor_analysis:
+    shadowgit_understanding:
+      - "ShadowGit = automatic git commit on EVERY file save"
+      - "Their MCP provides read-only access to git history"
+      - "Focus: Never lose work + perfect git granularity"
+    
+    our_differentiation:
+      - "We index Claude conversations (ShadowGit doesn't)"
+      - "We link conversations to git commits (unique value)"
+      - "Combined context: AI knows what you DISCUSSED and BUILT"
+      - "Broader scope than just git tracking"
+    
+  revised_architecture_decision:
+    keep_as_is:
+      - "Git tools remain in MCP server (already built and working)"
+      - "MCP handles git operations via existing handlers"
+    
+    must_change:
+      - "Mac app must use local SQLite directly (not via MCP)"
+      - "Mac app needs FSEvents for conversation indexing"
+      - "Mac app needs automatic git tracking (like ShadowGit)"
+    
+    competitive_strategy:
+      - "Match ShadowGit's auto-commit feature"
+      - "Add unique conversation + git linking"
+      - "Provide superior context to AI assistants"
