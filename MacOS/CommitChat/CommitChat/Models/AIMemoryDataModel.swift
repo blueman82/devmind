@@ -356,20 +356,20 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     
                     while sqlite3_step(stmt) == SQLITE_ROW {
                         let sessionId = String(cString: sqlite3_column_text(stmt, 0))
-                        let title = String(cString: sqlite3_column_text(stmt, 1))
+                        let projectName = String(cString: sqlite3_column_text(stmt, 1))
                         let projectPath = String(cString: sqlite3_column_text(stmt, 2))
                         let updatedAtString = String(cString: sqlite3_column_text(stmt, 3))
-                        let summary = String(cString: sqlite3_column_text(stmt, 4))
+                        let keywords = String(cString: sqlite3_column_text(stmt, 4))
                         
                         let updatedAt = formatter.date(from: updatedAtString) ?? Date()
                         
                         let resultDict: [String: Any] = [
                             "sessionId": sessionId,
-                            "title": title,
+                            "title": projectName,
                             "project": projectPath,
                             "date": ISO8601DateFormatter().string(from: updatedAt),
                             "messageCount": 0, // Would need separate query for exact count
-                            "snippet": summary,
+                            "snippet": keywords,  // Use keywords as snippet
                             "hasErrors": false // Placeholder
                         ]
                         let result = try! ConversationSearchResult(from: resultDict)
