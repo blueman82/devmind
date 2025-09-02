@@ -228,11 +228,21 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             throw AIMemoryError.invalidData
         }
         
-        // DEADLOCK FIX: Remove withCheckedThrowingContinuation to prevent async/queue deadlock
-        // Use direct synchronous call on database queue instead
-        return try await Task { @MainActor in
-            return try self.indexConversationSafely(conversation)
-        }.value
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            databaseQueue.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
+                    return
+                }
+                
+                do {
+                    try self.indexConversationSafely(conversation)
+                    continuation.resume()
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
     
     private func indexConversationSafely(_ conversation: IndexableConversation) throws {
