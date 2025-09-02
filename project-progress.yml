@@ -4181,3 +4181,45 @@ phase_26_conversation_detail_fix:
     build_status: "✅ BUILD SUCCEEDED"
     functionality: "Detail view now loads real conversation content via MCP"
     ready_for_testing: "Right panel should show actual conversation messages"
+
+# Phase 27: Fixed getConversationContext Response Parsing
+phase_27_conversation_context_parsing_fix:
+  timestamp: "2025-09-02T01:40:00"
+  milestone: "Fixed 'failed to load conversation' error in detail view"
+  
+  user_feedback: "UI shows me failed to load conversation when I select one"
+  
+  root_cause_analysis:
+    issue: "getConversationContext used old direct parsing instead of nested JSON extraction"
+    discovery: "Same MCP response format issue as listRecentConversations but not fixed"
+    comparison: "listRecentConversations works, getConversationContext fails with same pattern"
+    
+  technical_problem:
+    old_code: "return try ConversationContext(from: response)"
+    expected_format: "Direct access to response structure"
+    actual_format: "Nested JSON string in response.content[0].text"
+    
+  solution_applied:
+    approach: "Applied same nested JSON parsing pattern as listRecentConversations"
+    parsing_steps:
+      1. "Extract response.content[0].text string"
+      2. "Parse string as JSON to get tool response"  
+      3. "Pass parsed object to ConversationContext(from:)"
+      
+    debugging_added:
+      - "getConversationContext parameter logging"
+      - "MCP response structure logging"
+      - "Text content extraction debugging"
+      - "Tool response parsing verification"
+      
+  code_changes:
+    mcpclient_method:
+      file: "MCPClient.swift"
+      lines: "521-562"
+      change: "Complete rewrite of getConversationContext response handling"
+      pattern: "Same nested JSON extraction as listRecentConversations"
+      
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    debug_coverage: "Comprehensive logging for conversation detail loading"
+    expected_outcome: "Detail view should now load real conversation content"
