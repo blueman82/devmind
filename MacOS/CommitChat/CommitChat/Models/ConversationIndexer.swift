@@ -66,9 +66,7 @@ class ConversationIndexer: ObservableObject {
         FSEventStreamSetDispatchQueue(stream, queue)
         FSEventStreamStart(stream)
         
-        DispatchQueue.main.async {
-            self.isMonitoring = true
-        }
+        isMonitoring = true
         
         print("Started monitoring: \(claudeProjectsPath)")
         
