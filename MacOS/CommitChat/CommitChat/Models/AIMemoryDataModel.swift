@@ -296,6 +296,146 @@ class AIMemoryDataManager: ObservableObject {
         print("📝 Indexing conversation: \(jsonlPath)")
     }
     
+    // MARK: - Indexing Methods
+    
+    func indexConversation(_ conversation: IndexableConversation) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .background).async {
+                // Begin transaction
+                var beginStmt: OpaquePointer?
+                if sqlite3_prepare_v2(self.db, "BEGIN TRANSACTION", -1, &beginStmt, nil) == SQLITE_OK {
+                    sqlite3_step(beginStmt)
+                    sqlite3_finalize(beginStmt)
+                }
+                
+                do {
+                    // Insert or update conversation
+                    let conversationSql = """
+                        INSERT OR REPLACE INTO conversations (
+                            session_id, project_path, title, created_at, updated_at,
+                            message_count, topics, has_code, has_errors
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """
+                    
+                    var conversationStmt: OpaquePointer?
+                    guard sqlite3_prepare_v2(self.db, conversationSql, -1, &conversationStmt, nil) == SQLITE_OK else {
+                        throw AIMemoryError.databaseError("Failed to prepare conversation insert")
+                    }
+                    
+                    defer { sqlite3_finalize(conversationStmt) }
+                    
+                    // Bind parameters
+                    sqlite3_bind_text(conversationStmt, 1, conversation.sessionId, -1, nil)
+                    sqlite3_bind_text(conversationStmt, 2, conversation.projectPath, -1, nil)
+                    sqlite3_bind_text(conversationStmt, 3, conversation.title, -1, nil)
+                    sqlite3_bind_double(conversationStmt, 4, conversation.createdAt.timeIntervalSince1970)
+                    sqlite3_bind_double(conversationStmt, 5, conversation.updatedAt.timeIntervalSince1970)
+                    sqlite3_bind_int(conversationStmt, 6, Int32(conversation.messages.count))
+                    
+                    let topicsString = conversation.topics.joined(separator: ", ")
+                    sqlite3_bind_text(conversationStmt, 7, topicsString, -1, nil)
+                    
+                    // Check for code and errors in messages
+                    let hasCode = conversation.messages.contains { !$0.toolCalls.isEmpty }
+                    let hasErrors = conversation.messages.contains { $0.content.lowercased().contains("error") }
+                    sqlite3_bind_int(conversationStmt, 8, hasCode ? 1 : 0)
+                    sqlite3_bind_int(conversationStmt, 9, hasErrors ? 1 : 0)
+                    
+                    guard sqlite3_step(conversationStmt) == SQLITE_DONE else {
+                        throw AIMemoryError.databaseError("Failed to insert conversation")
+                    }
+                    
+                    // Delete existing messages for this conversation
+                    let deleteSql = "DELETE FROM messages WHERE conversation_id = ?"
+                    var deleteStmt: OpaquePointer?
+                    if sqlite3_prepare_v2(self.db, deleteSql, -1, &deleteStmt, nil) == SQLITE_OK {
+                        sqlite3_bind_text(deleteStmt, 1, conversation.sessionId, -1, nil)
+                        sqlite3_step(deleteStmt)
+                        sqlite3_finalize(deleteStmt)
+                    }
+                    
+                    // Insert messages
+                    let messageSql = """
+                        INSERT INTO messages (
+                            id, conversation_id, role, content, timestamp, tool_calls
+                        ) VALUES (?, ?, ?, ?, ?, ?)
+                    """
+                    
+                    var messageStmt: OpaquePointer?
+                    guard sqlite3_prepare_v2(self.db, messageSql, -1, &messageStmt, nil) == SQLITE_OK else {
+                        throw AIMemoryError.databaseError("Failed to prepare message insert")
+                    }
+                    
+                    defer { sqlite3_finalize(messageStmt) }
+                    
+                    for message in conversation.messages {
+                        sqlite3_reset(messageStmt)
+                        sqlite3_bind_text(messageStmt, 1, message.id, -1, nil)
+                        sqlite3_bind_text(messageStmt, 2, conversation.sessionId, -1, nil)
+                        sqlite3_bind_text(messageStmt, 3, message.role, -1, nil)
+                        sqlite3_bind_text(messageStmt, 4, message.content, -1, nil)
+                        sqlite3_bind_double(messageStmt, 5, message.timestamp.timeIntervalSince1970)
+                        
+                        let toolCallsJson = message.toolCalls.joined(separator: ",")
+                        sqlite3_bind_text(messageStmt, 6, toolCallsJson, -1, nil)
+                        
+                        guard sqlite3_step(messageStmt) == SQLITE_DONE else {
+                            throw AIMemoryError.databaseError("Failed to insert message")
+                        }
+                    }
+                    
+                    // Delete existing file references
+                    let deleteFilesSql = "DELETE FROM file_references WHERE conversation_id = ?"
+                    var deleteFilesStmt: OpaquePointer?
+                    if sqlite3_prepare_v2(self.db, deleteFilesSql, -1, &deleteFilesStmt, nil) == SQLITE_OK {
+                        sqlite3_bind_text(deleteFilesStmt, 1, conversation.sessionId, -1, nil)
+                        sqlite3_step(deleteFilesStmt)
+                        sqlite3_finalize(deleteFilesStmt)
+                    }
+                    
+                    // Insert file references
+                    if !conversation.fileReferences.isEmpty {
+                        let fileSql = """
+                            INSERT INTO file_references (conversation_id, file_path)
+                            VALUES (?, ?)
+                        """
+                        
+                        var fileStmt: OpaquePointer?
+                        if sqlite3_prepare_v2(self.db, fileSql, -1, &fileStmt, nil) == SQLITE_OK {
+                            defer { sqlite3_finalize(fileStmt) }
+                            
+                            for filePath in conversation.fileReferences {
+                                sqlite3_reset(fileStmt)
+                                sqlite3_bind_text(fileStmt, 1, conversation.sessionId, -1, nil)
+                                sqlite3_bind_text(fileStmt, 2, filePath, -1, nil)
+                                sqlite3_step(fileStmt)
+                            }
+                        }
+                    }
+                    
+                    // Commit transaction
+                    var commitStmt: OpaquePointer?
+                    if sqlite3_prepare_v2(self.db, "COMMIT", -1, &commitStmt, nil) == SQLITE_OK {
+                        sqlite3_step(commitStmt)
+                        sqlite3_finalize(commitStmt)
+                    }
+                    
+                    continuation.resume()
+                    
+                } catch {
+                    // Rollback on error
+                    var rollbackStmt: OpaquePointer?
+                    if sqlite3_prepare_v2(self.db, "ROLLBACK", -1, &rollbackStmt, nil) == SQLITE_OK {
+                        sqlite3_step(rollbackStmt)
+                        sqlite3_finalize(rollbackStmt)
+                    }
+                    
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
     // MARK: - Helper Methods
     
     private func buildTimeframeFilter(_ timeframe: String) -> String {
