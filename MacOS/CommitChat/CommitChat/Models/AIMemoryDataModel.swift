@@ -166,7 +166,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Replaces: mcpClient.getConversationContext()
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            DispatchQueue.global(qos: .userInitiated).async(execute: { [weak self] in
                 guard let self = self else {
                     continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
                     return
