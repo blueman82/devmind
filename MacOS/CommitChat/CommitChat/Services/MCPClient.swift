@@ -519,6 +519,8 @@ class MCPClient: ObservableObject {
     
     /// Get conversation context
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
+        print("🔍 DEBUG: getConversationContext called with sessionId=\(sessionId), page=\(page), pageSize=\(pageSize)")
+        
         let toolParams: [String: Any] = [
             "session_id": sessionId,
             "page": page,
@@ -531,9 +533,32 @@ class MCPClient: ObservableObject {
             "arguments": toolParams
         ]
         
+        print("🔍 DEBUG: Sending getConversationContext request with params: \(params)")
+        
         let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
-        return try ConversationContext(from: response)
+        print("🔍 DEBUG: Received getConversationContext response keys: \(response.keys)")
+        
+        // Extract the nested JSON response from the MCP tool call (same as listRecentConversations)
+        guard let content = response["content"] as? [[String: Any]],
+              let firstContent = content.first,
+              let textContent = firstContent["text"] as? String else {
+            print("🔍 DEBUG: Failed to extract content.text from getConversationContext MCP response")
+            throw MCPClientError.invalidResponse
+        }
+        
+        print("🔍 DEBUG: Extracted getConversationContext text content length: \(textContent.count)")
+        
+        // Parse the nested JSON response from the tool
+        guard let data = textContent.data(using: .utf8),
+              let toolResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            print("🔍 DEBUG: Failed to parse nested JSON from getConversationContext")
+            throw MCPClientError.invalidResponse
+        }
+        
+        print("🔍 DEBUG: Parsed getConversationContext tool response keys: \(toolResponse.keys)")
+        
+        return try ConversationContext(from: toolResponse)
     }
     
     /// List restore points
