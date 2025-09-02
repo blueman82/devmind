@@ -228,6 +228,7 @@ struct MainBrowserWindow: View {
     // MARK: - Methods
     
     private func loadRecentConversations() {
+        print("🔍 DEBUG: MainBrowserWindow.loadRecentConversations() called")
         isLoadingConversations = true
         conversationError = nil
         
@@ -236,10 +237,14 @@ struct MainBrowserWindow: View {
                 // Determine timeframe based on selected project
                 let timeframe = selectedProject == nil ? "today" : "last week"
                 
+                print("🔍 DEBUG: About to call mcpClient.listRecentConversations(limit: 50, timeframe: \(timeframe))")
+                
                 let conversations = try await mcpClient.listRecentConversations(
                     limit: 50,
                     timeframe: timeframe
                 )
+                
+                print("🔍 DEBUG: Successfully received \(conversations.count) conversations")
                 
                 await MainActor.run {
                     self.recentConversations = conversations
@@ -247,13 +252,16 @@ struct MainBrowserWindow: View {
                     
                     // Update global conversation count
                     appState.conversationCount = conversations.count
+                    print("🔍 DEBUG: UI updated with \(conversations.count) conversations")
                 }
             } catch let error as MCPClientError {
+                print("🔍 DEBUG: MCPClientError caught: \(error)")
                 await MainActor.run {
                     self.conversationError = error
                     self.isLoadingConversations = false
                 }
             } catch {
+                print("🔍 DEBUG: Generic error caught: \(error)")
                 await MainActor.run {
                     self.conversationError = .serverError(error.localizedDescription)
                     self.isLoadingConversations = false
