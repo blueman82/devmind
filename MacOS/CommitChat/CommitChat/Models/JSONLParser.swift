@@ -69,9 +69,10 @@ class JSONLParser {
             do {
                 if let json = try JSONSerialization.jsonObject(with: lineData) as? [String: Any] {
                     // Parse Claude Code JSONL format
-                    // Extract session ID from first line if available
-                    if sessionId == nil {
-                        sessionId = json["sessionId"] as? String
+                    // BUG FIX: Extract session ID from EVERY line, should be consistent within file
+                    // All lines in a JSONL file should have the same sessionId
+                    if let currentSessionId = json["sessionId"] as? String {
+                        sessionId = currentSessionId
                     }
                     
                     // Extract working directory for project path
