@@ -158,7 +158,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
                 
                 sqlite3_finalize(stmt)
-            }
+            })
         }
     }
     
@@ -239,7 +239,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
                 
                 sqlite3_finalize(stmt)
-            }
+            })
         }
     }
     
@@ -294,7 +294,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
                 
                 sqlite3_finalize(stmt)
-            }
+            })
         }
     }
     
