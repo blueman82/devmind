@@ -303,6 +303,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         let now = Date()
         
         // Check if conversation exists
+        print("🔍 DEBUG insertOrUpdate: sessionId = '\(conversation.sessionId)', length = \(conversation.sessionId.count)")
         var conversationId: Int64 = -1
         let selectSql = "SELECT id FROM conversations WHERE session_id = ?"
         var selectStmt: OpaquePointer?
