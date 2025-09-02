@@ -488,17 +488,38 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             sqlite3_reset(messageStmt)
             sqlite3_bind_int64(messageStmt, 1, conversationId)
             sqlite3_bind_int64(messageStmt, 2, Int64(index)) // message_index
-            sqlite3_bind_text(messageStmt, 3, message.id, -1, nil) // uuid
-            sqlite3_bind_text(messageStmt, 4, message.role, -1, nil) // role
-            sqlite3_bind_text(messageStmt, 5, "text", -1, nil) // content_type
-            sqlite3_bind_text(messageStmt, 6, message.content, -1, nil) // content
+            
+            // Use withCString to ensure string validity during binding
+            _ = message.id.withCString { cString in
+                sqlite3_bind_text(messageStmt, 3, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // uuid
+            }
+            
+            _ = message.role.withCString { cString in
+                sqlite3_bind_text(messageStmt, 4, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // role
+            }
+            
+            _ = "text".withCString { cString in
+                sqlite3_bind_text(messageStmt, 5, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // content_type
+            }
+            
+            _ = message.content.withCString { cString in
+                sqlite3_bind_text(messageStmt, 6, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // content
+            }
             
             let timestampString = ISO8601DateFormatter().string(from: message.timestamp)
-            sqlite3_bind_text(messageStmt, 7, timestampString, -1, nil) // timestamp
+            _ = timestampString.withCString { cString in
+                sqlite3_bind_text(messageStmt, 7, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // timestamp
+            }
             
             let toolCallsJson = message.toolCalls.joined(separator: ",")
-            sqlite3_bind_text(messageStmt, 8, toolCallsJson, -1, nil) // tool_calls
-            sqlite3_bind_text(messageStmt, 9, "[]", -1, nil) // file_references (empty JSON array)
+            _ = toolCallsJson.withCString { cString in
+                sqlite3_bind_text(messageStmt, 8, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // tool_calls
+            }
+            
+            _ = "[]".withCString { cString in
+                sqlite3_bind_text(messageStmt, 9, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self)) // file_references
+            }
+            
             sqlite3_bind_int(messageStmt, 10, Int32(message.content.count)) // tokens (approximate)
             
             let stepResult = sqlite3_step(messageStmt)
