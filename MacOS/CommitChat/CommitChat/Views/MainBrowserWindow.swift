@@ -268,16 +268,16 @@ struct MainBrowserWindow: View {
                     appState.conversationCount = conversations.count
                     print("🔍 DEBUG: UI updated with \(conversations.count) conversations")
                 }
-            } catch let error as MCPClientError {
-                print("🔍 DEBUG: MCPClientError caught: \(error)")
+            } catch let error as AIMemoryError {
+                print("🔍 DEBUG: AIMemoryError caught: \(error)")
                 await MainActor.run {
-                    self.conversationError = error
+                    self.conversationError = error.localizedDescription
                     self.isLoadingConversations = false
                 }
             } catch {
                 print("🔍 DEBUG: Generic error caught: \(error)")
                 await MainActor.run {
-                    self.conversationError = .serverError(error.localizedDescription)
+                    self.conversationError = error.localizedDescription
                     self.isLoadingConversations = false
                 }
             }
