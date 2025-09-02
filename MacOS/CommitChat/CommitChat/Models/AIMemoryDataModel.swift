@@ -190,10 +190,10 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 
                 let timeframeFilter = self.buildTimeframeFilter(timeframe)
                 let sql = """
-                    SELECT id, session_id, title, project, last_updated, message_count, topics, summary, has_code, has_errors
+                    SELECT id, session_id, title, project_path, updated_at, message_count, topics, summary, has_code, has_errors
                     FROM conversations
-                    WHERE last_updated >= datetime('\(timeframeFilter)')
-                    ORDER BY last_updated DESC
+                    WHERE updated_at >= datetime('\(timeframeFilter)')
+                    ORDER BY updated_at DESC
                     LIMIT \(limit)
                 """
                 
@@ -201,22 +201,23 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     var conversations: [ConversationItem] = []
                     
                     while sqlite3_step(stmt) == SQLITE_ROW {
+                        let conversationId = sqlite3_column_int(stmt, 0)
                         let sessionId = String(cString: sqlite3_column_text(stmt, 1))
                         let title = String(cString: sqlite3_column_text(stmt, 2))
-                        let project = String(cString: sqlite3_column_text(stmt, 3))
-                        let lastUpdatedString = String(cString: sqlite3_column_text(stmt, 4))
+                        let projectPath = String(cString: sqlite3_column_text(stmt, 3))
+                        let updatedAtString = String(cString: sqlite3_column_text(stmt, 4))
                         let messageCount = sqlite3_column_int(stmt, 5)
                         let hasCode = sqlite3_column_int(stmt, 8) != 0
                         let hasErrors = sqlite3_column_int(stmt, 9) != 0
                         
                         let formatter = ISO8601DateFormatter()
-                        let lastUpdated = formatter.date(from: lastUpdatedString) ?? Date()
+                        let updatedAt = formatter.date(from: updatedAtString) ?? Date()
                         
                         let item = ConversationItem(
                             sessionId: sessionId,
                             title: title,
-                            project: project,
-                            date: lastUpdated,
+                            project: projectPath,
+                            date: updatedAt,
                             messageCount: Int(messageCount),
                             hasCode: hasCode,
                             hasErrors: hasErrors
@@ -424,54 +425,94 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
                 
                 do {
+                    // First check if conversation exists to get its ID
+                    var conversationId: Int64 = -1
+                    let selectSql = "SELECT id FROM conversations WHERE session_id = ?"
+                    var selectStmt: OpaquePointer?
+                    if sqlite3_prepare_v2(self.db, selectSql, -1, &selectStmt, nil) == SQLITE_OK {
+                        sqlite3_bind_text(selectStmt, 1, conversation.sessionId, -1, nil)
+                        if sqlite3_step(selectStmt) == SQLITE_ROW {
+                            conversationId = sqlite3_column_int64(selectStmt, 0)
+                        }
+                        sqlite3_finalize(selectStmt)
+                    }
+                    
                     // Insert or update conversation
-                    let conversationSql = """
-                        INSERT OR REPLACE INTO conversations (
-                            session_id, project, title, last_updated,
-                            message_count, topics, has_code, has_errors
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """
+                    let conversationSql: String
+                    if conversationId > 0 {
+                        conversationSql = """
+                            UPDATE conversations SET
+                                title = ?, project_path = ?, updated_at = ?,
+                                message_count = ?, topics = ?, has_code = ?, has_errors = ?
+                            WHERE id = ?
+                        """
+                    } else {
+                        conversationSql = """
+                            INSERT INTO conversations (
+                                session_id, title, project_path, created_at, updated_at,
+                                message_count, topics, has_code, has_errors
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """
+                    }
                     
                     var conversationStmt: OpaquePointer?
                     guard sqlite3_prepare_v2(self.db, conversationSql, -1, &conversationStmt, nil) == SQLITE_OK else {
-                        throw AIMemoryError.databaseError("Failed to prepare conversation insert")
+                        throw AIMemoryError.databaseError("Failed to prepare conversation statement")
                     }
                     
                     defer { sqlite3_finalize(conversationStmt) }
                     
-                    // Bind parameters
-                    sqlite3_bind_text(conversationStmt, 1, conversation.sessionId, -1, nil)
-                    sqlite3_bind_text(conversationStmt, 2, conversation.projectPath, -1, nil)
-                    sqlite3_bind_text(conversationStmt, 3, conversation.title, -1, nil)
-                    sqlite3_bind_double(conversationStmt, 4, conversation.updatedAt.timeIntervalSince1970)
-                    sqlite3_bind_int(conversationStmt, 5, Int32(conversation.messages.count))
-                    
                     let topicsString = conversation.topics.joined(separator: ", ")
-                    sqlite3_bind_text(conversationStmt, 6, topicsString, -1, nil)
-                    
-                    // Check for code and errors in messages
                     let hasCode = conversation.messages.contains { !$0.toolCalls.isEmpty }
                     let hasErrors = conversation.messages.contains { $0.content.lowercased().contains("error") }
-                    sqlite3_bind_int(conversationStmt, 7, hasCode ? 1 : 0)
-                    sqlite3_bind_int(conversationStmt, 8, hasErrors ? 1 : 0)
+                    let dateFormatter = ISO8601DateFormatter()
+                    let now = dateFormatter.string(from: Date())
+                    
+                    if conversationId > 0 {
+                        // UPDATE existing conversation
+                        sqlite3_bind_text(conversationStmt, 1, conversation.title, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 2, conversation.projectPath, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 3, now, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 4, Int32(conversation.messages.count))
+                        sqlite3_bind_text(conversationStmt, 5, topicsString, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 6, hasCode ? 1 : 0)
+                        sqlite3_bind_int(conversationStmt, 7, hasErrors ? 1 : 0)
+                        sqlite3_bind_int64(conversationStmt, 8, conversationId)
+                    } else {
+                        // INSERT new conversation
+                        sqlite3_bind_text(conversationStmt, 1, conversation.sessionId, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 2, conversation.title, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 3, conversation.projectPath, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 4, now, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 5, now, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 6, Int32(conversation.messages.count))
+                        sqlite3_bind_text(conversationStmt, 7, topicsString, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 8, hasCode ? 1 : 0)
+                        sqlite3_bind_int(conversationStmt, 9, hasErrors ? 1 : 0)
+                    }
                     
                     guard sqlite3_step(conversationStmt) == SQLITE_DONE else {
-                        throw AIMemoryError.databaseError("Failed to insert conversation")
+                        throw AIMemoryError.databaseError("Failed to insert/update conversation")
+                    }
+                    
+                    // Get the conversation ID for message insertion
+                    if conversationId <= 0 {
+                        conversationId = sqlite3_last_insert_rowid(self.db)
                     }
                     
                     // Delete existing messages for this conversation
                     let deleteSql = "DELETE FROM messages WHERE conversation_id = ?"
                     var deleteStmt: OpaquePointer?
                     if sqlite3_prepare_v2(self.db, deleteSql, -1, &deleteStmt, nil) == SQLITE_OK {
-                        sqlite3_bind_text(deleteStmt, 1, conversation.sessionId, -1, nil)
+                        sqlite3_bind_int64(deleteStmt, 1, conversationId)
                         sqlite3_step(deleteStmt)
                         sqlite3_finalize(deleteStmt)
                     }
                     
-                    // Insert messages (use INSERT OR REPLACE to handle duplicate IDs)
+                    // Insert messages
                     let messageSql = """
-                        INSERT OR REPLACE INTO messages (
-                            id, conversation_id, role, content, timestamp, tool_calls
+                        INSERT INTO messages (
+                            conversation_id, message_uuid, role, content, timestamp, tool_calls
                         ) VALUES (?, ?, ?, ?, ?, ?)
                     """
                     
@@ -485,11 +526,13 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     print("📝 Inserting \(conversation.messages.count) messages for conversation: \(conversation.sessionId)")
                     for (index, message) in conversation.messages.enumerated() {
                         sqlite3_reset(messageStmt)
-                        sqlite3_bind_text(messageStmt, 1, message.id, -1, nil)
-                        sqlite3_bind_text(messageStmt, 2, conversation.sessionId, -1, nil)
+                        sqlite3_bind_int64(messageStmt, 1, conversationId)
+                        sqlite3_bind_text(messageStmt, 2, message.id, -1, nil)  // message_uuid
                         sqlite3_bind_text(messageStmt, 3, message.role, -1, nil)
                         sqlite3_bind_text(messageStmt, 4, message.content, -1, nil)
-                        sqlite3_bind_double(messageStmt, 5, message.timestamp.timeIntervalSince1970)
+                        
+                        let timestampString = ISO8601DateFormatter().string(from: message.timestamp)
+                        sqlite3_bind_text(messageStmt, 5, timestampString, -1, nil)
                         
                         let toolCallsJson = message.toolCalls.joined(separator: ",")
                         sqlite3_bind_text(messageStmt, 6, toolCallsJson, -1, nil)
