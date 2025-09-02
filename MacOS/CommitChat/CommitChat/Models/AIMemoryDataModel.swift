@@ -123,6 +123,31 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
         }
     }
     
+    private func checkAndRepairDatabase() {
+        // Check database integrity
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, "PRAGMA integrity_check", -1, &stmt, nil) == SQLITE_OK {
+            if sqlite3_step(stmt) == SQLITE_ROW {
+                let result = String(cString: sqlite3_column_text(stmt, 0))
+                if result != "ok" {
+                    print("⚠️ Database integrity issues detected: \(result)")
+                    print("🔧 Rebuilding database indexes...")
+                    
+                    // Rebuild all indexes
+                    if sqlite3_exec(db, "REINDEX", nil, nil, nil) == SQLITE_OK {
+                        print("✅ Database indexes rebuilt successfully")
+                    } else {
+                        let error = String(cString: sqlite3_errmsg(db))
+                        print("❌ Failed to rebuild indexes: \(error)")
+                    }
+                } else {
+                    print("✅ Database integrity check passed")
+                }
+            }
+            sqlite3_finalize(stmt)
+        }
+    }
+    
     // MARK: - Conversation Operations (replacing MCPClient calls)
     
     /// List recent conversations from local database
