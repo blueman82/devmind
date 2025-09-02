@@ -80,9 +80,8 @@ struct MainBrowserWindow: View {
     }
     
     private var contentView: some View {
-        } content: {
-            // Main content area with conversation grid
-            VStack(spacing: 0) {
+        // Main content area with conversation grid
+        VStack(spacing: 0) {
                 // Toolbar
                 HStack {
                     HStack {
