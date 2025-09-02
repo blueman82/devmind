@@ -56,7 +56,7 @@ class ProcessManager: ObservableObject {
     /// Start the MCP server process
     func startMCPServer() {
         Self.logger.debug("startMCPServer() called")
-        Self.logger.debug("Current serverStatus = \(serverStatus.displayText)")
+        Self.logger.debug("Current serverStatus = \(self.serverStatus.displayText)")
         guard serverStatus != .running && serverStatus != .starting else {
             Self.logger.debug("MCP server is already running or starting - exiting early")
             return
