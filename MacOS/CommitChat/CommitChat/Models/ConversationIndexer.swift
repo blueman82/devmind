@@ -99,7 +99,7 @@ class ConversationIndexer: ObservableObject {
         
         isMonitoring = true
         
-        Self.logger.debug("Started monitoring: \(claudeProjectsPath)")
+        Self.logger.debug("Started monitoring: \(self.claudeProjectsPath)")
         
         // Initial scan of existing conversations
         performInitialScan()
