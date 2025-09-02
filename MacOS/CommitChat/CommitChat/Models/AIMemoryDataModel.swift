@@ -448,8 +448,8 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         
         let messageSql = """
             INSERT OR REPLACE INTO messages (
-                conversation_id, message_uuid, role, content, timestamp, tool_calls
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                conversation_id, message_index, uuid, role, content_type, content, timestamp, tool_calls, file_references, tokens
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         
         var messageStmt: OpaquePointer?
