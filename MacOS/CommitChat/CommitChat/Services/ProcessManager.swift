@@ -56,7 +56,7 @@ class ProcessManager: ObservableObject {
     /// Start the MCP server process
     func startMCPServer() {
         Self.logger.debug("startMCPServer() called")
-        Self.logger.debug("Current serverStatus = \(serverStatus)")
+        Self.logger.debug("Current serverStatus = \(serverStatus.displayText)")
         guard serverStatus != .running && serverStatus != .starting else {
             Self.logger.debug("MCP server is already running or starting - exiting early")
             return
@@ -106,7 +106,7 @@ class ProcessManager: ObservableObject {
                         let error = "MCP server crashed with exit code \(process.terminationStatus)"
                         self?.serverStatus = .error(error)
                         self?.lastError = error
-                        Self.logger.error("\(error.localizedDescription)")
+                        Self.logger.error("\(error)")
                     }
                     
                     self?.mcpProcess = nil
@@ -121,13 +121,13 @@ class ProcessManager: ObservableObject {
                 Self.logger.debug("process.isRunning = \(process.isRunning)")
                 if process.isRunning {
                     self.serverStatus = .running
-                    print("ProcessManager: Setting serverStatus to .running")
-                    print("MCP server started successfully")
+                    Self.logger.debug("ProcessManager: Setting serverStatus to .running")
+                    Self.logger.debug("MCP server started successfully")
                 } else {
                     let error = "MCP server failed to start"
                     self.serverStatus = .error(error)
                     self.lastError = error
-                    print("ProcessManager: Setting serverStatus to .error(\(error))")
+                    Self.logger.debug("ProcessManager: Setting serverStatus to .error(\(error))")
                 }
             }
             
@@ -136,7 +136,7 @@ class ProcessManager: ObservableObject {
                 let errorMessage = "Failed to start MCP server: \(error.localizedDescription)"
                 self.serverStatus = .error(errorMessage)
                 self.lastError = errorMessage
-                print(errorMessage)
+                Self.logger.error("\(errorMessage)")
             }
         }
     }
@@ -160,7 +160,7 @@ class ProcessManager: ObservableObject {
         // Force kill after 5 seconds if still running
         DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
             if let process = self.mcpProcess, process.isRunning {
-                print("Force killing MCP server process")
+                Self.logger.debug("Force killing MCP server process")
                 // Send SIGKILL signal to force termination
                 kill(process.processIdentifier, SIGKILL)
             }
@@ -215,32 +215,32 @@ class ProcessManager: ObservableObject {
     private func setupOutputMonitoring(outputPipe: Pipe, errorPipe: Pipe) {
         // Monitor standard output
         outputPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
-            print("ProcessManager: readabilityHandler called")
+            Self.logger.debug("ProcessManager: readabilityHandler called")
             let data = handle.availableData
-            print("ProcessManager: availableData size = \(data.count) bytes")
+            Self.logger.debug("ProcessManager: availableData size = \(data.count) bytes")
             
             if !data.isEmpty {
                 let output = String(data: data, encoding: .utf8) ?? ""
-                print("ProcessManager: raw output = '\(output)'")
-                print("ProcessManager: output.isEmpty = \(output.isEmpty)")
+                Self.logger.debug("ProcessManager: raw output = '\(output)'")
+                Self.logger.debug("ProcessManager: output.isEmpty = \(output.isEmpty)")
                 
                 // Pass raw output to MCPClient for JSON-RPC parsing BEFORE any processing
                 // This ensures MCPClient gets the unmodified JSON-RPC responses
                 if self?.serverStatus == .running {
                     MCPClient.shared.parseJSONRPCResponses(output)
-                    print("ProcessManager: Passed output to MCPClient for JSON-RPC parsing")
+                    Self.logger.debug("ProcessManager: Passed output to MCPClient for JSON-RPC parsing")
                 }
                 
                 DispatchQueue.main.async {
                     self?.serverOutput.append(output.trimmingCharacters(in: .whitespacesAndNewlines))
-                    print("MCP Server Output: \(output)")
+                    Self.logger.debug("MCP Server Output: \(output)")
                     
                     // Strip ALL ANSI color codes before pattern matching (comprehensive regex)
                     var cleanOutput = output.replacingOccurrences(of: "\\u001b\\[[0-9;]*m", with: "", options: .regularExpression)
                     cleanOutput = cleanOutput.replacingOccurrences(of: "\\033\\[[0-9;]*m", with: "", options: .regularExpression)
                     cleanOutput = cleanOutput.replacingOccurrences(of: "\\e\\[[0-9;]*m", with: "", options: .regularExpression)
                     cleanOutput = cleanOutput.replacingOccurrences(of: "\\[[0-9;]*m", with: "", options: .regularExpression)
-                    print("ProcessManager: cleaned output = '\(cleanOutput)'")
+                    Self.logger.debug("ProcessManager: cleaned output = '\(cleanOutput)'")
                     
                     // Enhanced debugging for pattern matching
                     let pattern1 = "MCP Server connected on stdio transport"
@@ -248,56 +248,56 @@ class ProcessManager: ObservableObject {
                     let containsPattern1 = cleanOutput.contains(pattern1)
                     let containsPattern2 = cleanOutput.contains(pattern2)
                     
-                    print("ProcessManager: Checking patterns:")
-                    print("ProcessManager:   - Pattern1 '\(pattern1)': \(containsPattern1)")
-                    print("ProcessManager:   - Pattern2 '\(pattern2)': \(containsPattern2)")
-                    print("ProcessManager:   - Current serverStatus: \(self?.serverStatus.displayText ?? "unknown")")
+                    Self.logger.debug("ProcessManager: Checking patterns:")
+                    Self.logger.debug("ProcessManager:   - Pattern1 '\(pattern1)': \(containsPattern1)")
+                    Self.logger.debug("ProcessManager:   - Pattern2 '\(pattern2)': \(containsPattern2)")
+                    Self.logger.debug("ProcessManager:   - Current serverStatus: \(self?.serverStatus.displayText ?? "unknown")")
                     
                     // Alternative status detection: look for server startup messages
                     if containsPattern1 || containsPattern2 {
-                        print("ProcessManager: ✅ PATTERN MATCHED! Detected MCP server startup via output")
+                        Self.logger.debug("ProcessManager: ✅ PATTERN MATCHED! Detected MCP server startup via output")
                         if self?.serverStatus != .running {
                             self?.serverStatus = .running
-                            print("ProcessManager: ✅ Setting serverStatus to .running via output detection")
+                            Self.logger.debug("ProcessManager: ✅ Setting serverStatus to .running via output detection")
                             // Now that server is running, future outputs will be passed to MCPClient
                         } else {
-                            print("ProcessManager: ⚠️  Server already marked as running, no status change needed")
+                            Self.logger.debug("ProcessManager: ⚠️  Server already marked as running, no status change needed")
                         }
                     } else {
-                        print("ProcessManager: ❌ No startup patterns found in this output")
+                        Self.logger.debug("ProcessManager: ❌ No startup patterns found in this output")
                     }
                 }
             } else {
-                print("ProcessManager: availableData is empty, skipping")
+                Self.logger.debug("ProcessManager: availableData is empty, skipping")
             }
         }
         
         // Monitor error output (MCP server uses console.error for startup messages)
         errorPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
-            print("ProcessManager: ERROR readabilityHandler called")
+            Self.logger.debug("ProcessManager: ERROR readabilityHandler called")
             let data = handle.availableData
-            print("ProcessManager: ERROR availableData size = \(data.count) bytes")
+            Self.logger.debug("ProcessManager: ERROR availableData size = \(data.count) bytes")
             
             if !data.isEmpty {
                 let error = String(data: data, encoding: .utf8) ?? ""
-                print("ProcessManager: ERROR raw output = '\(error)'")
+                Self.logger.debug("ProcessManager: ERROR raw output = '\(error)'")
                 
                 DispatchQueue.main.async {
                     // Check for MCP server startup message in stderr first
                     let startupPattern = "AI Memory MCP Server running on stdio"
                     let containsStartup = error.contains(startupPattern)
                     
-                    print("ProcessManager: ERROR - Checking for startup pattern:")
-                    print("ProcessManager: ERROR - Pattern '\(startupPattern)': \(containsStartup)")
-                    print("ProcessManager: ERROR - Current serverStatus: \(self?.serverStatus.displayText ?? "unknown")")
+                    Self.logger.debug("ProcessManager: ERROR - Checking for startup pattern:")
+                    Self.logger.debug("ProcessManager: ERROR - Pattern '\(startupPattern)': \(containsStartup)")
+                    Self.logger.debug("ProcessManager: ERROR - Current serverStatus: \(self?.serverStatus.displayText ?? "unknown")")
                     
                     if containsStartup {
-                        print("ProcessManager: ✅ STDERR STARTUP DETECTED! Found MCP server startup in stderr")
+                        Self.logger.debug("ProcessManager: ✅ STDERR STARTUP DETECTED! Found MCP server startup in stderr")
                         if self?.serverStatus != .running {
                             self?.serverStatus = .running
-                            print("ProcessManager: ✅ Setting serverStatus to .running via STDERR detection")
+                            Self.logger.debug("ProcessManager: ✅ Setting serverStatus to .running via STDERR detection")
                         } else {
-                            print("ProcessManager: ⚠️  Server already marked as running via stderr")
+                            Self.logger.debug("ProcessManager: ⚠️  Server already marked as running via stderr")
                         }
                         // Don't treat startup message as an error
                         self?.serverOutput.append("MCP Server Startup: \(error.trimmingCharacters(in: .whitespacesAndNewlines))")
@@ -306,11 +306,11 @@ class ProcessManager: ObservableObject {
                         let errorMessage = "MCP Server Error: \(error)"
                         self?.lastError = errorMessage
                         self?.serverOutput.append(errorMessage)
-                        print(errorMessage)
+                        Self.logger.error("\(errorMessage)")
                     }
                 }
             } else {
-                print("ProcessManager: ERROR availableData is empty, skipping")
+                Self.logger.debug("ProcessManager: ERROR availableData is empty, skipping")
             }
         }
     }
