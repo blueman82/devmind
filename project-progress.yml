@@ -4045,3 +4045,50 @@ phase_23_json_buffering_fix:
     build_status: "✅ BUILD SUCCEEDED"
     syntax_check: "Swift compilation successful"
     ready_for_testing: "Should handle large conversation list responses"
+
+# Phase 24: MCP Tool Response Format Discovery
+phase_24_mcp_response_format_fix:
+  timestamp: "2025-09-02T01:30:00" 
+  milestone: "Fixed MCP tool response parsing - discovered actual response structure"
+  
+  user_feedback: "Still not one single change - think harder about this"
+  
+  breakthrough_discovery:
+    issue: "All previous fixes were wrong assumptions about response format"
+    actual_mcp_response: |
+      {
+        "result": {
+          "content": [{
+            "type": "text", 
+            "text": "{\"timeframe\": \"today\", \"results\": [...]}"
+          }]
+        },
+        "jsonrpc": "2.0",
+        "id": 5
+      }
+    assumed_format: "Direct access to results array"
+    real_format: "Nested JSON string inside content[0].text"
+    
+  debugging_approach:
+    step_1: "Added comprehensive debug logging to trace execution flow"
+    step_2: "Discovered MCP server was responding successfully"
+    step_3: "Found response parsing was failing on wrong format assumption"
+    step_4: "Analyzed actual log structure to understand nesting"
+    
+  technical_fix:
+    old_parsing: |
+      guard let results = response["results"] as? [[String: Any]]
+    new_parsing: |
+      guard let content = response["content"] as? [[String: Any]],
+            let firstContent = content.first,
+            let textContent = firstContent["text"] as? String else {
+        // Extract nested JSON string
+      }
+      guard let data = textContent.data(using: .utf8),
+            let toolResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let results = toolResponse["results"] as? [[String: Any]]
+    
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    debug_logging: "Added to both MainBrowserWindow and MCPClient"
+    ready_for_testing: "Browse UI should now correctly parse MCP tool responses"
