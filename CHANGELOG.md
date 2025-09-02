@@ -2,6 +2,25 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-02] - UI REQUIREMENTS DOCUMENTATION - Indexing Progress Visibility
+
+### Product Requirements Update
+- **UI ENHANCEMENT**: Added indexing progress display requirement to AI-Memory-App-PRD.md
+- **USER EXPERIENCE**: Users need real-time visibility into database building progress
+- **CURRENT GAP**: Indexing progress only visible in Xcode console, not in production UI
+- **REQUIREMENT**: Real-time progress indicators showing "X/Y files processed" in UI
+
+### Documentation Updates
+- **User Interface**: Added "Indexing Progress Display - Real-time database building status with progress indicators"
+- **Daily Usage**: Added "Progress visibility - Users can see indexing progress in real-time UI"
+- **Menu Bar Interface**: Added "Progress display - Real-time indexing progress (X/Y files processed)"
+- **macOS Application Roadmap**: Added "Indexing Progress UI - Real-time progress indicators for database building"
+
+### Next Phase Requirements
+- Implement UI progress indicators for ConversationIndexer operations
+- Show real-time file processing counts in main application window
+- Provide transparent feedback during initial conversation indexing
+
 ## [2025-09-02] - CRITICAL BREAKTHROUGH - Conversation Indexing Fixed
 
 ### CRITICAL BUG FIX - Multiple Conversation Records
