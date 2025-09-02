@@ -11,15 +11,18 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Performance**: All UI operations < 50ms
 - **Impact**: 10x performance improvement achieved
 
-### Phase 2: Conversation Indexing (IN PROGRESS - 30%)
+### Phase 2: Conversation Indexing (IN PROGRESS - 60%)
 
 #### Current Tasks
 - [✅] Created ConversationIndexer.swift with FSEvents monitoring - COMPLETE
   - FSEvents API implemented for ~/.claude/projects/ monitoring
   - Initial scan capability for existing conversations
   - Background queue processing for performance
-- [ ] Implementing JSONL parser for conversation extraction - NEXT
-- [ ] Adding indexConversation method to populate database
+- [✅] Implemented JSONLParser.swift for conversation extraction - COMPLETE
+  - Parses JSONL format from Claude Code conversations
+  - Extracts messages, file references, and topics
+  - Handles multiple JSON object types (conversation.create, message, tool_use)
+- [🔨] Adding indexConversation method to populate database - IN PROGRESS
 
 #### Added
 - `ConversationIndexer.swift` - Real-time conversation file monitor (200 lines)
