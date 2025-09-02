@@ -106,10 +106,7 @@ struct ConversationCard: View {
         Text("Conversation Card - TODO: Restore full implementation")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-                            
-                            Button("Retry") {
-                                loadRecentConversations()
-                            }
+}
                             .buttonStyle(.borderedProminent)
                         }
                         .padding(50)
