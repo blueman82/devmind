@@ -107,7 +107,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
     
     // CORRUPTION FIX 2: Database configuration for reliability
     private func configureDatabase() {
-        guard let db = db else { return }
+        guard db != nil else { return }
         
         // Enable WAL mode for better concurrency and corruption resistance
         executeSQL("PRAGMA journal_mode = WAL;")
