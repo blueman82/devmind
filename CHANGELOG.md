@@ -35,6 +35,15 @@ All notable changes to the AI Memory App project will be documented in this file
 - [✅] **Zero warnings build achieved** - Complete systematic verification with clean build
 - [✅] **Project documentation updated** - All progress tracked in CHANGELOG.md
 
+### Message UUID Constraint Fixed (✅ COMPLETE) - 2025-09-02
+- [✅] **Issue Identified**: Same message UUID appearing multiple times in conversations
+- [✅] **Root Cause**: Claude reuses UUIDs across and within conversations
+- [✅] **Solution Implemented**:
+  - Changed from `message_uuid TEXT UNIQUE` (global uniqueness)
+  - To `UNIQUE(conversation_id, message_uuid)` (per-conversation uniqueness)
+  - Added `INSERT OR REPLACE` to handle duplicate UUIDs gracefully
+- [✅] **Verification**: Messages now inserting successfully without constraint violations
+
 ### SQLite Corruption FIXED (✅ COMPLETE) - 2025-09-02
 - [✅] **Root Cause Found**: Schema mismatch between MCP server and local implementation
 - [✅] **Not a SQLite 3.43.2 bug**: Corruption was due to our code, not the SQLite version
