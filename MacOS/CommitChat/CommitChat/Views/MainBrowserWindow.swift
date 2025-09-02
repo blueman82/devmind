@@ -96,25 +96,8 @@ struct MainBrowserWindow: View {
         // This method can be used for additional side effects if needed
     }
 }
-                    
-                    HStack(spacing: 4) {
-                        Button(action: {}) {
-                            Image(systemName: "square.grid.2x2")
-                        }
-                        .buttonStyle(.accessoryBar)
-                        
-                        Button(action: {}) {
-                            Image(systemName: "list.bullet")
-                        }
-                        .buttonStyle(.accessoryBar)
-                    }
-                }
-                .padding()
-                
-                Divider()
-                
-                // Conversation grid
-                ScrollView {
+
+struct ConversationCard: View {
                     if isLoadingConversations {
                         VStack {
                             ProgressView("Loading conversations...")
