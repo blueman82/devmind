@@ -17,7 +17,7 @@ class ConversationIndexer: ObservableObject {
     
     private var eventStream: FSEventStreamRef?
     private let queue = DispatchQueue(label: "com.commitchat.conversation.indexer", qos: .background)
-    private let dataManager = AIMemoryDataManager.shared
+    private let dataManager = AIMemoryDataManagerFixed.shared
     private let jsonlParser = JSONLParser()
     
     private let claudeProjectsPath: String = {
