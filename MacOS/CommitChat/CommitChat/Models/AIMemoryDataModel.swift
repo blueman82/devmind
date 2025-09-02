@@ -386,10 +386,8 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             
             defer { sqlite3_finalize(insertStmt) }
             
-            #if DEBUG
-            Self.logger.debug("🔍 INSERT: Binding sessionId = '\(conversation.sessionId)' at position 1")
-            #endif
-            sqlite3_bind_text(insertStmt, 1, conversation.sessionId, -1, nil)
+            Self.logger.debug("🔍 INSERT: Binding sessionId = '\(sessionIdToUse)' at position 1")
+            sqlite3_bind_text(insertStmt, 1, sessionIdToUse, -1, nil)
             sqlite3_bind_text(insertStmt, 2, projectHash, -1, nil)
             sqlite3_bind_text(insertStmt, 3, projectName, -1, nil)
             sqlite3_bind_text(insertStmt, 4, conversation.projectPath, -1, nil)
