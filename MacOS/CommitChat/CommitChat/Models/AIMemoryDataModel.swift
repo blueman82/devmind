@@ -27,6 +27,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     
     private var db: OpaquePointer?
     private let databaseURL: URL
+    private let databaseQueue = DispatchQueue(label: "com.commitchat.database", qos: .background)
     
     // MARK: - Initialization
     
