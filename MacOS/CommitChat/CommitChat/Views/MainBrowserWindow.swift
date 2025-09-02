@@ -283,6 +283,20 @@ struct MainBrowserWindow: View {
         }
     }
     
+    private func updateAvailableProjects(from conversations: [ConversationItem]) {
+        var projectSet = Set<String>()
+        projectSet.insert("All Projects") // Always include this option
+        
+        for conversation in conversations {
+            projectSet.insert(conversation.project)
+        }
+        
+        let sortedProjects = Array(projectSet.subtracting(["All Projects"])).sorted()
+        self.availableProjects = ["All Projects"] + sortedProjects
+        
+        print("🔍 DEBUG: Updated available projects: \(self.availableProjects)")
+    }
+    
     private func filterConversations() {
         // Filtering is handled by the computed property
         // This method can be used for additional side effects if needed
