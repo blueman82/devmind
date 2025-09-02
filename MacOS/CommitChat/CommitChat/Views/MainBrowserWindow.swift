@@ -17,8 +17,14 @@ struct MainBrowserWindow: View {
     @State private var conversationError: MCPClientError?
     
     private let mcpClient = MCPClient.shared
-    // Dynamic projects loaded once and cached to avoid performance issues
-    @State private var availableProjects: [String] = ["All Projects"]
+    // Dynamic projects with fallback to ensure some projects are always available
+    @State private var availableProjects: [String] = [
+        "All Projects", 
+        "devmind", 
+        "camp-ops-tools-emea-ketchup", 
+        "harrison", 
+        "clipforge-ai"
+    ]
     
     private var projects: [String] {
         return availableProjects
