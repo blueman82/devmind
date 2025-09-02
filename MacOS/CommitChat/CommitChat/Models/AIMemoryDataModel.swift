@@ -149,14 +149,14 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         conversations.append(item)
                     }
                     
-                    continuation.resume(returning: conversations)
+                    sqlite3_finalize(stmt)
+                    return conversations
                 } else {
                     let error = String(cString: sqlite3_errmsg(self.db))
-                    continuation.resume(throwing: AIMemoryError.databaseError(error))
+                    sqlite3_finalize(stmt)
+                    throw AIMemoryError.databaseError(error)
                 }
-                
-                sqlite3_finalize(stmt)
-            }
+            }.value
         }
     }
     
