@@ -4322,3 +4322,51 @@ phase_29_dynamic_projects_fix:
     build_status: "✅ BUILD SUCCEEDED"
     syntax_check: "xcodebuild compilation successful"
     expected_result: "All projects from conversations should be selectable and filter correctly"
+
+# Phase 30: Regression Fix - Revert Dynamic Projects 
+# Date: 2025-09-02 01:47:00
+# Status: ✅ COMPLETE
+# Issue: Dynamic projects caused worse performance and fewer projects showing
+
+phase_30_regression_fix:
+  status: "✅ COMPLETE"
+  completion_percentage: 100
+  
+  regression_identified:
+    symptoms:
+      - "Fewer projects showing up than before (only 'All Projects')"
+      - "Same issue with conversation preview not accessible"
+      - "Xcode reports 160+ wakes and high energy usage"
+      - "recentConversations.count = 0 in logs"
+      
+    root_cause_analysis:
+      computed_property_issue: "Dynamic projects computed var called repeatedly"
+      empty_data_problem: "No conversations loaded so projects array only contains 'All Projects'"
+      performance_impact: "Computed property evaluated on every UI refresh causing 160+ wakes"
+      energy_usage: "High CPU usage from repeated empty computation"
+        
+  solution_implemented:
+    approach: "Revert to static projects list with known project names added"
+    reasoning:
+      - "Dynamic computation requires conversations to be loaded first"
+      - "Computed properties cause performance issues when called frequently"
+      - "Static list provides immediate functionality while debugging conversation loading"
+      
+    code_changes:
+      file: "MainBrowserWindow.swift"
+      lines: "20-21"
+      change: "Reverted to static let projects array"
+      improvements:
+        - "Added 'camp-ops-tools-emea' and 'ketchup' to static list"
+        - "Eliminated performance overhead of computed property"
+        - "Provides immediate project filtering functionality"
+      
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    syntax_check: "xcodebuild compilation successful"
+    performance_fix: "Eliminated repeated computed property calls"
+    expected_result: "Reduced energy usage and projects list should work immediately"
+    
+  next_steps:
+    priority_1: "Debug why recentConversations.count = 0"
+    priority_2: "Fix conversation loading to enable future dynamic projects implementation"
