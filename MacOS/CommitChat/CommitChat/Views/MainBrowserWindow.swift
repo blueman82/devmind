@@ -244,8 +244,8 @@ struct MainBrowserWindow: View {
         
         Task {
             do {
-                // Determine timeframe based on selected project
-                let timeframe = selectedProject == nil ? "today" : "last week"
+                // Use longer timeframe to discover all available projects
+                let timeframe = selectedProject == nil ? "last month" : "last week"
                 
                 print("🔍 DEBUG: About to call mcpClient.listRecentConversations(limit: 50, timeframe: \(timeframe))")
                 
