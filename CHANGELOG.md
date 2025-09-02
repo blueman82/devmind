@@ -66,6 +66,9 @@ All notable changes to the AI Memory App project will be documented in this file
 - [✅] **ROOT CAUSE IDENTIFIED**: JSONLParser was expecting different JSONL format than Claude Code produces
 - [✅] **JSONLParser Rewritten**: Fixed to handle actual Claude Code JSONL format with `sessionId`, `cwd`, `message` fields
 - [✅] **Claude Code Format Support**: Parser now correctly extracts conversation data from real JSONL files
+- [✅] **Unicode Error Handling**: Added robust error handling for corrupted Unicode sequences in JSONL files
+- [✅] **JSON Parsing Resilience**: Skip corrupted JSON lines gracefully with detailed logging for "missing surrogate pair" errors
+- [✅] **Lossy Unicode Conversion**: Fallback to replacement characters when UTF-8 decoding fails
 - [✅] **Database Wipe & Rebuild**: Completely wiped corrupted database for clean start with corrected parser
 - [✅] **Data Validation Added**: Comprehensive validation guards prevent future corruption at source
 - [✅] **Thread-Safe Operations**: Serial dispatch queue ensures SQLite operations are thread-safe
