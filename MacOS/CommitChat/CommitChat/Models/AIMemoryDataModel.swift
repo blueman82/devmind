@@ -119,12 +119,13 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
             CREATE TABLE IF NOT EXISTS messages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 conversation_id INTEGER NOT NULL,
-                message_uuid TEXT UNIQUE,
+                message_uuid TEXT,
                 role TEXT NOT NULL,
                 content TEXT NOT NULL,
                 timestamp DATETIME NOT NULL,
                 tool_calls TEXT,
-                FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+                FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+                UNIQUE(conversation_id, message_uuid)
             );
         """
         
@@ -509,9 +510,9 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         sqlite3_finalize(deleteStmt)
                     }
                     
-                    // Insert messages
+                    // Insert messages (use INSERT OR REPLACE to handle duplicate UUIDs within same conversation)
                     let messageSql = """
-                        INSERT INTO messages (
+                        INSERT OR REPLACE INTO messages (
                             conversation_id, message_uuid, role, content, timestamp, tool_calls
                         ) VALUES (?, ?, ?, ?, ?, ?)
                     """
