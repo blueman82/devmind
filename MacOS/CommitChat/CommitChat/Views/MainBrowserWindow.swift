@@ -109,10 +109,31 @@ struct ConversationCard: View {
 }
 
 struct ConversationDetailView: View {
-                    } else if filteredConversations.isEmpty {
-                        VStack(spacing: 16) {
-                            Image(systemName: "tray")
-                                .font(.largeTitle)
+    let item: ConversationItem
+    @State private var conversationContent: ConversationContext?
+    @State private var isLoadingContent = false
+    @State private var loadError: String?
+    
+    private let mcpClient = MCPClient.shared
+    private let dataManager = AIMemoryDataManager.shared
+    
+    var body: some View {
+        Text("Detail View - TODO: Restore full implementation")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private func loadConversationContent() {
+        // TODO: Restore full implementation
+    }
+}
+
+struct MessageBubble: View {
+    let role: String
+    let content: String
+    
+    var body: some View {
+        Text("Message Bubble - TODO: Restore full implementation")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .foregroundColor(.secondary)
                             
                             Text("No conversations found")
