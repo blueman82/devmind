@@ -291,37 +291,53 @@ class AIMemoryDataManager: ObservableObject {
     /// Index a new conversation from JSONL file
     /// This will be called by FSEvents monitoring
     func indexConversation(jsonlPath: String, projectPath: String) async throws {
-        // TODO: Implement JSONL parsing and Core Data insertion
+        // TODO: Implement JSONL parsing and SQLite insertion
         // This replaces the MCP server's indexing functionality
         print("📝 Indexing conversation: \(jsonlPath)")
     }
     
     // MARK: - Helper Methods
     
-    private func parseTimeframe(_ timeframe: String) -> Date? {
+    private func buildTimeframeFilter(_ timeframe: String) -> String {
         let calendar = Calendar.current
         let now = Date()
+        let formatter = ISO8601DateFormatter()
         
         switch timeframe.lowercased() {
         case "today":
-            return calendar.startOfDay(for: now)
+            let startOfDay = calendar.startOfDay(for: now)
+            return formatter.string(from: startOfDay)
         case "yesterday":
-            return calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now))
+            if let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now)) {
+                return formatter.string(from: yesterday)
+            }
         case "last week", "week":
-            return calendar.date(byAdding: .day, value: -7, to: now)
+            if let weekAgo = calendar.date(byAdding: .day, value: -7, to: now) {
+                return formatter.string(from: weekAgo)
+            }
         case "last month", "month":
-            return calendar.date(byAdding: .month, value: -1, to: now)
+            if let monthAgo = calendar.date(byAdding: .month, value: -1, to: now) {
+                return formatter.string(from: monthAgo)
+            }
         default:
-            return nil
+            break
+        }
+        
+        // Default to beginning of time
+        return "1970-01-01T00:00:00Z"
+    }
+    
+    // MARK: - Database Management
+    
+    func closeDatabase() {
+        if let db = db {
+            sqlite3_close(db)
+            self.db = nil
         }
     }
     
-    // MARK: - Save Context
-    
-    func save() throws {
-        if context.hasChanges {
-            try context.save()
-        }
+    deinit {
+        closeDatabase()
     }
 }
 
