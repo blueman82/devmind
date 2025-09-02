@@ -22,6 +22,10 @@ All notable changes to the AI Memory App project will be documented in this file
 - [ ] Adding indexConversation method to populate database
 
 #### Added
+- `ConversationIndexer.swift` - Real-time conversation file monitor (200 lines)
+  - FSEvents-based monitoring for ~/.claude/projects/
+  - Automatic detection of new/modified JSONL files
+  - Background processing queue to prevent UI blocking
 - `AIMemoryDataModel.swift` - Local SQLite database manager (368 lines)
   - Direct SQLite3 implementation for optimal performance
   - Async/await interface matching MCPClient for easy migration
