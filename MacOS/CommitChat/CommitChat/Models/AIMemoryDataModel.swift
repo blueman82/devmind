@@ -407,9 +407,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
         guard !conversation.projectPath.isEmpty else {
             throw AIMemoryError.invalidData
         }
-        guard !conversation.title.isEmpty else {
-            throw AIMemoryError.invalidData
-        }
+        // Note: title is now derived from project_name, no validation needed
         
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             databaseQueue.async { [weak self] in
@@ -444,16 +442,16 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     if conversationId > 0 {
                         conversationSql = """
                             UPDATE conversations SET
-                                title = ?, project_path = ?, updated_at = ?,
-                                message_count = ?, topics = ?, has_code = ?, has_errors = ?
+                                project_hash = ?, project_name = ?, project_path = ?, updated_at = ?,
+                                message_count = ?, file_references = ?, topics = ?, keywords = ?, total_tokens = ?
                             WHERE id = ?
                         """
                     } else {
                         conversationSql = """
                             INSERT INTO conversations (
-                                session_id, title, project_path, created_at, updated_at,
-                                message_count, topics, has_code, has_errors
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                session_id, project_hash, project_name, project_path, created_at, updated_at,
+                                message_count, file_references, topics, keywords, total_tokens
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """
                     }
                     
@@ -464,33 +462,45 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     
                     defer { sqlite3_finalize(conversationStmt) }
                     
-                    let topicsString = conversation.topics.joined(separator: ", ")
-                    let hasCode = conversation.messages.contains { !$0.toolCalls.isEmpty }
-                    let hasErrors = conversation.messages.contains { $0.content.lowercased().contains("error") }
+                    // Prepare data for MCP schema
+                    let projectHash = conversation.projectPath.data(using: .utf8)?.base64EncodedString() ?? ""
+                    let projectName = conversation.title  // Use title as project_name
+                    let fileRefsJson = try? JSONSerialization.data(withJSONObject: conversation.fileReferences)
+                    let fileRefsString = fileRefsJson != nil ? String(data: fileRefsJson!, encoding: .utf8) : "[]"
+                    let topicsJson = try? JSONSerialization.data(withJSONObject: conversation.topics)
+                    let topicsJsonString = topicsJson != nil ? String(data: topicsJson!, encoding: .utf8) : "[]"
+                    let keywords = extractKeywords(from: conversation)
+                    let keywordsJson = try? JSONSerialization.data(withJSONObject: keywords)
+                    let keywordsString = keywordsJson != nil ? String(data: keywordsJson!, encoding: .utf8) : "[]"
+                    let totalTokens = conversation.messages.reduce(0) { $0 + $1.content.count / 4 }
                     let dateFormatter = ISO8601DateFormatter()
                     let now = dateFormatter.string(from: Date())
                     
                     if conversationId > 0 {
-                        // UPDATE existing conversation
-                        sqlite3_bind_text(conversationStmt, 1, conversation.title, -1, nil)
-                        sqlite3_bind_text(conversationStmt, 2, conversation.projectPath, -1, nil)
-                        sqlite3_bind_text(conversationStmt, 3, now, -1, nil)
-                        sqlite3_bind_int(conversationStmt, 4, Int32(conversation.messages.count))
-                        sqlite3_bind_text(conversationStmt, 5, topicsString, -1, nil)
-                        sqlite3_bind_int(conversationStmt, 6, hasCode ? 1 : 0)
-                        sqlite3_bind_int(conversationStmt, 7, hasErrors ? 1 : 0)
-                        sqlite3_bind_int64(conversationStmt, 8, conversationId)
-                    } else {
-                        // INSERT new conversation
-                        sqlite3_bind_text(conversationStmt, 1, conversation.sessionId, -1, nil)
-                        sqlite3_bind_text(conversationStmt, 2, conversation.title, -1, nil)
+                        // UPDATE existing conversation - MCP schema
+                        sqlite3_bind_text(conversationStmt, 1, projectHash, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 2, projectName, -1, nil)
                         sqlite3_bind_text(conversationStmt, 3, conversation.projectPath, -1, nil)
                         sqlite3_bind_text(conversationStmt, 4, now, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 5, Int32(conversation.messages.count))
+                        sqlite3_bind_text(conversationStmt, 6, fileRefsString, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 7, topicsJsonString, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 8, keywordsString, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 9, Int32(totalTokens))
+                        sqlite3_bind_int64(conversationStmt, 10, conversationId)
+                    } else {
+                        // INSERT new conversation - MCP schema
+                        sqlite3_bind_text(conversationStmt, 1, conversation.sessionId, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 2, projectHash, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 3, projectName, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 4, conversation.projectPath, -1, nil)
                         sqlite3_bind_text(conversationStmt, 5, now, -1, nil)
-                        sqlite3_bind_int(conversationStmt, 6, Int32(conversation.messages.count))
-                        sqlite3_bind_text(conversationStmt, 7, topicsString, -1, nil)
-                        sqlite3_bind_int(conversationStmt, 8, hasCode ? 1 : 0)
-                        sqlite3_bind_int(conversationStmt, 9, hasErrors ? 1 : 0)
+                        sqlite3_bind_text(conversationStmt, 6, now, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 7, Int32(conversation.messages.count))
+                        sqlite3_bind_text(conversationStmt, 8, fileRefsString, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 9, topicsJsonString, -1, nil)
+                        sqlite3_bind_text(conversationStmt, 10, keywordsString, -1, nil)
+                        sqlite3_bind_int(conversationStmt, 11, Int32(totalTokens))
                     }
                     
                     guard sqlite3_step(conversationStmt) == SQLITE_DONE else {
