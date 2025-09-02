@@ -88,9 +88,6 @@ struct MainBrowserWindow: View {
         Text("Detail View - TODO: Move detail content here") 
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-                            .foregroundColor(.secondary)
-                        TextField("Filter conversations...", text: $searchText)
-                            .textFieldStyle(.plain)
                     }
                     .padding(8)
                     .background(Color(NSColor.controlBackgroundColor))
