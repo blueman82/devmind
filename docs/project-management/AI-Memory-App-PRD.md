@@ -381,10 +381,11 @@ class AIMemoryMCPServer extends Server {
 
 ### Daily Usage
 1. **Transparent operation** - App runs in background, indexing automatically
-2. **AI interactions** - Claude/Cursor automatically gain conversation memory
-3. **Search & resume** - Find and resume previous development sessions
-4. **Disaster recovery** - One-click restore to working states
-5. **Cross-project learning** - AI suggests solutions from other projects
+2. **Progress visibility** - Users can see indexing progress in real-time UI
+3. **AI interactions** - Claude/Cursor automatically gain conversation memory
+4. **Search & resume** - Find and resume previous development sessions
+5. **Disaster recovery** - One-click restore to working states
+6. **Cross-project learning** - AI suggests solutions from other projects
 
 ### Menu Bar Interface
 - **Status indicator** - Shows indexing status and recent activity
