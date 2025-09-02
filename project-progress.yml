@@ -4280,3 +4280,45 @@ phase_28_conversation_context_fix:
     build_status: "✅ BUILD SUCCEEDED"
     syntax_check: "xcodebuild compilation successful"
     expected_result: "Conversation detail view should now load real messages"
+
+# Phase 29: Dynamic Projects List Fix
+# Date: 2025-09-02 01:44:00
+# Status: ✅ COMPLETE
+# Issue: Non-devmind projects not responding to clicks - hardcoded project list
+
+phase_29_dynamic_projects_fix:
+  status: "✅ COMPLETE"
+  completion_percentage: 100
+  
+  issue_identified:
+    error_symptoms:
+      - "Only devmind project conversations respond when clicked"
+      - "Other projects like camp-ops, ketchup don't work"
+      - "Project filtering not working for unlisted projects"
+      
+    root_cause:
+      hardcoded_projects: ["All Projects", "devmind", "api-server", "CommitChat", "web-app", "docs"]
+      missing_projects: "camp-ops, ketchup, and other actual project names from conversations"
+      filtering_logic: "selectedProject filter only works for hardcoded project names"
+        
+  solution_implemented:
+    approach: "Replace hardcoded projects array with dynamic computation from conversations"
+    implementation_details:
+      - "Changed from static let to computed var projects"
+      - "Extract unique project names from recentConversations"
+      - "Sort projects alphabetically with 'All Projects' at top"
+      - "Added debug logging for projects list generation"
+      
+    code_changes:
+      file: "MainBrowserWindow.swift"
+      lines: "20-30"
+      change: "Replaced hardcoded projects array with dynamic computed property"
+      benefits:
+        - "Automatically includes all project names from actual conversations"
+        - "No need to manually maintain project list"
+        - "Supports any project that appears in conversation data"
+      
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    syntax_check: "xcodebuild compilation successful"
+    expected_result: "All projects from conversations should be selectable and filter correctly"
