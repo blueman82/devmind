@@ -430,7 +430,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         sqlite3_finalize(commitStmt)
                     }
                     
-                    continuation.resume()
+                    // Transaction completed successfully
                     
                 } catch {
                     // Rollback on error
@@ -440,9 +440,9 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                         sqlite3_finalize(rollbackStmt)
                     }
                     
-                    continuation.resume(throwing: error)
+                    throw error
                 }
-            }
+            }.value
         }
     }
     
