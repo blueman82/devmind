@@ -14,9 +14,9 @@ struct MainBrowserWindow: View {
     @State private var selectedConversation: ConversationItem?
     @State private var recentConversations: [ConversationItem] = []
     @State private var isLoadingConversations = false
-    @State private var conversationError: MCPClientError?
+    @State private var conversationError: String?
     
-    private let mcpClient = MCPClient.shared
+    private let dataManager = AIMemoryDataManager.shared
     // Purely dynamic projects loaded from filesystem/conversations
     @State private var availableProjects: [String] = ["All Projects"]
     
@@ -174,10 +174,10 @@ struct MainBrowserWindow: View {
                     Spacer()
                     
                     Circle()
-                        .fill(mcpClient.isConnected ? Color.green : Color.red)
+                        .fill(dataManager.isInitialized ? Color.green : Color.red)
                         .frame(width: 6, height: 6)
                     
-                    Text(mcpClient.isConnected ? "Connected" : "Disconnected")
+                    Text(dataManager.isInitialized ? "Database Ready" : "Initializing...")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -248,9 +248,9 @@ struct MainBrowserWindow: View {
                 // Use longer timeframe to discover all available projects
                 let timeframe = selectedProject == nil ? "last month" : "last week"
                 
-                print("🔍 DEBUG: About to call mcpClient.listRecentConversations(limit: 50, timeframe: \(timeframe))")
+                print("🔍 DEBUG: About to call dataManager.listRecentConversations(limit: 50, timeframe: \(timeframe))")
                 
-                let conversations = try await mcpClient.listRecentConversations(
+                let conversations = try await dataManager.listRecentConversations(
                     limit: 50,
                     timeframe: timeframe
                 )
@@ -512,7 +512,7 @@ struct ConversationDetailView: View {
                 // Use the actual sessionId from the conversation item
                 let sessionId = item.sessionId
                 
-                let content = try await mcpClient.getConversationContext(
+                let content = try await dataManager.getConversationContext(
                     sessionId: sessionId,
                     page: 1,
                     pageSize: 50
