@@ -37,46 +37,49 @@ struct MainBrowserWindow: View {
     private var sidebarView: some View {
         // Sidebar with project filters
         List(selection: $selectedProject) {
-                Section("Projects") {
-                    ForEach(projects, id: \.self) { project in
-                        Label {
-                            HStack {
-                                Text(project)
-                                Spacer()
-                                if project != "All Projects" {
-                                    Text("\(Int.random(in: 5...50))")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color(NSColor.controlBackgroundColor))
-                                        .cornerRadius(8)
-                                }
+            Section("Projects") {
+                ForEach(projects, id: \.self) { project in
+                    Label {
+                        HStack {
+                            Text(project)
+                            Spacer()
+                            if project != "All Projects" {
+                                Text("\(Int.random(in: 5...50))")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color(NSColor.controlBackgroundColor))
+                                    .cornerRadius(8)
                             }
-                        } icon: {
-                            Image(systemName: project == "All Projects" ? "tray.2" : "folder")
-                                .foregroundColor(project == "All Projects" ? .accentColor : .secondary)
                         }
-                        .tag(project)
+                    } icon: {
+                        Image(systemName: project == "All Projects" ? "tray.2" : "folder")
+                            .foregroundColor(project == "All Projects" ? .accentColor : .secondary)
                     }
-                }
-                
-                Section("Quick Filters") {
-                    Label("Recent", systemImage: "clock")
-                    Label("Has Code", systemImage: "chevron.left.forwardslash.chevron.right")
-                    Label("Has Errors", systemImage: "exclamationmark.triangle")
-                    Label("Starred", systemImage: "star")
+                    .tag(project)
                 }
             }
-            .listStyle(SidebarListStyle())
-            .frame(minWidth: 200)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: {}) {
-                        Image(systemName: "plus")
-                    }
+            
+            Section("Quick Filters") {
+                Label("Recent", systemImage: "clock")
+                Label("Has Code", systemImage: "chevron.left.forwardslash.chevron.right")
+                Label("Has Errors", systemImage: "exclamationmark.triangle")
+                Label("Starred", systemImage: "star")
+            }
+        }
+        .listStyle(SidebarListStyle())
+        .frame(minWidth: 200)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: {}) {
+                    Image(systemName: "plus")
                 }
             }
+        }
+    }
+    
+    private var contentView: some View {
         } content: {
             // Main content area with conversation grid
             VStack(spacing: 0) {
