@@ -4747,3 +4747,73 @@ architecture_redesign:
       - "Match ShadowGit's auto-commit feature"
       - "Add unique conversation + git linking"
       - "Provide superior context to AI assistants"
+
+## Phase 37: Strategic Implementation Plan
+strategic_implementation:
+  status: "PLANNED"
+  date_created: "2025-09-02"
+  total_effort: "20-25 hours to full PRD compliance"
+  
+  phase_1_performance_fix:
+    duration: "2-3 hours"
+    priority: "🚨 IMMEDIATE"
+    impact: "10x performance improvement"
+    tasks:
+      - "Connect MainBrowserWindow to AIMemoryDataModel"
+      - "Remove MCPClient dependency from UI"
+      - "Test performance (<50ms for all operations)"
+    expected_result: "Instant UI without network calls"
+  
+  phase_2_conversation_indexing:
+    duration: "4-6 hours"
+    priority: "⚡ HIGH"
+    impact: "Core differentiator operational"
+    tasks:
+      - "Implement FSEvents monitoring for ~/.claude/projects/"
+      - "Create JSONL parser for conversation extraction"
+      - "Index conversations to local SQLite"
+    expected_result: "Real-time conversation indexing"
+  
+  phase_3_git_integration:
+    duration: "6-8 hours"
+    priority: "🎯 COMPETITIVE"
+    impact: "Feature parity with ShadowGit"
+    tasks:
+      - "Automatic commits on file saves"
+      - "Link conversations to git commits"
+      - "Build restore UI in Mac app"
+    expected_result: "Complete git tracking + UI"
+  
+  phase_4_architecture_completion:
+    duration: "4-6 hours"
+    priority: "🔄 FINAL"
+    impact: "Full PRD compliance"
+    tasks:
+      - "IPC mechanism for MCP to query Mac app"
+      - "MCP fallback to JSONL when no app"
+      - "Gate premium features behind app"
+    expected_result: "Proper architecture + monetization"
+  
+  success_metrics:
+    performance:
+      - "UI operations < 50ms"
+      - "Search results < 100ms"
+      - "Zero network calls for local data"
+    features:
+      - "Conversations indexed within 2 seconds"
+      - "Git commits captured automatically"
+      - "Accurate restore previews"
+    competitive:
+      - "Feature parity with ShadowGit"
+      - "Unique conversation + git linking"
+      - "Superior AI context provision"
+  
+  risk_mitigation:
+    - "SQLite indexes for large datasets"
+    - "macOS permissions handling for FSEvents"
+    - "Separate .git-shadow directory for safety"
+  
+  immediate_next_action:
+    task: "Connect MainBrowserWindow to AIMemoryDataModel"
+    estimated_time: "1 hour"
+    expected_outcome: "Instant 10x performance boost"
