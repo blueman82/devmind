@@ -462,15 +462,19 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         for (index, message) in batch.enumerated() {
             sqlite3_reset(messageStmt)
             sqlite3_bind_int64(messageStmt, 1, conversationId)
-            sqlite3_bind_text(messageStmt, 2, message.id, -1, nil)
-            sqlite3_bind_text(messageStmt, 3, message.role, -1, nil)
-            sqlite3_bind_text(messageStmt, 4, message.content, -1, nil)
+            sqlite3_bind_int64(messageStmt, 2, Int64(index)) // message_index
+            sqlite3_bind_text(messageStmt, 3, message.id, -1, nil) // uuid
+            sqlite3_bind_text(messageStmt, 4, message.role, -1, nil) // role
+            sqlite3_bind_text(messageStmt, 5, "text", -1, nil) // content_type
+            sqlite3_bind_text(messageStmt, 6, message.content, -1, nil) // content
             
             let timestampString = ISO8601DateFormatter().string(from: message.timestamp)
-            sqlite3_bind_text(messageStmt, 5, timestampString, -1, nil)
+            sqlite3_bind_text(messageStmt, 7, timestampString, -1, nil) // timestamp
             
             let toolCallsJson = message.toolCalls.joined(separator: ",")
-            sqlite3_bind_text(messageStmt, 6, toolCallsJson, -1, nil)
+            sqlite3_bind_text(messageStmt, 8, toolCallsJson, -1, nil) // tool_calls
+            sqlite3_bind_text(messageStmt, 9, "[]", -1, nil) // file_references (empty JSON array)
+            sqlite3_bind_int(messageStmt, 10, Int32(message.content.count)) // tokens (approximate)
             
             let stepResult = sqlite3_step(messageStmt)
             if stepResult != SQLITE_DONE {
