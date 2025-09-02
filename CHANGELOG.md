@@ -35,6 +35,15 @@ All notable changes to the AI Memory App project will be documented in this file
 - [✅] **Zero warnings build achieved** - Complete systematic verification with clean build
 - [✅] **Project documentation updated** - All progress tracked in CHANGELOG.md
 
+### Conversation Data Extraction Fixed (✅ COMPLETE) - 2025-09-02
+- [✅] **Issue Identified**: Conversations had empty titles and project paths
+- [✅] **Root Cause**: Hardcoded "Untitled Conversation" and no title extraction
+- [✅] **Solution Implemented**:
+  - Extract title from first user message (first 50 chars)
+  - Parse project name from Claude directory structure
+  - Clean up URL-encoded project names (replace hyphens with spaces)
+- [✅] **Verification**: Conversations now have meaningful titles and project paths
+
 ### Message UUID Constraint Fixed (✅ COMPLETE) - 2025-09-02
 - [✅] **Issue Identified**: Same message UUID appearing multiple times in conversations
 - [✅] **Root Cause**: Claude reuses UUIDs across and within conversations
