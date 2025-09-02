@@ -67,6 +67,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
         // Open SQLite database
         if sqlite3_open(databaseURL.path, &db) == SQLITE_OK {
             createTables()
+            checkAndRepairDatabase()
             isInitialized = true
             print("✅ AIMemoryDataManager initialized with local SQLite at: \(databaseURL.path)")
         } else {
