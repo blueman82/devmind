@@ -222,7 +222,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                                 "currentPage": page,
                                 "totalPages": totalPages
                             ]
-                            let context = try! ConversationContext(from: contextDict)
+                            let context = try ConversationContext(from: contextDict)
                             
                             sqlite3_finalize(stmt)
                             return context
