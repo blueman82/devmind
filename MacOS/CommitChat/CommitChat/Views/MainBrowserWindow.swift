@@ -26,6 +26,16 @@ struct MainBrowserWindow: View {
     
     var body: some View {
         NavigationSplitView {
+            sidebarView
+        } content: {
+            contentView
+        } detail: {
+            detailView
+        }
+    }
+    
+    private var sidebarView: some View {
+        VStack {
             // Sidebar with project filters
             List(selection: $selectedProject) {
                 Section("Projects") {
