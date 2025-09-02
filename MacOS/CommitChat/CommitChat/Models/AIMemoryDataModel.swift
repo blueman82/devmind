@@ -17,7 +17,7 @@ import Combine
 /// ## Architecture Change
 /// - OLD: Mac App → JSON-RPC → MCP Server → SQLite
 /// - NEW: Mac App → Local SQLite + MCP Server queries Mac App
-class AIMemoryDataManager: ObservableObject {
+class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     static let shared = AIMemoryDataManager()
     
     @Published var isInitialized: Bool = false
