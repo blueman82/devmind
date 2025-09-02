@@ -108,37 +108,52 @@ class AIMemoryDataManager: ObservableObject {
     /// Replaces: mcpClient.listRecentConversations()
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
         return try await withCheckedThrowingContinuation { continuation in
-            context.perform {
-                let request: NSFetchRequest<Conversation> = Conversation.fetchRequest()
+            DispatchQueue.global(qos: .userInitiated).async {
+                var stmt: OpaquePointer?
                 
-                // Apply timeframe filter
-                if let timeframeDate = self.parseTimeframe(timeframe) {
-                    request.predicate = NSPredicate(format: "lastUpdated >= %@", timeframeDate as NSDate)
-                }
+                let timeframeFilter = self.buildTimeframeFilter(timeframe)
+                let sql = """
+                    SELECT id, session_id, title, project, last_updated, message_count, topics, summary, has_code, has_errors
+                    FROM conversations
+                    WHERE last_updated >= datetime('\(timeframeFilter)')
+                    ORDER BY last_updated DESC
+                    LIMIT \(limit)
+                """
                 
-                request.sortDescriptors = [
-                    NSSortDescriptor(key: "lastUpdated", ascending: false)
-                ]
-                request.fetchLimit = limit
-                
-                do {
-                    let conversations = try self.context.fetch(request)
-                    let items = conversations.map { conversation in
-                        ConversationItem(
-                            id: conversation.id?.uuidString ?? UUID().uuidString,
-                            sessionId: conversation.sessionId ?? "",
-                            title: conversation.title ?? "Untitled Conversation",
-                            project: conversation.project ?? "Unknown Project",
-                            lastModified: conversation.lastUpdated ?? Date(),
-                            messageCount: Int(conversation.messageCount),
-                            topics: conversation.topicsArray,
-                            summary: conversation.summary ?? ""
+                if sqlite3_prepare_v2(self.db, sql, -1, &stmt, nil) == SQLITE_OK {
+                    var conversations: [ConversationItem] = []
+                    
+                    while sqlite3_step(stmt) == SQLITE_ROW {
+                        let sessionId = String(cString: sqlite3_column_text(stmt, 1))
+                        let title = String(cString: sqlite3_column_text(stmt, 2))
+                        let project = String(cString: sqlite3_column_text(stmt, 3))
+                        let lastUpdatedString = String(cString: sqlite3_column_text(stmt, 4))
+                        let messageCount = sqlite3_column_int(stmt, 5)
+                        let hasCode = sqlite3_column_int(stmt, 8) != 0
+                        let hasErrors = sqlite3_column_int(stmt, 9) != 0
+                        
+                        let formatter = ISO8601DateFormatter()
+                        let lastUpdated = formatter.date(from: lastUpdatedString) ?? Date()
+                        
+                        let item = ConversationItem(
+                            sessionId: sessionId,
+                            title: title,
+                            project: project,
+                            date: lastUpdated,
+                            messageCount: Int(messageCount),
+                            hasCode: hasCode,
+                            hasErrors: hasErrors
                         )
+                        conversations.append(item)
                     }
-                    continuation.resume(returning: items)
-                } catch {
-                    continuation.resume(throwing: error)
+                    
+                    continuation.resume(returning: conversations)
+                } else {
+                    let error = String(cString: sqlite3_errmsg(self.db))
+                    continuation.resume(throwing: AIMemoryError.databaseError(error))
                 }
+                
+                sqlite3_finalize(stmt)
             }
         }
     }
@@ -147,51 +162,75 @@ class AIMemoryDataManager: ObservableObject {
     /// Replaces: mcpClient.getConversationContext()
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
         return try await withCheckedThrowingContinuation { continuation in
-            context.perform {
-                // Find conversation by session ID
-                let conversationRequest: NSFetchRequest<Conversation> = Conversation.fetchRequest()
-                conversationRequest.predicate = NSPredicate(format: "sessionId == %@", sessionId)
+            DispatchQueue.global(qos: .userInitiated).async {
+                var stmt: OpaquePointer?
                 
-                do {
-                    guard let conversation = try self.context.fetch(conversationRequest).first else {
+                // First get conversation info
+                let conversationSQL = """
+                    SELECT message_count FROM conversations WHERE session_id = ?
+                """
+                
+                if sqlite3_prepare_v2(self.db, conversationSQL, -1, &stmt, nil) == SQLITE_OK {
+                    sqlite3_bind_text(stmt, 1, sessionId, -1, nil)
+                    
+                    if sqlite3_step(stmt) == SQLITE_ROW {
+                        let totalMessages = sqlite3_column_int(stmt, 0)
+                        sqlite3_finalize(stmt)
+                        
+                        // Now get messages with pagination
+                        let offset = (page - 1) * pageSize
+                        let messagesSQL = """
+                            SELECT role, content, timestamp, tool_calls
+                            FROM messages m
+                            JOIN conversations c ON m.conversation_id = c.id
+                            WHERE c.session_id = ?
+                            ORDER BY m.timestamp ASC
+                            LIMIT \(pageSize) OFFSET \(offset)
+                        """
+                        
+                        if sqlite3_prepare_v2(self.db, messagesSQL, -1, &stmt, nil) == SQLITE_OK {
+                            sqlite3_bind_text(stmt, 1, sessionId, -1, nil)
+                            
+                            var messages: [ConversationMessage] = []
+                            let formatter = ISO8601DateFormatter()
+                            
+                            while sqlite3_step(stmt) == SQLITE_ROW {
+                                let role = String(cString: sqlite3_column_text(stmt, 0))
+                                let content = String(cString: sqlite3_column_text(stmt, 1))
+                                let timestampString = String(cString: sqlite3_column_text(stmt, 2))
+                                let timestamp = formatter.date(from: timestampString) ?? Date()
+                                
+                                let message = ConversationMessage(
+                                    role: role,
+                                    content: content,
+                                    timestamp: timestamp
+                                )
+                                messages.append(message)
+                            }
+                            
+                            let totalPages = Int(ceil(Double(totalMessages) / Double(pageSize)))
+                            let context = ConversationContext(
+                                sessionId: sessionId,
+                                messages: messages,
+                                totalMessages: Int(totalMessages),
+                                currentPage: page,
+                                totalPages: totalPages
+                            )
+                            
+                            continuation.resume(returning: context)
+                        } else {
+                            let error = String(cString: sqlite3_errmsg(self.db))
+                            continuation.resume(throwing: AIMemoryError.databaseError(error))
+                        }
+                    } else {
                         continuation.resume(throwing: AIMemoryError.conversationNotFound)
-                        return
                     }
-                    
-                    // Fetch messages for this conversation with pagination
-                    let messageRequest: NSFetchRequest<Message> = Message.fetchRequest()
-                    messageRequest.predicate = NSPredicate(format: "conversation == %@", conversation)
-                    messageRequest.sortDescriptors = [
-                        NSSortDescriptor(key: "messageIndex", ascending: true)
-                    ]
-                    
-                    let offset = (page - 1) * pageSize
-                    messageRequest.fetchOffset = offset
-                    messageRequest.fetchLimit = pageSize
-                    
-                    let messages = try self.context.fetch(messageRequest)
-                    
-                    let messageItems = messages.map { message in
-                        MessageItem(
-                            role: message.role ?? "unknown",
-                            content: message.contentSummary ?? "",
-                            timestamp: message.timestamp ?? Date(),
-                            toolCalls: message.toolCallsArray
-                        )
-                    }
-                    
-                    let context = ConversationContext(
-                        sessionId: sessionId,
-                        messages: messageItems,
-                        totalMessages: Int(conversation.messageCount),
-                        currentPage: page,
-                        totalPages: Int(ceil(Double(conversation.messageCount) / Double(pageSize)))
-                    )
-                    
-                    continuation.resume(returning: context)
-                } catch {
-                    continuation.resume(throwing: error)
+                } else {
+                    let error = String(cString: sqlite3_errmsg(self.db))
+                    continuation.resume(throwing: AIMemoryError.databaseError(error))
                 }
+                
+                sqlite3_finalize(stmt)
             }
         }
     }
@@ -200,35 +239,49 @@ class AIMemoryDataManager: ObservableObject {
     /// Replaces: mcpClient.searchConversations()
     func searchConversations(query: String, limit: Int = 10) async throws -> [ConversationSearchResult] {
         return try await withCheckedThrowingContinuation { continuation in
-            context.perform {
-                let request: NSFetchRequest<Conversation> = Conversation.fetchRequest()
+            DispatchQueue.global(qos: .userInitiated).async {
+                var stmt: OpaquePointer?
                 
-                // Simple text search - in full implementation, this would use Core Data's
-                // full-text search capabilities or SQLite FTS5
-                let searchPredicate = NSPredicate(format: "title CONTAINS[cd] %@ OR summary CONTAINS[cd] %@ OR topics CONTAINS[cd] %@", 
-                                                query, query, query)
-                request.predicate = searchPredicate
-                request.sortDescriptors = [
-                    NSSortDescriptor(key: "lastUpdated", ascending: false)
-                ]
-                request.fetchLimit = limit
+                let sql = """
+                    SELECT session_id, title, project, last_updated, summary
+                    FROM conversations
+                    WHERE title LIKE '%\(query)%' OR summary LIKE '%\(query)%' OR topics LIKE '%\(query)%'
+                    ORDER BY last_updated DESC
+                    LIMIT \(limit)
+                """
                 
-                do {
-                    let conversations = try self.context.fetch(request)
-                    let results = conversations.map { conversation in
-                        ConversationSearchResult(
-                            sessionId: conversation.sessionId ?? "",
-                            title: conversation.title ?? "Untitled",
-                            project: conversation.project ?? "Unknown",
-                            lastModified: conversation.lastUpdated ?? Date(),
-                            relevanceScore: 0.8, // Placeholder - would implement proper scoring
-                            matchedContent: conversation.summary ?? ""
+                if sqlite3_prepare_v2(self.db, sql, -1, &stmt, nil) == SQLITE_OK {
+                    var results: [ConversationSearchResult] = []
+                    let formatter = ISO8601DateFormatter()
+                    
+                    while sqlite3_step(stmt) == SQLITE_ROW {
+                        let sessionId = String(cString: sqlite3_column_text(stmt, 0))
+                        let title = String(cString: sqlite3_column_text(stmt, 1))
+                        let project = String(cString: sqlite3_column_text(stmt, 2))
+                        let lastUpdatedString = String(cString: sqlite3_column_text(stmt, 3))
+                        let summary = String(cString: sqlite3_column_text(stmt, 4))
+                        
+                        let lastUpdated = formatter.date(from: lastUpdatedString) ?? Date()
+                        
+                        let result = ConversationSearchResult(
+                            sessionId: sessionId,
+                            title: title,
+                            project: project,
+                            date: lastUpdated,
+                            messageCount: 0, // Would need separate query for exact count
+                            snippet: summary,
+                            hasErrors: false // Placeholder
                         )
+                        results.append(result)
                     }
+                    
                     continuation.resume(returning: results)
-                } catch {
-                    continuation.resume(throwing: error)
+                } else {
+                    let error = String(cString: sqlite3_errmsg(self.db))
+                    continuation.resume(throwing: AIMemoryError.databaseError(error))
                 }
+                
+                sqlite3_finalize(stmt)
             }
         }
     }
