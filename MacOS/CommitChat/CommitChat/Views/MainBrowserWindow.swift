@@ -35,9 +35,8 @@ struct MainBrowserWindow: View {
     }
     
     private var sidebarView: some View {
-        VStack {
-            // Sidebar with project filters
-            List(selection: $selectedProject) {
+        // Sidebar with project filters
+        List(selection: $selectedProject) {
                 Section("Projects") {
                     ForEach(projects, id: \.self) { project in
                         Label {
