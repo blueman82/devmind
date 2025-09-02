@@ -4092,3 +4092,41 @@ phase_24_mcp_response_format_fix:
     build_status: "✅ BUILD SUCCEEDED"
     debug_logging: "Added to both MainBrowserWindow and MCPClient"
     ready_for_testing: "Browse UI should now correctly parse MCP tool responses"
+
+# Phase 25: Debugging Dummy Data Issue  
+phase_25_dummy_data_investigation:
+  timestamp: "2025-09-02T01:35:00"
+  milestone: "Added comprehensive debugging to identify data flow issues"
+  
+  user_report: "No errors but looks like dummy demo data is only showing"
+  
+  investigation_approach:
+    comprehensive_logging: "Added debug traces throughout conversation loading flow"
+    data_source_analysis: "Verified only SearchWindow uses mock data, not MainBrowserWindow"
+    ui_flow_mapping: "Traced from onAppear -> loadRecentConversations -> filteredConversations"
+    
+  debugging_added:
+    mainbrowserwindow:
+      - "onAppear debug trace"
+      - "loadRecentConversations entry/success/error logging" 
+      - "filteredConversations count tracking with filtering steps"
+    mcpclient:
+      - "listRecentConversations parameter logging"
+      - "MCP response structure logging"
+      - "Nested JSON extraction debugging"
+      - "Individual conversation processing traces"
+      
+  hypothesis:
+    likely_causes:
+      - "MCP server returns valid data but field mapping still incorrect"
+      - "Async loading not completing before UI renders"
+      - "Error in conversation parsing causing empty result set"
+      - "UI fallback behavior showing placeholder content"
+      
+  next_steps:
+    validation: "Run app and check console logs to trace actual execution"
+    diagnosis: "Compare logged data with expected conversation structure"
+    
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    debug_coverage: "Complete flow tracing from UI to MCP response"
