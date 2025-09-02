@@ -50,7 +50,16 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Pattern**: `withCheckedThrowingContinuation` + `databaseQueue.async` for proper thread isolation
 - **Impact**: Eliminates all SQLite mutex violations while maintaining async interface
 
-### Testing Required
+### Database Schema Fix (✅ COMPLETE) - 2025-09-02
+- [✅] **SQL Column Mapping Fixed**: Corrected INSERT statement to match actual database schema
+  - Fixed: `project_path` → `project` (column name mismatch)
+  - Fixed: `created_at, updated_at` → `last_updated` (schema only has last_updated column)
+  - Reduced parameter count from 9 to 8 parameters to match schema
+- [✅] **Parameter Binding Corrected**: Updated sqlite3_bind_* calls to match new column order
+- [✅] **Build Verification Passed**: Complete build successful after schema corrections
+- [✅] **Systematic Verification**: Confirmed other `project_path` references are correct (external MCP/JSONL formats)
+
+### Testing Required  
 - **SQLite Database Population**: Verify conversation indexing works with real JSONL files
 
 ### Next Steps (Phases 3-4)
