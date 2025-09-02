@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import os
 
 /// JSON-RPC client for communicating with the Node.js MCP server
 /// 
@@ -31,6 +32,7 @@ import Combine
 class MCPClient: ObservableObject {
     /// Shared singleton instance for consistent MCP server communication
     static let shared = MCPClient()
+    private static let logger = Logger(subsystem: "com.commitchat", category: "MCPClient")
     
     /// Published connection status for reactive UI updates
     @Published var isConnected: Bool = false
@@ -172,10 +174,10 @@ class MCPClient: ObservableObject {
                     } else if !previousStatus && status.isRunning {
                         // Connection just established - set up response parsing
                         self?.setupResponseParsing()
-                        print("MCPClient: Response parsing set up after connection established")
+                        Self.logger.debug("Response parsing set up after connection established")
                     }
-                    print("MCPClient connection status updated: \(previousStatus) → \(status.isRunning)")
-                    print("MCPClient isConnected property is now: \(self?.isConnected ?? false)")
+                    Self.logger.debug("Connection status updated: \(previousStatus) → \(status.isRunning)")
+                    Self.logger.debug("isConnected property is now: \(self?.isConnected ?? false)")
                 }
             }
             .store(in: &cancellables)
@@ -211,7 +213,7 @@ class MCPClient: ObservableObject {
     private func setupResponseParsing() {
         // Response parsing is now handled via ProcessManager's unified handler
         // ProcessManager will call parseJSONRPCResponses() directly
-        print("JSON-RPC response parsing delegated to ProcessManager's unified handler")
+        Self.logger.debug("JSON-RPC response parsing delegated to ProcessManager's unified handler")
     }
     
     func parseJSONRPCResponses(_ output: String) {
@@ -288,7 +290,7 @@ class MCPClient: ObservableObject {
                 }
             }
         } catch {
-            print("Failed to parse JSON-RPC response: \(error)")
+            Self.logger.error("Failed to parse JSON-RPC response: \(error.localizedDescription)")
         }
     }
     
@@ -445,7 +447,7 @@ class MCPClient: ObservableObject {
               let firstContent = content.first,
               let textContent = firstContent["text"] as? String else {
             // Log the actual response structure for debugging
-            print("MCPClient: Unexpected response structure: \(response)")
+            Self.logger.error("Unexpected response structure: \(response)")
             throw MCPClientError.invalidResponse
         }
         
@@ -472,7 +474,7 @@ class MCPClient: ObservableObject {
     /// - Returns: Array of conversation items with metadata
     /// - Throws: `MCPClientError` for connection or server failures
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
-        print("🔍 DEBUG: listRecentConversations called with limit=\(limit), timeframe='\(timeframe)'")
+        Self.logger.debug("🔍 listRecentConversations called with limit=\(limit), timeframe='\(timeframe)'")
         
         let toolParams: [String: Any] = [
             "limit": limit,
@@ -484,42 +486,42 @@ class MCPClient: ObservableObject {
             "arguments": toolParams
         ]
         
-        print("🔍 DEBUG: Sending request with params: \(params)")
+        Self.logger.debug("🔍 Sending request with params: \(params)")
         
         let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
-        print("🔍 DEBUG: Received response keys: \(response.keys)")
-        print("🔍 DEBUG: Full response: \(response)")
+        Self.logger.debug("🔍 Received response keys: \(response.keys)")
+        Self.logger.debug("🔍 Full response: \(response)")
         
         // Extract the nested JSON response from the MCP tool call
         guard let content = response["content"] as? [[String: Any]],
               let firstContent = content.first,
               let textContent = firstContent["text"] as? String else {
-            print("🔍 DEBUG: Failed to extract content.text from MCP response")
+            Self.logger.debug("🔍 Failed to extract content.text from MCP response")
             throw MCPClientError.invalidResponse
         }
         
-        print("🔍 DEBUG: Extracted text content: \(textContent)")
+        Self.logger.debug("🔍 Extracted text content: \(textContent)")
         
         // Parse the nested JSON response from the tool
         guard let data = textContent.data(using: .utf8),
               let toolResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let results = toolResponse["results"] as? [[String: Any]] else {
-            print("🔍 DEBUG: Failed to parse nested JSON or extract 'results' array")
+            Self.logger.debug("🔍 Failed to parse nested JSON or extract 'results' array")
             throw MCPClientError.invalidResponse
         }
         
-        print("🔍 DEBUG: Found \(results.count) conversation results")
+        Self.logger.debug("🔍 Found \(results.count) conversation results")
         
         return try results.map { conv in
-            print("🔍 DEBUG: Processing conversation: \(conv)")
+            Self.logger.debug("🔍 Processing conversation: \(conv)")
             return try ConversationItem(from: conv)
         }
     }
     
     /// Get conversation context
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
-        print("🔍 DEBUG: getConversationContext called with sessionId=\(sessionId), page=\(page), pageSize=\(pageSize)")
+        Self.logger.debug("🔍 getConversationContext called with sessionId=\(sessionId), page=\(page), pageSize=\(pageSize)")
         
         let toolParams: [String: Any] = [
             "session_id": sessionId,
@@ -533,30 +535,30 @@ class MCPClient: ObservableObject {
             "arguments": toolParams
         ]
         
-        print("🔍 DEBUG: Sending getConversationContext request with params: \(params)")
+        Self.logger.debug("🔍 Sending getConversationContext request with params: \(params)")
         
         let response: [String: Any] = try await sendRequest(method: "tools/call", params: params)
         
-        print("🔍 DEBUG: Received getConversationContext response keys: \(response.keys)")
+        Self.logger.debug("🔍 Received getConversationContext response keys: \(response.keys)")
         
         // Extract the nested JSON response from the MCP tool call (same as listRecentConversations)
         guard let content = response["content"] as? [[String: Any]],
               let firstContent = content.first,
               let textContent = firstContent["text"] as? String else {
-            print("🔍 DEBUG: Failed to extract content.text from getConversationContext MCP response")
+            Self.logger.debug("🔍 Failed to extract content.text from getConversationContext MCP response")
             throw MCPClientError.invalidResponse
         }
         
-        print("🔍 DEBUG: Extracted getConversationContext text content length: \(textContent.count)")
+        Self.logger.debug("🔍 Extracted getConversationContext text content length: \(textContent.count)")
         
         // Parse the nested JSON response from the tool
         guard let data = textContent.data(using: .utf8),
               let toolResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            print("🔍 DEBUG: Failed to parse nested JSON from getConversationContext")
+            Self.logger.debug("🔍 Failed to parse nested JSON from getConversationContext")
             throw MCPClientError.invalidResponse
         }
         
-        print("🔍 DEBUG: Parsed getConversationContext tool response keys: \(toolResponse.keys)")
+        Self.logger.debug("🔍 Parsed getConversationContext tool response keys: \(toolResponse.keys)")
         
         return try ConversationContext(from: toolResponse)
     }
@@ -704,7 +706,7 @@ struct ConversationContext {
         // Handle the actual MCP response format
         guard let sessionId = dict["sessionId"] as? String,
               let messagesData = dict["messages"] as? [[String: Any]] else {
-            print("🔍 DEBUG: ConversationContext missing required fields - sessionId or messages")
+            Self.logger.debug("🔍 ConversationContext missing required fields - sessionId or messages")
             throw MCPClientError.invalidResponse
         }
         
