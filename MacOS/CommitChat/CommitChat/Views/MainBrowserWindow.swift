@@ -260,6 +260,9 @@ struct MainBrowserWindow: View {
                     self.recentConversations = conversations
                     self.isLoadingConversations = false
                     
+                    // Update available projects from conversations (cached to avoid repeated computation)
+                    self.updateAvailableProjects(from: conversations)
+                    
                     // Update global conversation count
                     appState.conversationCount = conversations.count
                     print("🔍 DEBUG: UI updated with \(conversations.count) conversations")
