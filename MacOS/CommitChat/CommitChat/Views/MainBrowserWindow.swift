@@ -80,12 +80,14 @@ struct MainBrowserWindow: View {
     }
     
     private var contentView: some View {
-        // Main content area with conversation grid
-        VStack(spacing: 0) {
-                // Toolbar
-                HStack {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
+        Text("Content View - TODO: Move full content here")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private var detailView: some View {
+        Text("Detail View - TODO: Move detail content here") 
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
                             .foregroundColor(.secondary)
                         TextField("Filter conversations...", text: $searchText)
                             .textFieldStyle(.plain)
