@@ -966,4 +966,21 @@ production_solution_required:
       cons: "Different paradigm, larger refactor"
     core_data:
       pros: "Apple's solution, good ecosystem support"
-      cons: "Still uses system SQLite 3.43.2 with corruption"
+      cons: "Still uses system SQLite 3.43.2 with corruption"## Phase 2: Data Layer - SQLite 3.43.2 Corruption Issue
+
+phase_2_data_layer:
+  name: 'SQLite Database & JSONL Parser'
+  status: '⚠️ BLOCKED - SQLite 3.43.2 Corruption'
+  critical_issue:
+    problem: 'SQLite 3.43.2 btree corruption at line 106515'
+    impact: 'Database corrupts during bulk insertions'
+    error_message: 'database disk image is malformed'
+    attempts_made:
+      - 'Matched MCP server schema exactly'
+      - 'Fixed INTEGER PRIMARY KEY AUTOINCREMENT'
+      - 'Added composite UNIQUE constraints'
+      - 'Fixed transaction handling'
+    result: 'Still corrupting - only 1 conversation, 0 messages stored'
+    root_cause: 'System SQLite 3.43.2 has known corruption bug'
+    solution_needed: 'Upgrade to SQLite 3.44.0+ or use alternative storage'
+
