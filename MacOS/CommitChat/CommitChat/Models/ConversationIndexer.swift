@@ -166,7 +166,7 @@ class ConversationIndexer: ObservableObject {
             let semaphore = DispatchSemaphore(value: 0)
             var indexingError: Error?
             
-            Task {
+            Task.detached {
                 do {
                     self.debugLog("🗄️ Database indexing started for: \(conversation.sessionId)")
                     try await self.dataManager.indexConversation(conversation)
