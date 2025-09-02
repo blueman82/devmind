@@ -47,6 +47,30 @@ project:
   parent_project: "DevMind AI Memory System"
   implementation_date_started: "2025-08-31"
   
+## PARTIAL FIX - DEEPER INVESTIGATION ONGOING - 2025-09-02
+
+partial_fix_status_2025_09_02:
+  fix_applied: "Task.detached implemented in ConversationIndexer.swift"
+  test_result: "❌ Still only 1 conversation indexed after rebuild"
+  user_feedback: "rebuilt - I bet you only find 1 again (confirmed correct)"
+  
+  current_status:
+    database_deleted: "All SQLite files removed for fresh start"
+    files_removed: ".db (119MB), .db-shm (32KB), .db-wal (11MB)"
+    rebuild_started: "User reports 'rebuild has begun' and 'looks better'"
+    user_request: "check yourself - verify current status"
+    
+  deeper_issue_identified:
+    not_task_execution: "Task.detached didn't resolve core problem"
+    actual_problem: "Likely in AIMemoryDataModel.indexConversation"
+    suspect_code: "withCheckedThrowingContinuation pattern"
+    evidence: "Debug log shows indexing starts but never completes"
+    
+  next_investigation:
+    focus: "AIMemoryDataModel database transaction handling"
+    check: "Continuation resume patterns"
+    verify: "Database write operations after fresh start"
+
 ## ROOT CAUSE FIXED - TASK EXECUTION DEADLOCK RESOLVED - 2025-09-02
 
 task_deadlock_fix_2025_09_02:
