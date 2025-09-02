@@ -512,7 +512,8 @@ struct ConversationDetailView: View {
                 // Use the actual sessionId from the conversation item
                 let sessionId = item.sessionId
                 
-                let content = try await dataManager.getConversationContext(
+                let manager = dataManager
+                let content = try await manager.getConversationContext(
                     sessionId: sessionId,
                     page: 1,
                     pageSize: 50
