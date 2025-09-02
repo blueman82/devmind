@@ -71,7 +71,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             try FileManager.default.createDirectory(at: appDirectory, withIntermediateDirectories: true)
             Self.logger.debug("🔧 Directory created/verified")
         } catch {
-            Self.logger.error("❌ Failed to create directory: \(error.localizedDescription)")
+            Self.logger.error("❌ Failed to create directory: \(error)")
         }
         
         // ARCHITECTURE: Swift App owns database, MCP Server queries it
@@ -79,7 +79,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         let claudeAIMemoryDir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude/ai-memory")
         try? FileManager.default.createDirectory(at: claudeAIMemoryDir, withIntermediateDirectories: true)
         databaseURL = claudeAIMemoryDir.appendingPathComponent("conversations.db")
-        Self.logger.debug("🔧 Database URL: \(databaseURL.path)")
+        Self.logger.debug("🔧 Database URL: \(self.databaseURL.path)")
         
         initializeDatabase()
     }
@@ -103,11 +103,11 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             createTables()
             checkAndRepairDatabase()
             isInitialized = true
-            Self.logger.debug("✅ AIMemoryDataManagerFixed initialized with corruption fixes at: \(databaseURL.path)")
+            Self.logger.debug("✅ AIMemoryDataManagerFixed initialized with corruption fixes at: \(self.databaseURL.path)")
         } else {
             let error = String(cString: sqlite3_errmsg(db))
             lastError = "Failed to open database: \(error)"
-            Self.logger.error("❌ Database error: \(error.localizedDescription)")
+            Self.logger.error("❌ Database error: \(error)")
         }
     }
     
@@ -188,7 +188,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
     private func executeSQL(_ sql: String) {
         if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
             let error = String(cString: sqlite3_errmsg(db))
-            Self.logger.error("❌ SQL error: \(error.localizedDescription)")
+            Self.logger.error("❌ SQL error: \(error)")
         }
     }
     
@@ -207,7 +207,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                         Self.logger.debug("✅ Database indexes rebuilt successfully")
                     } else {
                         let error = String(cString: sqlite3_errmsg(db))
-                        Self.logger.error("❌ Failed to rebuild indexes: \(error.localizedDescription)")
+                        Self.logger.error("❌ Failed to rebuild indexes: \(error)")
                     }
                 } else {
                     Self.logger.debug("✅ Database integrity check passed")
@@ -292,7 +292,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                 sqlite3_step(rollbackStmt)
                 sqlite3_finalize(rollbackStmt)
             }
-            Self.logger.error("❌ Transaction rolled back due to error: \(error.localizedDescription)")
+            Self.logger.error("❌ Transaction rolled back due to error: \(error)")
             throw error
         }
     }
@@ -434,7 +434,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
                     Self.logger.debug("✅ BATCH \(batchIndex + 1)/\(batches.count) completed: \(batch.count) messages")
                 } catch {
                     retryCount += 1
-                    Self.logger.warning("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(MAX_RETRIES)): \(error.localizedDescription)")
+                    Self.logger.warning("⚠️ BATCH \(batchIndex + 1) failed (retry \(retryCount)/\(MAX_RETRIES)): \(error)")
                     
                     if retryCount >= MAX_RETRIES {
                         throw AIMemoryError.databaseError("Failed to insert message batch after \(MAX_RETRIES) retries: \(error)")
