@@ -970,17 +970,29 @@ production_solution_required:
 
 phase_2_data_layer:
   name: 'SQLite Database & JSONL Parser'
-  status: '⚠️ BLOCKED - SQLite 3.43.2 Corruption'
-  critical_issue:
+  status: '⚠️ READY FOR LIBRARY SOLUTION'
+  architecture_clarification:
+    correct_architecture: 'Swift App owns database, MCP queries it'
+    business_model: 'App is paid product, MCP is free companion'
+    current_blocker: 'Swift import SQLite3 uses system SQLite 3.43.2'
+  corruption_issue:
     problem: 'SQLite 3.43.2 btree corruption at line 106515'
-    impact: 'Database corrupts during bulk insertions'
-    error_message: 'database disk image is malformed'
-    attempts_made:
-      - 'Matched MCP server schema exactly'
-      - 'Fixed INTEGER PRIMARY KEY AUTOINCREMENT'
-      - 'Added composite UNIQUE constraints'
-      - 'Fixed transaction handling'
-    result: 'Still corrupting - only 1 conversation, 0 messages stored'
-    root_cause: 'System SQLite 3.43.2 has known corruption bug'
-    solution_needed: 'Upgrade to SQLite 3.44.0+ or use alternative storage'
+    technical_cause: 'System SQLite has known bulk insert bug'
+    evidence: 'Only happens in Swift app, never in MCP server'
+  solution_options:
+    option_1:
+      name: 'SQLite.swift'
+      description: 'Swift-native wrapper with bundled SQLite'
+      pros: 'Type-safe, modern Swift, active development'
+      implementation: 'Add package dependency, refactor AIMemoryDataModel'
+    option_2:
+      name: 'FMDB'
+      description: 'Battle-tested Objective-C wrapper'
+      pros: 'Production-proven, bundles latest SQLite'
+      implementation: 'Add CocoaPods/SPM, bridge to Swift'
+    option_3:
+      name: 'Core Data'
+      description: 'Apple native solution'
+      cons: 'Still uses system SQLite 3.43.2, same corruption risk'
+  next_action: 'Choose database library and implement'
 
