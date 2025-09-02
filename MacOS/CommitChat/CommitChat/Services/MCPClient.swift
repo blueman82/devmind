@@ -42,6 +42,7 @@ class MCPClient: ObservableObject {
     private var requestId: Int = 0
     private var pendingRequests: [Int: (Result<Any, Error>) -> Void] = [:]
     private let requestQueue = DispatchQueue(label: "com.commitchat.mcpclient.requests", qos: .userInitiated)
+    private var responseBuffer = ""
     
     private let processManager = ProcessManager.shared
     private var cancellables = Set<AnyCancellable>()
