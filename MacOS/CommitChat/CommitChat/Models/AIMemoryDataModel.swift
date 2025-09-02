@@ -593,7 +593,10 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             for filePath in fileReferences {
                 sqlite3_reset(fileStmt)
                 sqlite3_bind_int64(fileStmt, 1, conversationId)
-                sqlite3_bind_text(fileStmt, 2, filePath, -1, nil)
+                // Use withCString to ensure string validity during binding
+                _ = filePath.withCString { cString in
+                    sqlite3_bind_text(fileStmt, 2, cString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+                }
                 sqlite3_step(fileStmt)
             }
         }
