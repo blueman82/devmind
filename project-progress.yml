@@ -6,7 +6,38 @@ project:
   repository: "/Users/harrison/Documents/Github/devmind"
   started: "2025-08-30"
 
-## LATEST UPDATE - 2025-09-02 - Crash Recovery & Rebuild In Progress
+## LATEST UPDATE - 2025-09-02 - CRITICAL INVESTIGATION - Core Database Issue Identified
+
+critical_database_issue_2025_09_02:
+  status: "URGENT INVESTIGATION - Same indexing problem persists after rebuild"
+  user_reaction: "oh fuck the 1 conversation again, do you recall from memory that you fixed this earlier?!"
+  investigation_directive: "yes investigate and find the root cause"
+  
+  breakthrough_discovery:
+    crash_not_cause: "Computer crash was coincidental - SAME underlying issue exists"
+    rebuild_result: "Still stuck at 1/654 conversations despite complete rebuild"
+    real_problem: "Database indexing phase hanging in ConversationIndexer"
+    evidence: "Debug logging shows JSONL parsing succeeds but database indexing never completes"
+    
+  technical_analysis:
+    hang_location: "processFileSync method waiting for semaphore.signal() that never comes"
+    async_task_issue: "Database indexing Task starts but never signals completion"
+    symptoms: "🗄️ Database indexing started for: [sessionId] - but hangs indefinitely"
+    previous_fixes_ineffective: "Sequential processing and JSONLParser fixes didn't address core database problem"
+    
+  root_cause_candidates:
+    primary_suspects:
+      - "AIMemoryDataModel.swift indexConversation method has blocking issue"
+      - "Database schema incompatibility between Swift app and MCP server"
+      - "SQLite database locks preventing write operations"
+      - "Async/await Task execution context problems in ConversationIndexer"
+      
+  investigation_priority:
+    immediate_focus: "Examine database indexing code path"
+    critical_files: "AIMemoryDataModel.swift, ConversationIndexer.swift"
+    test_approach: "Isolate database write operations to identify blocking point"
+
+## PREVIOUS UPDATE - 2025-09-02 - Crash Recovery & Rebuild In Progress
 
 crash_recovery_status_2025_09_02:
   status: "IN PROGRESS - Database rebuilding from scratch"
