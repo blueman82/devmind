@@ -491,10 +491,21 @@ class MCPClient: ObservableObject {
         print("🔍 DEBUG: Received response keys: \(response.keys)")
         print("🔍 DEBUG: Full response: \(response)")
         
-        // The server returns results directly, not wrapped in "conversations"
-        guard let results = response["results"] as? [[String: Any]] else {
-            print("🔍 DEBUG: Failed to extract 'results' array from response")
-            print("🔍 DEBUG: Response structure: \(type(of: response))")
+        // Extract the nested JSON response from the MCP tool call
+        guard let content = response["content"] as? [[String: Any]],
+              let firstContent = content.first,
+              let textContent = firstContent["text"] as? String else {
+            print("🔍 DEBUG: Failed to extract content.text from MCP response")
+            throw MCPClientError.invalidResponse
+        }
+        
+        print("🔍 DEBUG: Extracted text content: \(textContent)")
+        
+        // Parse the nested JSON response from the tool
+        guard let data = textContent.data(using: .utf8),
+              let toolResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let results = toolResponse["results"] as? [[String: Any]] else {
+            print("🔍 DEBUG: Failed to parse nested JSON or extract 'results' array")
             throw MCPClientError.invalidResponse
         }
         
