@@ -16,7 +16,7 @@ struct MainBrowserWindow: View {
     @State private var isLoadingConversations = false
     @State private var conversationError: String?
     
-    private let dataManager = AIMemoryDataManager.shared
+    private let dataManager = AIMemoryDataManagerFixed.shared
     @State private var availableProjects: [String] = ["All Projects"]
     
     private var projects: [String] {
@@ -327,7 +327,7 @@ struct ConversationCard: View {
 
 struct ConversationDetailView: View {
     let conversation: ConversationItem
-    private let dataManager = AIMemoryDataManager.shared
+    private let dataManager = AIMemoryDataManagerFixed.shared
     
     var body: some View {
         VStack {
