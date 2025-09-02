@@ -476,7 +476,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
             }
         }
-    }
     
     // MARK: - Helper Methods
     
