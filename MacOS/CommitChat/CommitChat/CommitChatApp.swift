@@ -9,6 +9,15 @@ import SwiftUI
 
 @main
 struct CommitChatApp: App {
+    init() {
+        // Initialize database
+        _ = AIMemoryDataManager.shared
+        
+        // Start conversation monitoring
+        ConversationIndexer.shared.startMonitoring()
+        print("🧠 AI Memory App started - monitoring conversations")
+    }
+    
     var body: some Scene {
         MenuBarExtra("AI Memory", systemImage: "brain") {
             ContentView()
