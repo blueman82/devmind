@@ -516,52 +516,7 @@ enum AIMemoryError: Error, LocalizedError {
     }
 }
 
-// MARK: - Supporting Data Types for JSONL parsing
-
-/// Represents a conversation parsed from JSONL file
-struct IndexableConversation {
-    let sessionId: String
-    let projectPath: String
-    let title: String
-    let createdAt: Date
-    let updatedAt: Date
-    let messages: [IndexableMessage]
-    let fileReferences: [String]
-    let topics: [String]
-}
-
-/// Represents a message within a conversation
-struct IndexableMessage {
-    let id: String
-    let role: String
-    let content: String
-    let timestamp: Date
-    let toolCalls: [String]
-}
-
-/// Search result structure
-struct ConversationSearchResult {
-    let sessionId: String
-    let title: String
-    let project: String
-    let date: Date
-    let messageCount: Int
-    let snippet: String
-    let hasErrors: Bool
-}
-
-/// Context structure for conversation details
-struct ConversationContext {
-    let sessionId: String
-    let messages: [ConversationMessage]
-    let totalMessages: Int
-    let currentPage: Int
-    let totalPages: Int
-}
-
-/// Individual message in conversation context
-struct ConversationMessage {
-    let role: String
-    let content: String
-    let timestamp: Date
-}
+// MARK: - Supporting Data Types
+// Note: Using existing types from ConversationIndexer.swift and MCPClient.swift
+// - IndexableConversation, IndexableMessage: defined in ConversationIndexer.swift
+// - ConversationSearchResult, ConversationContext, ConversationMessage: defined in MCPClient.swift
