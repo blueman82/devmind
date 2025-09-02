@@ -11,13 +11,14 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Performance**: All UI operations < 50ms
 - **Impact**: 10x performance improvement achieved
 
-### Phase 2: Conversation Indexing (IN PROGRESS - 10%)
+### Phase 2: Conversation Indexing (IN PROGRESS - 30%)
 
 #### Current Tasks
-- [🔨] Creating ConversationIndexer.swift with FSEvents monitoring - IN PROGRESS
-  - Framework imports verified (Foundation, CoreServices)
-  - Ready to implement FSEvents stream
-- [ ] Implementing JSONL parser for conversation extraction
+- [✅] Created ConversationIndexer.swift with FSEvents monitoring - COMPLETE
+  - FSEvents API implemented for ~/.claude/projects/ monitoring
+  - Initial scan capability for existing conversations
+  - Background queue processing for performance
+- [ ] Implementing JSONL parser for conversation extraction - NEXT
 - [ ] Adding indexConversation method to populate database
 
 #### Added
