@@ -47,6 +47,42 @@ project:
   parent_project: "DevMind AI Memory System"
   implementation_date_started: "2025-08-31"
   
+## CRITICAL INVESTIGATION - SAME INDEXING ISSUE PERSISTS - 2025-09-02
+
+critical_issue_investigation_2025_09_02:
+  user_frustration: "oh fuck the 1 conversation again, do you recall from memory that you fixed this earlier?!"
+  user_directive: "yes investigate and find the root cause"
+  status: "CRITICAL - Same underlying problem persists after rebuild"
+  
+  issue_analysis:
+    crash_not_root_cause: "Database rebuild shows SAME 1/654 pattern - crash was coincidental"
+    previous_fix_ineffective: "JSONLParser sessionId fix and sequential processing didn't resolve core issue"
+    real_problem: "Database indexing phase hanging at async Task execution"
+    evidence: "Debug log shows parsing succeeds but indexing never completes"
+    
+  technical_investigation_required:
+    database_level_issue: "ConversationIndexer hanging at database indexing step"
+    async_task_problem: "Semaphore wait blocking on async Task that never signals completion"
+    potential_causes:
+      - "Database schema compatibility between Swift app and MCP server"
+      - "SQLite database locks preventing writes"
+      - "Async/await Task execution context issues"
+      - "Memory constraints or resource limits"
+      - "Database constraint violations during indexing"
+      
+  debug_evidence:
+    file_discovery: "✅ 654 JSONL files found correctly"
+    jsonl_parsing: "✅ Parsed conversation with 6 messages successfully"  
+    database_indexing: "❌ Hangs at 'Database indexing started' - never completes"
+    hang_location: "processFileSync waiting for semaphore.signal() that never comes"
+    
+  next_investigation_steps:
+    - "Examine AIMemoryDataModel.swift indexConversation method"
+    - "Check for database locks or constraint violations"
+    - "Investigate async Task execution context in ConversationIndexer"
+    - "Verify database schema compatibility"
+    - "Test simple database write operations"
+
 ## CRASH RECOVERY STATUS - DATABASE REBUILD REQUIRED - 2025-09-02
 
 crash_recovery_assessment_2025_09_02:
