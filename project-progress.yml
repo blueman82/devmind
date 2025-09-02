@@ -6,7 +6,35 @@ project:
   repository: "/Users/harrison/Documents/Github/devmind"
   started: "2025-08-30"
 
-## LATEST UPDATE - 2025-09-02 - ROOT CAUSE FIXED - Task Execution Deadlock Resolved
+## LATEST UPDATE - 2025-09-02 - CRITICAL DISCOVERY - Progress vs Database Mismatch
+
+critical_discovery_2025_09_02:
+  status: "MAJOR ISSUE FOUND - Debug shows progress but database has 1 record"
+  date: "2025-09-02"
+  user_feedback: "looks better" after fresh database rebuild
+  
+  shocking_discovery:
+    debug_log_shows: "✅ Progress: 333/655 files processed, 333 conversations indexed"
+    database_shows: "Only 1 conversation record with 358 messages"
+    conclusion: "All 333 conversations being OVERWRITTEN into single record"
+    
+  the_real_problem:
+    not_hanging: "Processing IS working - reached 334/655 files"
+    actual_issue: "Database UPSERT logic replacing instead of inserting"
+    evidence: "Single conversation record keeps getting updated"
+    impact: "99.8% data loss - 333 conversations merged into 1"
+    
+  root_cause_hypothesis:
+    location: "AIMemoryDataModel.insertOrUpdateConversation method"
+    problem: "Likely using same ID or UNIQUE constraint violation"
+    pattern: "Each new conversation overwrites the previous one"
+    
+  positive_news:
+    processing_works: "File processing and parsing successful"
+    task_fix_helped: "Task.detached allowed processing to continue"
+    progress_visible: "333/655 files already processed"
+
+## PREVIOUS UPDATE - 2025-09-02 - ROOT CAUSE FIXED - Task Execution Deadlock Resolved
 
 root_cause_fix_2025_09_02:
   status: "FIXED - Task.detached resolves semaphore deadlock"
