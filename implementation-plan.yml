@@ -1,0 +1,249 @@
+# AI Memory App - Strategic Implementation Plan
+# Created: 2025-09-02
+# Total Effort: 20-25 hours to full PRD compliance
+
+project:
+  name: "AI Memory App"
+  description: "macOS app that indexes Claude Code conversations and git history"
+  unique_value: "Links AI conversations to git commits - knows what you DISCUSSED and what you BUILT"
+  competitor: "ShadowGit (auto-commits only, no conversation tracking)"
+
+current_status:
+  working:
+    - "MCP server with 5 git tools"
+    - "UI displays conversations (via network)"
+    - "SQLite database schema"
+    - "AIMemoryDataModel.swift created"
+  
+  problems:
+    - "10x performance penalty (network calls for local data)"
+    - "No conversation indexing in Mac app"
+    - "No automatic git tracking"
+    - "Architecture inverted (app is client, not server)"
+
+## Phase 1: Performance Fix (IMMEDIATE)
+phase_1_performance:
+  duration: "2-3 hours"
+  priority: "🚨 CRITICAL"
+  impact: "10x performance improvement"
+  
+  tasks:
+    connect_ui_to_local:
+      file: "MainBrowserWindow.swift"
+      change: "Replace MCPClient with AIMemoryDataModel"
+      effort: "1 hour"
+      specific_changes:
+        - "Replace MCPClient.shared with AIMemoryDataModel.shared"
+        - "Update loadRecentConversations() to use local DB"
+        - "Update search to use local DB"
+        - "Remove all async network calls for local data"
+      result: "Instant UI operations"
+    
+    remove_mcp_dependency:
+      file: "SearchWindow.swift"
+      change: "Use local database for search"
+      effort: "30 mins"
+      result: "Instant search"
+    
+    test_performance:
+      action: "Verify UI is instant"
+      metric: "<50ms for all operations"
+      effort: "30 mins"
+      result: "Confirmed performance improvement"
+
+## Phase 2: Conversation Indexing (CORE DIFFERENTIATOR)
+phase_2_conversation_indexing:
+  duration: "4-6 hours"
+  priority: "⚡ HIGH"
+  impact: "Core differentiator working"
+  
+  tasks:
+    fsevents_monitor:
+      file: "ConversationIndexer.swift"
+      implementation: "FSEvents API for ~/.claude/projects/"
+      code_structure: |
+        class ConversationIndexer {
+          private var eventStream: FSEventStreamRef?
+          func startMonitoring()
+          func handleFileChange(_ path: String)
+        }
+      effort: "2 hours"
+      result: "Real-time conversation detection"
+    
+    jsonl_parser:
+      file: "JSONLParser.swift"
+      implementation: "Parse JSONL, extract messages"
+      code_structure: |
+        class JSONLParser {
+          func parseConversation(_ jsonlPath: String) -> Conversation
+          func extractMessages(_ data: Data) -> [Message]
+          func extractTopics(_ messages: [Message]) -> [String]
+        }
+      effort: "2 hours"
+      result: "Conversation data extracted"
+    
+    index_to_database:
+      file: "AIMemoryDataModel.swift"
+      method: "indexConversation()"
+      implementation: "Store parsed data in SQLite"
+      effort: "2 hours"
+      result: "Conversations in local SQLite"
+
+## Phase 3: Git Integration (COMPETITIVE PARITY)
+phase_3_git_integration:
+  duration: "6-8 hours"
+  priority: "🎯 COMPETITIVE"
+  impact: "Match and exceed ShadowGit"
+  
+  tasks:
+    automatic_commits:
+      file: "GitAutoTracker.swift"
+      trigger: "FSEvents on project files"
+      implementation: |
+        - Monitor project directories for file changes
+        - Create commits in .git-shadow directory
+        - Never touch main .git directory
+      frequency: "On save or time interval"
+      effort: "3 hours"
+      result: "Auto-commits like ShadowGit"
+    
+    link_conversations:
+      file: "ConversationGitLinker.swift"
+      logic: "Match timestamps and files"
+      implementation: |
+        - Compare conversation timestamps with commits
+        - Match file references in conversations
+        - Store links in conversation_git_links table
+      effort: "2 hours"
+      result: "Conversations linked to commits"
+    
+    restore_ui:
+      file: "RestorePointsView.swift"
+      features:
+        - "List restore points with search"
+        - "Preview what would change"
+        - "One-click restore with safety"
+      effort: "3 hours"
+      result: "Complete git UI in Mac app"
+
+## Phase 4: Architecture Completion (FINAL)
+phase_4_architecture:
+  duration: "4-6 hours"
+  priority: "🔄 FINAL"
+  impact: "Complete PRD compliance"
+  
+  tasks:
+    ipc_mechanism:
+      approach: "XPC Service or Named Pipes"
+      direction: "MCP queries Mac app"
+      implementation: |
+        - Mac app exposes data service
+        - MCP connects as client
+        - Async request/response protocol
+      effort: "3 hours"
+      result: "Proper data flow"
+    
+    mcp_fallback:
+      logic: "If no app, use JSONL directly"
+      implementation: |
+        - Check if Mac app is running
+        - Fall back to direct JSONL parsing
+        - Reduced features without app
+      effort: "1 hour"
+      result: "Works without app"
+    
+    premium_features:
+      gate: "Git features require app"
+      features_gated:
+        - "Git restore operations"
+        - "Automatic commit tracking"
+        - "Conversation-git linking"
+      effort: "2 hours"
+      result: "Monetization ready"
+
+## Success Metrics
+success_metrics:
+  performance:
+    ui_operations: "< 50ms"
+    search_results: "< 100ms"
+    network_calls: "Zero for local data"
+  
+  features:
+    conversation_indexing: "Within 2 seconds of change"
+    git_commits: "Captured automatically"
+    restore_preview: "Accurate diff display"
+  
+  competitive:
+    shadowgit_parity: "Auto-commit feature"
+    unique_value: "Conversation + git linking"
+    ai_context: "Superior to competitors"
+
+## Risk Mitigation
+risk_mitigation:
+  performance_risk:
+    risk: "SQLite slow with large datasets"
+    mitigation:
+      - "Add proper indexes"
+      - "Use FTS5 for search"
+      - "Implement pagination"
+  
+  permissions_risk:
+    risk: "macOS permissions for file monitoring"
+    mitigation:
+      - "Request permissions in app"
+      - "Clear user communication"
+      - "Fallback to polling if needed"
+  
+  git_safety_risk:
+    risk: "Corrupting user's git repo"
+    mitigation:
+      - "Separate .git-shadow directory"
+      - "Never modify main .git"
+      - "Read-only operations on main repo"
+
+## Execution Timeline
+timeline:
+  week_1:
+    monday:
+      task: "Phase 1 - Performance fix"
+      hours: "2-3"
+      deliverable: "UI with local data"
+    
+    tuesday:
+      task: "Phase 2 - Conversation indexing"
+      hours: "4-6"
+      deliverable: "Real-time indexing"
+    
+    wednesday:
+      task: "Phase 3 - Git integration (part 1)"
+      hours: "4"
+      deliverable: "Auto-commit system"
+    
+    thursday:
+      task: "Phase 3 - Git integration (part 2)"
+      hours: "4"
+      deliverable: "Restore UI"
+    
+    friday:
+      task: "Phase 4 - Architecture completion"
+      hours: "4-6"
+      deliverable: "IPC and monetization"
+  
+  total_effort: "20-25 hours"
+  completion_date: "End of week 1"
+
+## Immediate Next Step
+next_action:
+  task: "Connect MainBrowserWindow to AIMemoryDataModel"
+  file: "/MacOS/CommitChat/CommitChat/Views/MainBrowserWindow.swift"
+  duration: "1 hour"
+  
+  specific_steps:
+    1: "Open MainBrowserWindow.swift"
+    2: "Replace 'MCPClient.shared' with 'AIMemoryDataModel.shared'"
+    3: "Update loadRecentConversations() method"
+    4: "Update search functionality"
+    5: "Test UI performance"
+  
+  expected_result: "Instant 10x performance improvement"
+  success_criteria: "All UI operations < 50ms"
