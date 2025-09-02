@@ -88,9 +88,14 @@ struct MainBrowserWindow: View {
         Text("Detail View - TODO: Move detail content here") 
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-                    .frame(maxWidth: 300)
-                    
-                    Spacer()
+    
+    // MARK: - Helper Methods
+    
+    private func filterConversations() {
+        // Filtering is handled by the computed property
+        // This method can be used for additional side effects if needed
+    }
+}
                     
                     HStack(spacing: 4) {
                         Button(action: {}) {
