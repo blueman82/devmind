@@ -238,7 +238,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
             }.value
         }
-    }
     
     /// Search conversations in local database
     /// Replaces: mcpClient.searchConversations()
