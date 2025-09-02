@@ -35,6 +35,27 @@ class ConversationIndexer: ObservableObject {
     
     private init() {}
     
+    private func debugLog(_ message: String) {
+        let timestamp = DateFormatter().string(from: Date())
+        let logEntry = "[\(timestamp)] \(message)\n"
+        
+        // Print to console (may not be visible in terminal)
+        print(message)
+        
+        // Also write to file
+        if let data = logEntry.data(using: .utf8) {
+            if !FileManager.default.fileExists(atPath: debugLogPath) {
+                FileManager.default.createFile(atPath: debugLogPath, contents: data, attributes: nil)
+            } else {
+                if let fileHandle = FileHandle(forWritingAtPath: debugLogPath) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            }
+        }
+    }
+    
     func startMonitoring() {
         guard !isMonitoring else { return }
         
