@@ -304,25 +304,22 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         
         let now = Date()
         
-        // Check if conversation exists
-        Self.logger.debug("🔍 insertOrUpdate: sessionId = '\(conversation.sessionId)', length = \(conversation.sessionId.count)")
-        
-        // CRITICAL DEBUG: Log the actual bytes of sessionId
+        // CRITICAL FIX: Handle empty sessionId to prevent all conversations overwriting each other
+        let sessionIdToUse: String
         if conversation.sessionId.isEmpty {
-            Self.logger.error("❌ CRITICAL: Empty sessionId detected in insertOrUpdate!")
-            Self.logger.error("❌ Conversation title: \(conversation.title)")
-            Self.logger.error("❌ Project path: \(conversation.projectPath)")
-            // Generate a unique sessionId to prevent overwriting
-            let generatedId = UUID().uuidString
-            Self.logger.debug("🔧 Generated replacement sessionId: \(generatedId)")
+            sessionIdToUse = UUID().uuidString
+            Self.logger.error("❌ CRITICAL: Empty sessionId detected! Generated: \(sessionIdToUse)")
+            Self.logger.error("❌ Title: \(conversation.title), Project: \(conversation.projectPath)")
+        } else {
+            sessionIdToUse = conversation.sessionId
+            Self.logger.debug("✅ Using sessionId: '\(sessionIdToUse)'")
         }
         
+        // Check if conversation exists
         var conversationId: Int64 = -1
         let selectSql = "SELECT id FROM conversations WHERE session_id = ?"
         var selectStmt: OpaquePointer?
         if sqlite3_prepare_v2(db, selectSql, -1, &selectStmt, nil) == SQLITE_OK {
-            // Use the sessionId or generate one if empty
-            let sessionIdToUse = conversation.sessionId.isEmpty ? UUID().uuidString : conversation.sessionId
             sqlite3_bind_text(selectStmt, 1, sessionIdToUse, -1, nil)
             if sqlite3_step(selectStmt) == SQLITE_ROW {
                 conversationId = sqlite3_column_int64(selectStmt, 0)
