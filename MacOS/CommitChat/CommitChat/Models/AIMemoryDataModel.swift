@@ -304,14 +304,19 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
         
         let now = Date()
         
+        print("🔍 DEBUG insertOrUpdateConversation: incoming sessionId = '\(conversation.sessionId)', length = \(conversation.sessionId.count)")
+        
         // CRITICAL FIX: Handle empty sessionId to prevent all conversations overwriting each other
         let sessionIdToUse: String
         if conversation.sessionId.isEmpty {
             sessionIdToUse = UUID().uuidString
+            print("❌ CRITICAL: Empty sessionId detected! Generated: \(sessionIdToUse)")
+            print("❌ Title: \(conversation.title), Project: \(conversation.projectPath)")
             Self.logger.error("❌ CRITICAL: Empty sessionId detected! Generated: \(sessionIdToUse)")
             Self.logger.error("❌ Title: \(conversation.title), Project: \(conversation.projectPath)")
         } else {
             sessionIdToUse = conversation.sessionId
+            print("✅ Using sessionId: '\(sessionIdToUse)'")
             Self.logger.debug("✅ Using sessionId: '\(sessionIdToUse)'")
         }
         
