@@ -3906,3 +3906,47 @@ phase_20_field_mapping:
       - "Response field name mapping"
     
   final_status: "Search UI should now work with actual server responses"
+
+# Phase 21: Search UI Clear Button Bug Fix
+phase_21_search_ui_bug:
+  timestamp: "2025-09-02T01:15:00"
+  milestone: "Fixed UI bug when clearing search or switching tabs"
+  
+  user_report:
+    symptom: "Search operation failed error appears after clearing results"
+    context: "Search works fine, but clearing or tab switching shows error"
+    
+  root_cause_analysis:
+    trigger: "Clear button sets searchText to empty string"
+    chain_reaction:
+      1. "Clear button clicked (SearchWindow.swift:65)"
+      2. "searchText = '' assignment"
+      3. "onChange handler fires (lines 47-62)"
+      4. "Debounced performSearch() called"
+      5. "Empty check triggers error message"
+    
+  bug_location:
+    file: "SearchWindow.swift"
+    method: "performSearch()"
+    lines: "152-156"
+    problematic_code: |
+      if searchText.isEmpty {
+          appState.searchError = .searchFailed("Please enter a search query")
+          appState.isSearching = false
+          return
+      }
+    
+  fix_applied:
+    approach: "Remove error on empty search, just clear results"
+    new_code: |
+      if searchText.isEmpty {
+          appState.isSearching = false
+          appState.searchResults = []  // Clear results
+          return
+      }
+    benefits:
+      - "No error when clearing search"
+      - "Clean UI state reset"
+      - "Better user experience"
+    
+  validation_status: "Ready for user testing"
