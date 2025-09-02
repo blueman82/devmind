@@ -244,12 +244,10 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Search conversations in local database
     /// Replaces: mcpClient.searchConversations()
     func searchConversations(query: String, limit: Int = 10) async throws -> [ConversationSearchResult] {
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let self = self else {
-                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
-                    return
-                }
+        return try await Task.detached { [weak self] in
+            guard let self = self else {
+                throw AIMemoryError.databaseError("Database manager deallocated")
+            }
                 var stmt: OpaquePointer?
                 
                 let sql = """
