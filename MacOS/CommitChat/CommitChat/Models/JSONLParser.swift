@@ -153,9 +153,9 @@ class JSONLParser {
         }
         
         // CRITICAL FIX: Handle empty string sessionId (not just nil)
-        Self.logger.debug("🔍 sessionId before fix: '\(sessionId ?? "nil")', isEmpty: \(sessionId?.isEmpty ?? true)")
+        print("🔍 DEBUG JSONLParser: sessionId before fix: '\(sessionId ?? "nil")', isEmpty: \(sessionId?.isEmpty ?? true)")
         let finalSessionId = (sessionId?.isEmpty ?? true) ? UUID().uuidString : sessionId!
-        Self.logger.debug("🔍 finalSessionId after fix: '\(finalSessionId)'")
+        print("🔍 DEBUG JSONLParser: finalSessionId after fix: '\(finalSessionId)' length=\(finalSessionId.count)")
         
         return IndexableConversation(
             sessionId: finalSessionId,
