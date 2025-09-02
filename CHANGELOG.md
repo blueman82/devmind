@@ -224,6 +224,20 @@ All notable changes to the AI Memory App project will be documented in this file
 
 ## [Unreleased] - 2025-09-02
 
+### Fixed
+- **Critical Database Bug**: Fixed sessionId loss during SQLite insertion that caused all conversations to overwrite each other
+  - Issue: sessionId values were being lost during sqlite3_bind_text() calls
+  - Solution: Used withCString closure to ensure string validity during binding
+  - Result: Database now correctly stores multiple unique conversations (655+ instead of 1)
+- **Logging System**: Converted all debug print statements to use os.log Logger framework
+  - Replaced print() and NSLog() with Logger.debug() throughout codebase
+  - Added proper logging categories for each component
+  - Improved debug output visibility and filtering
+
+### Changed
+- Updated database binding to use proper string lifecycle management
+- Enhanced debug logging for sessionId tracking throughout parsing and insertion pipeline
+
 ### PHASE 5 COMPLETE - Critical Database Corruption Resolution ✅ 
 - **Status**: 🎉 SQLite corruption eliminated through systematic approach
 - **BREAKTHROUGH**: Disk-level corruption identified as root cause, not code implementation
