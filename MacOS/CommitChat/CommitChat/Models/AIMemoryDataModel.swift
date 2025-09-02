@@ -158,7 +158,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
             }.value
         }
-    }
     
     /// Get conversation context from local database
     /// Replaces: mcpClient.getConversationContext()
