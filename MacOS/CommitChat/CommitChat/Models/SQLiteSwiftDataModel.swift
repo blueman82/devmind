@@ -10,6 +10,14 @@ import Foundation
 import SQLite // SQLite.swift package
 import Combine
 
+// MARK: - Required Type Imports from Other Modules
+
+// These types are defined in other files - we need them for compilation
+// ConversationItem is in MockData.swift
+// IndexableConversation is in ConversationIndexer.swift  
+// ConversationSearchResult is in MCPClient.swift
+// ConversationContext is in MCPClient.swift
+
 // MARK: - Supporting Types
 
 enum AIMemoryError: Error, LocalizedError {
