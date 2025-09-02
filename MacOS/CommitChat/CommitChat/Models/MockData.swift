@@ -52,13 +52,20 @@ struct ConversationItem: Identifiable {
             throw MCPClientError.invalidResponse
         }
         
+        // Extract sessionId - required field
+        if let sessionId = dict["sessionId"] as? String {
+            self.sessionId = sessionId
+        } else if let sessionId = dict["session_id"] as? String {
+            self.sessionId = sessionId
+        } else {
+            throw MCPClientError.invalidResponse
+        }
+        
         // Generate title from sessionId if not provided
         if let title = dict["title"] as? String {
             self.title = title
-        } else if let sessionId = dict["sessionId"] as? String {
-            self.title = "Conversation \(sessionId.prefix(8))..."
         } else {
-            self.title = "Untitled Conversation"
+            self.title = "Conversation \(self.sessionId.prefix(8))..."
         }
         
         self.project = project
