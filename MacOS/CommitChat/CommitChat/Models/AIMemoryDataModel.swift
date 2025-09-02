@@ -418,7 +418,7 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             sqlite3_finalize(deleteStmt)
         }
         
-        Self.logger.debug("📝 CORRUPTION-FIX: Inserting \(messages.count) messages in batches of \(BATCH_SIZE)...")
+        Self.logger.debug("📝 CORRUPTION-FIX: Inserting \(messages.count) messages in batches of \(self.BATCH_SIZE)...")
         
         // Process messages in batches to prevent corruption
         let batches = messages.chunked(into: BATCH_SIZE)
