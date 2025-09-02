@@ -706,7 +706,7 @@ struct ConversationContext {
         // Handle the actual MCP response format
         guard let sessionId = dict["sessionId"] as? String,
               let messagesData = dict["messages"] as? [[String: Any]] else {
-            Self.logger.debug("🔍 ConversationContext missing required fields - sessionId or messages")
+            MCPClient.logger.debug("🔍 ConversationContext missing required fields - sessionId or messages")
             throw MCPClientError.invalidResponse
         }
         
