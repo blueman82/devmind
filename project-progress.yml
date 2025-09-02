@@ -1146,8 +1146,8 @@ test_coverage_implementation:
       - "Fixed path validation issues in git tests"
       - "Fixed column name mismatches in restore_points table"
       - "Made tests more robust for test environment variations"
-        - "Updated whitelist to allow '--format=' and '--stat' flags"
-        - "Lines increased from 215 to 228"
+      - "Updated whitelist to allow '--format=' and '--stat' flags"
+      - "Lines increased from 215 to 228"
     
     git_manager:
       file: "src/git/git-manager.js"
