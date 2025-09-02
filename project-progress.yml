@@ -4130,3 +4130,54 @@ phase_25_dummy_data_investigation:
   validation:
     build_status: "✅ BUILD SUCCEEDED"
     debug_coverage: "Complete flow tracing from UI to MCP response"
+
+# Phase 26: Fixed Conversation Detail View Demo Data
+phase_26_conversation_detail_fix:
+  timestamp: "2025-09-02T01:35:00"
+  milestone: "Replaced hardcoded demo messages with real conversation content loading"
+  
+  user_feedback: "devmind conversations show up but conversation preview to the right shows demo data"
+  
+  problem_identified:
+    issue: "ConversationDetailView was hardcoded with demo MessageBubbles"
+    location: "MainBrowserWindow.swift lines 387-391"
+    behavior: "Showed correct title/project but fake conversation messages"
+    
+  solution_implemented:
+    data_model_enhancement:
+      - "Added sessionId field to ConversationItem struct"
+      - "Updated all initializers to handle sessionId extraction"
+      - "Fixed dict parsing to extract sessionId from MCP response"
+      
+    detail_view_rewrite:
+      - "Replaced hardcoded MessageBubbles with dynamic content loading"
+      - "Added loading state with ProgressView"
+      - "Added error handling for failed conversation loads"
+      - "Implemented real conversation content display"
+      - "Shows first 10 messages with content preview truncation"
+      
+    async_loading:
+      - "Calls getConversationContext with actual sessionId"
+      - "Handles loading/error states appropriately"
+      - "Updates content when different conversation selected"
+      
+  code_changes:
+    conversationitem_model:
+      file: "MockData.swift"
+      changes:
+        - "Added sessionId: String property"
+        - "Updated init methods to extract/handle sessionId"
+        - "Added fallback logic for sessionId vs session_id"
+        
+    conversation_detail_view:
+      file: "MainBrowserWindow.swift" 
+      changes:
+        - "Added @State for conversationContent, isLoadingContent, loadError"
+        - "Implemented loadConversationContent() async method"
+        - "Dynamic UI showing loading/error/content states"
+        - "Real message display with ForEach over actual conversation data"
+        
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    functionality: "Detail view now loads real conversation content via MCP"
+    ready_for_testing: "Right panel should show actual conversation messages"
