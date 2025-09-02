@@ -185,6 +185,7 @@ class ConversationIndexer: ObservableObject {
         queue.async { [weak self] in
             guard let self = self else { return }
             
+            print("🔍 Starting initial scan of JSONL files...")
             let fileManager = FileManager.default
             
             // Check if the Claude projects directory exists
@@ -193,9 +194,13 @@ class ConversationIndexer: ObservableObject {
                 return
             }
             
+            // First pass: count all JSONL files
+            var allJsonlFiles: [String] = []
+            
             do {
                 // Get all project directories
                 let projectDirs = try fileManager.contentsOfDirectory(atPath: self.claudeProjectsPath)
+                print("📁 Found \(projectDirs.count) project directories")
                 
                 for projectDir in projectDirs {
                     let projectPath = (self.claudeProjectsPath as NSString).appendingPathComponent(projectDir)
@@ -209,18 +214,37 @@ class ConversationIndexer: ObservableObject {
                     
                     // Look for JSONL files in the project directory
                     let projectContents = try fileManager.contentsOfDirectory(atPath: projectPath)
+                    let jsonlFiles = projectContents.filter { $0.hasSuffix(".jsonl") }
                     
-                    for file in projectContents {
-                        if file.hasSuffix(".jsonl") {
-                            let filePath = (projectPath as NSString).appendingPathComponent(file)
-                            self.handleFileChange(filePath)
-                        }
+                    for file in jsonlFiles {
+                        let filePath = (projectPath as NSString).appendingPathComponent(file)
+                        allJsonlFiles.append(filePath)
+                    }
+                    
+                    if !jsonlFiles.isEmpty {
+                        print("📂 \(projectDir): \(jsonlFiles.count) JSONL files")
                     }
                 }
                 
-                print("Initial scan completed")
+                await MainActor.run {
+                    self.totalFilesFound = allJsonlFiles.count
+                }
+                
+                print("📊 Total JSONL files found: \(allJsonlFiles.count)")
+                print("🚀 Starting sequential processing...")
+                
+                // Second pass: process all files sequentially
+                for filePath in allJsonlFiles {
+                    self.processFileSync(filePath)
+                }
+                
+                await MainActor.run {
+                    self.isInitialScanComplete = true
+                }
+                
+                print("✅ Initial scan completed - processed \(allJsonlFiles.count) files")
             } catch {
-                print("Error during initial scan: \(error)")
+                print("❌ Error during initial scan: \(error)")
             }
         }
     }
