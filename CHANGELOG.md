@@ -31,10 +31,11 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Impact**: Real-time conversation indexing now functional
 
 #### Completed Tasks
-- [✅] Created ConversationIndexer.swift with FSEvents monitoring
-  - FSEvents API implemented for ~/.claude/projects/ monitoring
-  - Initial scan capability for existing conversations
-  - Background queue processing for performance
+- [⚠️] ConversationIndexer.swift - File creation blocked by hook
+  - Design complete: FSEvents API for ~/.claude/projects/ monitoring
+  - Will include: Initial scan capability for existing conversations
+  - Will include: Background queue processing for performance
+  - NOTE: CoreServices framework verified but hook preventing creation
 - [✅] Implemented JSONLParser.swift for conversation extraction
   - Parses JSONL format from Claude Code conversations
   - Extracts messages, file references, and topics
