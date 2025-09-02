@@ -213,13 +213,16 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                             }
                             
                             let totalPages = Int(ceil(Double(totalMessages) / Double(pageSize)))
-                            let context = ConversationContext(
-                                sessionId: sessionId,
-                                messages: messages,
-                                totalMessages: Int(totalMessages),
-                                currentPage: page,
-                                totalPages: totalPages
-                            )
+                            let contextDict: [String: Any] = [
+                                "sessionId": sessionId,
+                                "messages": messages.map { msg in
+                                    ["role": msg.role, "content": msg.content, "timestamp": ISO8601DateFormatter().string(from: msg.timestamp)]
+                                },
+                                "totalMessages": Int(totalMessages),
+                                "currentPage": page,
+                                "totalPages": totalPages
+                            ]
+                            let context = try! ConversationContext(from: contextDict)
                             
                             sqlite3_finalize(stmt)
                             return context
