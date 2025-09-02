@@ -59,7 +59,10 @@ class JSONLParser {
         var topics = Set<String>()
         
         for (index, line) in lines.enumerated() {
-            guard let lineData = line.data(using: .utf8) else {
+            // Pre-process line to fix Unicode issues
+            let sanitizedLine = sanitizeUnicodeInJSON(line)
+            guard let lineData = sanitizedLine.data(using: .utf8) else {
+                print("Warning: Could not convert line \(index + 1) to UTF-8 data")
                 continue
             }
             
