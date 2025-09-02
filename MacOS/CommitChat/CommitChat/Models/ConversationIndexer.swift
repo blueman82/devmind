@@ -115,20 +115,28 @@ class ConversationIndexer: ObservableObject {
             do {
                 // Parse the conversation file
                 let conversation = try self.jsonlParser.parseConversation(at: path)
+                print("📊 Parsed conversation: \(conversation.sessionId) with \(conversation.messages.count) messages")
                 
                 // Index to database
+                print("🔄 Starting database indexing task for: \(conversation.sessionId)")
                 Task {
+                    print("🗄️ Database indexing task started for: \(conversation.sessionId)")
                     do {
+                        print("🔍 Calling dataManager.indexConversation for: \(conversation.sessionId)")
                         try await self.dataManager.indexConversation(conversation)
                         
+                        print("✅ Database indexing successful for: \(conversation.sessionId)")
                         await MainActor.run {
                             self.indexedCount += 1
                             self.lastIndexedTime = Date()
+                            print("📈 Updated indexedCount to: \(self.indexedCount)")
                         }
                         
                         print("Indexed conversation: \(conversation.sessionId)")
                     } catch {
-                        print("Failed to index conversation: \(error)")
+                        print("❌ Failed to index conversation: \(conversation.sessionId)")
+                        print("❌ Error details: \(error)")
+                        print("❌ Error type: \(type(of: error))")
                     }
                 }
             } catch {
