@@ -107,12 +107,10 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// List recent conversations from local database
     /// Replaces: mcpClient.listRecentConversations()
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let self = self else {
-                    continuation.resume(throwing: AIMemoryError.databaseError("Database manager deallocated"))
-                    return
-                }
+        return try await Task.detached { [weak self] in
+            guard let self = self else {
+                throw AIMemoryError.databaseError("Database manager deallocated")
+            }
                 var stmt: OpaquePointer?
                 
                 let timeframeFilter = self.buildTimeframeFilter(timeframe)
