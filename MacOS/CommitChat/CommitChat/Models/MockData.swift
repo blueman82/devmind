@@ -23,7 +23,8 @@ struct ConversationItem: Identifiable {
     let hasErrors: Bool
     
     /// Traditional initializer for mock data and direct construction
-    init(title: String, project: String, date: Date, messageCount: Int, hasCode: Bool, hasErrors: Bool) {
+    init(sessionId: String = UUID().uuidString, title: String, project: String, date: Date, messageCount: Int, hasCode: Bool, hasErrors: Bool) {
+        self.sessionId = sessionId
         self.title = title
         self.project = project
         self.date = date
