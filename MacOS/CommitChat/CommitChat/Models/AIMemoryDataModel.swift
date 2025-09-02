@@ -153,13 +153,17 @@ class AIMemoryDataManagerFixed: ObservableObject, @unchecked Sendable {
             CREATE TABLE IF NOT EXISTS messages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 conversation_id INTEGER NOT NULL,
-                message_uuid TEXT,
+                message_index INTEGER NOT NULL,
+                uuid TEXT,
+                timestamp DATETIME,
                 role TEXT NOT NULL,
-                content TEXT NOT NULL,
-                timestamp DATETIME NOT NULL,
+                content_type TEXT,
+                content TEXT,
+                content_summary TEXT,
                 tool_calls TEXT,
-                FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
-                UNIQUE(conversation_id, message_uuid)
+                file_references TEXT,
+                tokens INTEGER DEFAULT 0,
+                FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
             );
         """
         
