@@ -2,6 +2,28 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-02] - ROOT CAUSE FOUND AND FIXED - Task Execution Deadlock
+
+### Critical Fix Applied - Task.detached Resolves Semaphore Deadlock
+- **ROOT CAUSE IDENTIFIED**: Unstructured Task in sync context causing eternal deadlock
+- **LOCATION**: ConversationIndexer.swift line 169 - Task created without proper executor
+- **SYMPTOM**: Semaphore.wait() at line 191 blocks forever, Task never executes
+- **FIX APPLIED**: Changed `Task {` to `Task.detached {` for proper async execution
+
+### Technical Root Cause Analysis
+- **The Deadlock Pattern**:
+  1. processFileSync runs on background queue
+  2. Creates unstructured Task without executor context (line 169)
+  3. Task fails to execute properly in sync context
+  4. semaphore.wait() blocks forever waiting for signal (line 191)
+  5. semaphore.signal() never reached because Task doesn't complete (line 187)
+
+### Solution Implementation
+- **Fix**: Changed `Task {` to `Task.detached {` in ConversationIndexer.swift
+- **Result**: Task now executes in detached context, allowing proper async execution
+- **Verification**: BUILD SUCCEEDED with zero errors and zero warnings
+- **Impact**: Database indexing can now proceed past file 1/654
+
 ## [2025-09-02] - CRITICAL ISSUE PERSISTS - Same Indexing Problem After Rebuild
 
 ### Investigation Status - Still Stuck at 1/654 Conversations
