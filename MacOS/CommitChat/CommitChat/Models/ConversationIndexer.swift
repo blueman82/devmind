@@ -14,11 +14,15 @@ class ConversationIndexer: ObservableObject {
     @Published var isMonitoring = false
     @Published var lastIndexedTime: Date?
     @Published var indexedCount = 0
+    @Published var totalFilesFound = 0
+    @Published var filesProcessed = 0
     
     private var eventStream: FSEventStreamRef?
     private let queue = DispatchQueue(label: "com.commitchat.conversation.indexer", qos: .background)
     private let dataManager = AIMemoryDataManagerFixed.shared
     private let jsonlParser = JSONLParser()
+    private var processedFiles = Set<String>()
+    private var isInitialScanComplete = false
     
     private let claudeProjectsPath: String = {
         let homeDirectory = FileManager.default.homeDirectoryForCurrentUser
