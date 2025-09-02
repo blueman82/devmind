@@ -107,7 +107,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// List recent conversations from local database
     /// Replaces: mcpClient.listRecentConversations()
     func listRecentConversations(limit: Int = 20, timeframe: String = "today") async throws -> [ConversationItem] {
-        return try await Task.detached { [weak self] in
+        return try Task { [weak self] in
             guard let self = self else {
                 throw AIMemoryError.databaseError("Database manager deallocated")
             }
@@ -162,7 +162,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Get conversation context from local database
     /// Replaces: mcpClient.getConversationContext()
     func getConversationContext(sessionId: String, page: Int = 1, pageSize: Int = 50) async throws -> ConversationContext {
-        return try await Task.detached { [weak self] in
+        return try Task { [weak self] in
             guard let self = self else {
                 throw AIMemoryError.databaseError("Database manager deallocated")
             }
@@ -246,7 +246,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     /// Search conversations in local database
     /// Replaces: mcpClient.searchConversations()
     func searchConversations(query: String, limit: Int = 10) async throws -> [ConversationSearchResult] {
-        return try await Task.detached { [weak self] in
+        return try Task { [weak self] in
             guard let self = self else {
                 throw AIMemoryError.databaseError("Database manager deallocated")
             }
