@@ -207,11 +207,13 @@ struct MainBrowserWindow: View {
     // MARK: - Computed Properties
     
     var filteredConversations: [ConversationItem] {
+        print("🔍 DEBUG: filteredConversations called - recentConversations.count = \(recentConversations.count)")
         var result = recentConversations
         
         // Filter by project
         if let project = selectedProject, project != "All Projects" {
             result = result.filter { $0.project.lowercased().contains(project.lowercased()) }
+            print("🔍 DEBUG: After project filter ('\(project)'), result.count = \(result.count)")
         }
         
         // Filter by search text
@@ -220,8 +222,10 @@ struct MainBrowserWindow: View {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
                 $0.project.localizedCaseInsensitiveContains(searchText)
             }
+            print("🔍 DEBUG: After search filter ('\(searchText)'), result.count = \(result.count)")
         }
         
+        print("🔍 DEBUG: Returning \(result.count) filtered conversations")
         return result
     }
     
