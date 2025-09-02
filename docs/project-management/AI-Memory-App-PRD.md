@@ -534,6 +534,7 @@ npm run test:git        # Git tools specific tests
 
 ### Phase 10: macOS Application (Optional)
 - [ ] **Native macOS App** - Menu bar interface (Swift/SwiftUI)
+- [ ] **Indexing Progress UI** - Real-time progress indicators for database building
 - [ ] **Visual Conversation Browser** - Rich UI for conversation management
 - [ ] **Advanced Search Interface** - Visual filters and result presentation
 - [ ] **Team Collaboration** - Shared conversation indices
