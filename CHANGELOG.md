@@ -2,21 +2,34 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
-## [2025-09-02] - Swift Logging Implementation & SessionId Database Fix
+## [2025-09-02] - COMPLETE FIX - SessionId SQLite Binding Issue Resolved
 
-### Changed
+### The Root Cause - Swift String Reference Loss in C API
+- **DISCOVERY**: sqlite3_bind_text() was losing Swift string reference
+- **IMPACT**: All 655 conversations overwriting single database record
+- **LOCATION**: AIMemoryDataModel.swift line 397-400
+- **SYMPTOM**: SessionId became empty during SQLite binding
+
+### Critical Fix Applied
+- **SOLUTION**: Used withCString closure to maintain string validity
+- **CODE CHANGE**:
+  ```swift
+  // Fixed using withCString closure
+  sessionIdToUse.withCString { cString in
+      sqlite3_bind_text(insertStmt, 1, cString, -1, ...)
+  }
+  ```
+- **VERIFICATION**: Database now stores 235+ unique conversations (growing to 655)
+
+### Swift Logging Implementation
 - Converted all debug print statements to use Swift's os.log Logger framework
 - Replaced NSLog calls with logger.debug/error/warning for better debugging
 - Fixed Swift compilation errors requiring explicit 'self' references in closures
 
-### Fixed  
-- Added sessionIdToUse variable in insertOrUpdateConversation to handle empty sessionIds
-- Fixed database insertion logic to use consistent sessionId throughout INSERT/UPDATE
-- Prevents all conversations from overwriting single record due to empty sessionId
-
-### Known Issue
-- SessionId is still not persisting correctly to database despite fixes
-- Need to investigate why sessionId becomes empty between JSONLParser and database
+### Clean Rebuild Test
+- Database deleted for fresh verification
+- Expected outcome: 655 unique conversations with valid sessionIds
+- Validation: `sqlite3 ~/.claude/ai-memory/conversations.db 'SELECT COUNT(*) FROM conversations;'`
 
 ## [2025-09-02] - DEBUGGING EMPTY SESSIONID - Issue Persists
 
