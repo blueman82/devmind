@@ -98,13 +98,15 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     }
     
     private func createTables() {
+        // Match the MCP server's working schema
         let createConversationsTable = """
             CREATE TABLE IF NOT EXISTS conversations (
-                id TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 session_id TEXT UNIQUE NOT NULL,
                 title TEXT NOT NULL,
-                project TEXT NOT NULL,
-                last_updated DATETIME NOT NULL,
+                project_path TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 message_count INTEGER DEFAULT 0,
                 topics TEXT,
                 summary TEXT,
@@ -115,20 +117,24 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
         
         let createMessagesTable = """
             CREATE TABLE IF NOT EXISTS messages (
-                id TEXT PRIMARY KEY,
-                conversation_id TEXT REFERENCES conversations(id),
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                conversation_id INTEGER NOT NULL,
+                message_uuid TEXT UNIQUE,
                 role TEXT NOT NULL,
                 content TEXT NOT NULL,
                 timestamp DATETIME NOT NULL,
-                tool_calls TEXT
+                tool_calls TEXT,
+                FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
             );
         """
         
         let createIndexes = """
             CREATE INDEX IF NOT EXISTS idx_conversations_session_id ON conversations(session_id);
-            CREATE INDEX IF NOT EXISTS idx_conversations_project ON conversations(project);
-            CREATE INDEX IF NOT EXISTS idx_conversations_last_updated ON conversations(last_updated);
+            CREATE INDEX IF NOT EXISTS idx_conversations_project_path ON conversations(project_path);
+            CREATE INDEX IF NOT EXISTS idx_conversations_created_at ON conversations(created_at);
+            CREATE INDEX IF NOT EXISTS idx_conversations_updated_at ON conversations(updated_at);
             CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+            CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
         """
         
         executeSQL(createConversationsTable)
