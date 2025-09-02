@@ -51,14 +51,23 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     // MARK: - Initialization
     
     private init() {
+        print("🔧 AIMemoryDataManager: Starting initialization...")
+        
         // Store database in Application Support directory
         let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let appDirectory = appSupportURL.appendingPathComponent("CommitChat")
+        print("🔧 AIMemoryDataManager: App directory: \(appDirectory.path)")
         
         // Create directory if needed
-        try? FileManager.default.createDirectory(at: appDirectory, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: appDirectory, withIntermediateDirectories: true)
+            print("🔧 AIMemoryDataManager: Directory created/verified")
+        } catch {
+            print("❌ AIMemoryDataManager: Failed to create directory: \(error)")
+        }
         
         databaseURL = appDirectory.appendingPathComponent("conversations.db")
+        print("🔧 AIMemoryDataManager: Database URL: \(databaseURL.path)")
         
         initializeDatabase()
     }
