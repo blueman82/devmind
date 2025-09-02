@@ -7,9 +7,11 @@
 
 import Foundation
 import CoreServices
+import os
 
 class ConversationIndexer: ObservableObject {
     static let shared = ConversationIndexer()
+    private static let logger = Logger(subsystem: "com.commitchat", category: "ConversationIndexer")
     
     @Published var isMonitoring = false
     @Published var lastIndexedTime: Date?
@@ -40,7 +42,7 @@ class ConversationIndexer: ObservableObject {
         let logEntry = "[\(timestamp)] \(message)\n"
         
         // Print to console (may not be visible in terminal)
-        print(message)
+        Self.logger.debug("\(message)")
         
         // Also write to file
         if let data = logEntry.data(using: .utf8) {
@@ -88,7 +90,7 @@ class ConversationIndexer: ObservableObject {
         )
         
         guard let stream = eventStream else {
-            print("Failed to create FSEvent stream")
+            Self.logger.error("Failed to create FSEvent stream")
             return
         }
         
@@ -97,7 +99,7 @@ class ConversationIndexer: ObservableObject {
         
         isMonitoring = true
         
-        print("Started monitoring: \(claudeProjectsPath)")
+        Self.logger.debug("Started monitoring: \(claudeProjectsPath)")
         
         // Initial scan of existing conversations
         performInitialScan()
@@ -115,7 +117,7 @@ class ConversationIndexer: ObservableObject {
             self.isMonitoring = false
         }
         
-        print("Stopped monitoring")
+        Self.logger.debug("Stopped monitoring")
     }
     
     private func handleEvents(numEvents: Int, eventPaths: UnsafeMutableRawPointer, eventFlags: UnsafePointer<FSEventStreamEventFlags>) {
@@ -141,7 +143,7 @@ class ConversationIndexer: ObservableObject {
             return
         }
         
-        print("Detected change in: \(path)")
+        Self.logger.debug("Detected change in: \(path)")
         
         queue.async { [weak self] in
             guard let self = self else { return }
@@ -191,16 +193,16 @@ class ConversationIndexer: ObservableObject {
             semaphore.wait()
             
             if let error = indexingError {
-                print("Database indexing failed for \(path): \(error)")
+                Self.logger.error("Database indexing failed for \(path): \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.filesProcessed += 1
                 }
             } else {
-                print("✅ Successfully indexed conversation from: \(path)")
+                Self.logger.debug("✅ Successfully indexed conversation from: \(path)")
             }
             
         } catch {
-            print("Failed to parse conversation at \(path): \(error)")
+            Self.logger.error("Failed to parse conversation at \(path): \(error.localizedDescription)")
             DispatchQueue.main.async {
                 self.filesProcessed += 1
             }
@@ -283,7 +285,7 @@ class ConversationIndexer: ObservableObject {
                 
                 self.debugLog("✅ Initial scan completed - processed \(allJsonlFiles.count) files")
             } catch {
-                print("❌ Error during initial scan: \(error)")
+                Self.logger.error("❌ Error during initial scan: \(error.localizedDescription)")
             }
         }
     }
