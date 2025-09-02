@@ -2,6 +2,27 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-02] - ROOT CAUSE FINALLY FOUND - Empty SessionId Bug Fixed
+
+### The Real Bug - Empty String SessionId
+- **DISCOVERY**: All 667 conversations had EMPTY sessionId in database
+- **IMPACT**: All conversations overwritten into single record (99.85% data loss)
+- **ROOT CAUSE**: JSONLParser returned empty string sessionId instead of nil
+- **SYMPTOM**: UPSERT found existing record with empty sessionId and updated instead of inserting
+
+### Critical Fix Applied
+- **FILE**: JSONLParser.swift line 154
+- **BEFORE**: `sessionId ?? UUID().uuidString` (only checked for nil)
+- **AFTER**: `(sessionId?.isEmpty ?? true) ? UUID().uuidString : sessionId!` (checks empty string)
+- **VERIFICATION**: BUILD SUCCEEDED with zero errors/warnings
+
+### Why This Happened
+1. Debug logs showed unique sessionIds being parsed
+2. Database showed empty sessionId field (LENGTH = 0)
+3. Empty string is not nil, so passed through nil-coalescing operator
+4. All conversations matched the single empty sessionId record
+5. UPSERT updated instead of inserting new records
+
 ## [2025-09-02] - PARTIAL FIX APPLIED - Deeper Issue Remains
 
 ### Task.detached Fix Applied But Issue Persists
