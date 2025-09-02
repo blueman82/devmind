@@ -35,6 +35,16 @@ All notable changes to the AI Memory App project will be documented in this file
 - [✅] **Zero warnings build achieved** - Complete systematic verification with clean build
 - [✅] **Project documentation updated** - All progress tracked in CHANGELOG.md
 
+### SQLite Corruption Root Cause Identified (🔧 IN PROGRESS) - 2025-09-02
+- [✅] **Root Cause Found**: Schema mismatch between MCP server and local implementation
+- [✅] **Not a SQLite 3.43.2 bug**: Corruption is due to our code, not the SQLite version
+- [✅] **Problem Identified**: 
+  - Conversations table defines `id TEXT PRIMARY KEY` but we never insert it
+  - We only insert `session_id` but messages reference non-existent `conversations(id)`
+  - Foreign key constraint violation causes btree index corruption at line 106515
+- [🔧] **Fix in Progress**: Correcting schema to match MCP server's original design
+- [📝] **Why it worked in MCP**: MCP server had correct schema, migration broke it
+
 ### SQLite Concurrency Fix (✅ COMPLETE) - 2025-09-02
 - [✅] **SQLite Mutex Error Resolved**: Fixed sqlite3MutexMisuseAssert runtime crash at AIMemoryDataModel.swift:318
 - [✅] **Thread-Safe Database Access**: Implemented serial dispatch queue (`databaseQueue`) for all SQLite operations
