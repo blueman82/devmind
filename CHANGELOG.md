@@ -110,12 +110,27 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Fixed Parser**: Extracts text from array structure and builds proper content string
 - **Impact**: Messages now have actual content instead of empty strings
 
+### UNIQUE Constraint Fix (✅ COMPLETE) - 2025-09-02
+- [✅] **UNIQUE Constraint Violation Resolved**: Fixed SQLite Error Code 19 "UNIQUE constraint failed: messages.id"
+- [✅] **INSERT OR REPLACE Implementation**: Changed `INSERT INTO messages` to `INSERT OR REPLACE INTO messages`
+- [✅] **Duplicate ID Handling**: Now gracefully handles duplicate message IDs across conversations
+- [✅] **Build Verification Passed**: Complete clean build successful - BUILD SUCCEEDED
+- [✅] **Database Design Understanding**: Messages have globally unique IDs, not conversation-scoped IDs
+
+### Root Cause Analysis - UNIQUE Constraint
+- **Schema**: `messages.id TEXT PRIMARY KEY` - globally unique across all conversations
+- **Issue**: Claude Code message UUIDs can appear in multiple conversations during re-indexing  
+- **Previous**: `INSERT INTO messages` failed on duplicate IDs from different conversations
+- **Fixed**: `INSERT OR REPLACE INTO messages` updates existing records instead of failing
+- **Impact**: Re-indexing conversations no longer fails on message ID duplicates
+
 ### Current Status
 - **Database Corruption**: ✅ RESOLVED - Root cause fixed, parser handles Claude Code JSONL format correctly
 - **Build Quality**: ✅ VERIFIED - Clean build with zero warnings/errors after comprehensive systematic verification
 - **Code Quality**: ✅ VERIFIED - All Swift warnings resolved, unreachable catch blocks fixed, follows proper patterns
 - **Compiler Warnings**: ✅ RESOLVED - No remaining Swift compiler warnings or errors
 - **Content Parsing**: ✅ RESOLVED - JSONL array content format now correctly parsed to string format
+- **UNIQUE Constraints**: ✅ RESOLVED - INSERT OR REPLACE handles duplicate message IDs gracefully
 
 ### Next Steps (Phases 3-4)
 - Phase 3: Git Integration - Auto-commit tracking like ShadowGit
