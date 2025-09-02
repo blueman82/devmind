@@ -61,7 +61,7 @@ sessionid_complete_fix_2025_09_02:
       - "Fixed message insertion (lines 529-555)"
       - "Fixed file reference insertion (line 598)"
       - "All Swift strings now maintain validity during SQLite binding"
-      - "Expected: All 655 conversations will now fully index including messages"
+      - "Expected: All 656 conversations will now fully index including messages"
     validation_command: "sqlite3 ~/.claude/ai-memory/conversations.db 'SELECT COUNT(DISTINCT session_id) FROM conversations;'"
     conclusion: "withCString fix completely successful - sessionId persistence bug eliminated"
     
