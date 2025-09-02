@@ -963,10 +963,11 @@ phase_5_database_library:
     ultrathink_analysis: "✅ COMPLETED - Found corruption source in bulk INSERT loop (lines 539-567)"
     corruption_location: "indexConversation method, message insertion for-loop"
     setup_documentation: "✅ COMPLETED - Created SQLITE_SWIFT_SETUP.md with Xcode instructions"
+    setup_instructions_enhanced: "✅ COMPLETED - Updated with horse/cart ordering and critical clarifications"
     sqlite_swift_implementation: "✅ COMPLETED - Created SQLiteSwiftDataModel.swift with corruption fix"
     critical_clarification: "✅ IDENTIFIED - import SQLite (package) vs import SQLite3 (system) distinction"
     compilation_blocker: "⚠️ IDENTIFIED - Cannot compile without adding SQLite.swift package to Xcode first"
-    correct_implementation_order: "1. Add package to Xcode, 2. Then implement, 3. Then test"
+    correct_implementation_order: "🐴 HORSE: Add package to Xcode, 🛒 CART: Test implementation, 🎯 GOAL: Verify corruption elimination"
     
   implementation_status:
     corruption_fix_code: "✅ WRITTEN - SQLiteSwiftDataModel.swift eliminates raw SQLite3 calls"
