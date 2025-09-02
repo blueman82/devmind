@@ -35,6 +35,7 @@ struct ConversationItem: Identifiable {
     
     /// Initialize from MCP search result data
     init(from searchResult: ConversationSearchResult) {
+        self.sessionId = searchResult.sessionId
         self.title = searchResult.title
         self.project = searchResult.project
         self.date = searchResult.date
