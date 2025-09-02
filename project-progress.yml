@@ -3998,3 +3998,50 @@ phase_22_browse_loading_bug:
     build_status: "✅ BUILD SUCCEEDED"
     syntax_check: "Swift compilation successful"
     ready_for_testing: "Browse UI should now load conversations"
+
+# Phase 23: JSON Response Buffering Fix
+phase_23_json_buffering_fix:
+  timestamp: "2025-09-02T01:25:00"
+  milestone: "Fixed JSON parsing for large conversation responses"
+  
+  user_report:
+    symptom: "Browse UI now shows 'failed to load conversations' error"
+    analysis: "Server returns conversation data but parsing fails on truncated JSON"
+    
+  root_cause_analysis:
+    issue: "Large JSON responses get chunked across multiple stdout reads"
+    current_parsing: "Assumes complete JSON-RPC responses on single lines"
+    failure_point: "JSON parsing fails on incomplete/truncated responses"
+    evidence: "Logs show valid conversation data ending with truncated JSON"
+    
+  technical_solution:
+    approach: "Implement JSON response buffering with brace counting"
+    implementation:
+      buffer: "Added responseBuffer property to accumulate chunked data"
+      parser: "Smart JSON extraction using brace counting and string detection"
+      algorithm:
+        - "Buffer all incoming output data"
+        - "Track opening/closing braces while respecting string literals"
+        - "Extract complete JSON objects when brace count reaches zero"
+        - "Process complete objects and remove from buffer"
+        
+  code_changes:
+    mcpclient_properties:
+      file: "MCPClient.swift"
+      lines: "45"
+      addition: "private var responseBuffer = ''"
+      
+    json_parsing_logic:
+      file: "MCPClient.swift" 
+      lines: "217-267"
+      change: "Complete rewrite of parseJSONRPCResponses method"
+      features:
+        - "Proper string literal handling with escape sequence support"
+        - "Brace counting algorithm for JSON object boundary detection"
+        - "Incremental buffer processing and cleanup"
+        - "Handles arbitrarily large responses split across chunks"
+        
+  validation:
+    build_status: "✅ BUILD SUCCEEDED"
+    syntax_check: "Swift compilation successful"
+    ready_for_testing: "Should handle large conversation list responses"
