@@ -223,21 +223,23 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                                 totalPages: totalPages
                             )
                             
-                            continuation.resume(returning: context)
+                            sqlite3_finalize(stmt)
+                            return context
                         } else {
                             let error = String(cString: sqlite3_errmsg(self.db))
-                            continuation.resume(throwing: AIMemoryError.databaseError(error))
+                            sqlite3_finalize(stmt)
+                            throw AIMemoryError.databaseError(error)
                         }
                     } else {
-                        continuation.resume(throwing: AIMemoryError.conversationNotFound)
+                        sqlite3_finalize(stmt)
+                        throw AIMemoryError.conversationNotFound
                     }
                 } else {
                     let error = String(cString: sqlite3_errmsg(self.db))
-                    continuation.resume(throwing: AIMemoryError.databaseError(error))
+                    sqlite3_finalize(stmt)
+                    throw AIMemoryError.databaseError(error)
                 }
-                
-                sqlite3_finalize(stmt)
-            }
+            }.value
         }
     }
     
