@@ -14,7 +14,7 @@ struct SearchWindow: View {
     @State private var searchTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
     
-    private let dataManager = AIMemoryDataManager.shared
+    private let dataManager = AIMemoryDataManagerFixed.shared
     
     let filters = ["All Projects", "Current Project", "Last 7 Days", "Has Code", "Has Errors"]
     
