@@ -13,8 +13,8 @@ struct CommitChatApp: App {
         print("🚀 CommitChat App initializing...")
         
         // Initialize database with detailed logging
-        print("🗄️ Initializing AIMemoryDataManager...")
-        let dataManager = AIMemoryDataManager.shared
+        print("🗄️ Initializing AIMemoryDataManagerFixed...")
+        let dataManager = AIMemoryDataManagerFixed.shared
         print("✅ AIMemoryDataManager initialized: \(dataManager)")
         
         // Start conversation monitoring with detailed status
