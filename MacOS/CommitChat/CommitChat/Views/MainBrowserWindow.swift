@@ -199,7 +199,8 @@ struct MainBrowserWindow: View {
         }
         .frame(minWidth: 900, minHeight: 600)
         .onAppear {
-            print("🔍 DEBUG: MainBrowserWindow.onAppear - calling loadRecentConversations()")
+            print("🔍 DEBUG: MainBrowserWindow.onAppear - loading projects and conversations")
+            loadAvailableProjectsFromFileSystem()
             loadRecentConversations()
         }
         .onChange(of: selectedProject) { _, _ in
