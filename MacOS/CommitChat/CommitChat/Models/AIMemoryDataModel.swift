@@ -309,7 +309,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     // MARK: - Indexing Methods
     
     func indexConversation(_ conversation: IndexableConversation) async throws {
-        try Task { [weak self] in
+        try await Task { [weak self] in
             guard let self = self else {
                 throw AIMemoryError.databaseError("Database manager deallocated")
             }
