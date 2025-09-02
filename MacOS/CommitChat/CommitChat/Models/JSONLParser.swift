@@ -45,7 +45,7 @@ class JSONLParser {
             content = validString
         } else {
             // Fallback: try with lossy conversion to handle corrupt Unicode
-            Self.logger.warning("Unicode corruption in \(path), using lossy conversion")
+            Self.logger.debug("Unicode corruption in \(path), using lossy conversion")
             content = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
         }
         
@@ -64,7 +64,7 @@ class JSONLParser {
             // Pre-process line to fix Unicode issues
             let sanitizedLine = sanitizeUnicodeInJSON(line)
             guard let lineData = sanitizedLine.data(using: .utf8) else {
-                Self.logger.warning("Could not convert line \(index + 1) to UTF-8 data")
+                Self.logger.debug("Could not convert line \(index + 1) to UTF-8 data")
                 continue
             }
             
@@ -113,10 +113,10 @@ class JSONLParser {
                 }
             } catch let jsonError {
                 // Skip corrupted JSON lines with detailed logging
-                Self.logger.error("Skipping corrupted JSON at line \(index + 1) in \(path): \(jsonError.localizedDescription)")
+                Self.logger.debug("Skipping corrupted JSON at line \(index + 1) in \(path): \(jsonError.localizedDescription)")
                 if let nsError = jsonError as NSError?,
                    nsError.domain == "NSCocoaErrorDomain" && nsError.code == 3840 {
-                    Self.logger.error("Unicode corruption detected - this line will be skipped")
+                    Self.logger.debug("Unicode corruption detected - this line will be skipped")
                 }
                 continue
             }
