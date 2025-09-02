@@ -238,7 +238,7 @@ class ConversationIndexer: ObservableObject {
                     self.processFileSync(filePath)
                 }
                 
-                await MainActor.run {
+                DispatchQueue.main.async {
                     self.isInitialScanComplete = true
                 }
                 
