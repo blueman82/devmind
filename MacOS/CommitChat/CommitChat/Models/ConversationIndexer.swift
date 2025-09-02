@@ -127,6 +127,9 @@ class ConversationIndexer: ObservableObject {
     }
     
     private func processFileSync(_ path: String) {
+        // Track processed files to avoid duplicates
+        processedFiles.insert(path)
+        
         do {
             // Parse the conversation file
             let conversation = try self.jsonlParser.parseConversation(at: path)
@@ -145,8 +148,9 @@ class ConversationIndexer: ObservableObject {
                     
                     await MainActor.run {
                         self.indexedCount += 1
+                        self.filesProcessed += 1
                         self.lastIndexedTime = Date()
-                        print("📈 Updated indexedCount to: \(self.indexedCount)")
+                        print("📈 Progress: \(self.filesProcessed)/\(self.totalFilesFound) files processed, \(self.indexedCount) conversations indexed")
                     }
                 } catch {
                     print("❌ Failed to index conversation: \(conversation.sessionId)")
@@ -162,12 +166,18 @@ class ConversationIndexer: ObservableObject {
             
             if let error = indexingError {
                 print("Database indexing failed for \(path): \(error)")
+                await MainActor.run {
+                    self.filesProcessed += 1
+                }
             } else {
                 print("✅ Successfully indexed conversation from: \(path)")
             }
             
         } catch {
             print("Failed to parse conversation at \(path): \(error)")
+            await MainActor.run {
+                self.filesProcessed += 1
+            }
         }
     }
     
