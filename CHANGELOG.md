@@ -178,7 +178,36 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Unicode Corruption**: ✅ RESOLVED - Sanitization pipeline recovers data from corrupted Unicode sequences
 - **MESSAGE INDEXING**: ❌ CRITICAL ISSUE - Massive indexing failure, 99.9% of data not processed
 
-### Next Steps (Phases 3-4)
+### 🧠 ULTRATHINK: SYSTEMATIC INDEXING FAILURE FIX PLAN (📋 READY FOR IMPLEMENTATION) - 2025-09-02
+- [📋] **4-PHASE COMPREHENSIVE PLAN**: Systematic approach to fix 99.9% indexing failure and restore search functionality
+- [🔍] **PHASE 1: DIAGNOSTIC** - Identify exact failure point in indexing pipeline
+  - Test ConversationIndexer startup and FSEvents detection
+  - Test JSONLParser with real JSONL files manually
+  - Test database insertion in isolation
+  - Add comprehensive debug logging to find breakage point
+- [🔧] **PHASE 2: TARGETED FIXES** - Fix identified root cause
+  - ConversationIndexer startup and FSEvents issues
+  - Silent database transaction failures
+  - Memory/performance issues with large files
+  - App permissions and file access problems
+- [📊] **PHASE 3: BULK REINDEX** - Process all existing conversation data
+  - Create bulk reindex tool for 500+ existing JSONL files
+  - Prioritized processing (recent files first, then large files)
+  - Progress monitoring and error handling
+  - Populate database with gigabytes of historical conversation data
+- [🎯] **PHASE 4: PRODUCTION MONITORING** - Ensure ongoing success
+  - Enhanced error handling and user-visible indexing status
+  - Performance monitoring and automatic retry logic
+  - Real-time indexing verification for new conversations
+
+### Implementation Strategy
+- **Root Cause Hypotheses**: ConversationIndexer not starting, FSEvents not detecting files, silent database failures
+- **Success Metrics**: Database grows from 3 messages to >1000 messages, "project ketchup" search works
+- **User Impact**: Transform "search operation failed" into full conversation history access
+- **Estimated Effort**: 2-4 hours diagnostic/fix, 1-2 hours bulk reindex
+- **Next Action**: Phase 1 Diagnostic - Add debug logging to identify exact failure point
+
+### Next Steps (Phases 3-4 - Original Roadmap)
 - Phase 3: Git Integration - Auto-commit tracking like ShadowGit
 - Phase 4: Architecture Completion - IPC mechanism for proper data flow
 
