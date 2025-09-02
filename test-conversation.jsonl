@@ -1,0 +1,6 @@
+{"type":"conversation.create","id":"test-session-001","metadata":{"title":"Test Conversation","project_path":"/Users/harrison/Documents/Github/devmind"},"timestamp":1735776000}
+{"type":"message","id":"msg-001","role":"user","content":"How do I implement a binary search in Python?","timestamp":1735776010}
+{"type":"message","id":"msg-002","role":"assistant","content":"Here's how to implement binary search in Python:\n\n```python\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n```","timestamp":1735776020,"tool_calls":["write_file"]}
+{"type":"tool_use","tool_use":{"name":"write_file","input":{"file_path":"/Users/harrison/Documents/Github/devmind/binary_search.py"}}}
+{"type":"message","id":"msg-003","role":"user","content":"Thanks! Can you add error handling?","timestamp":1735776030}
+{"type":"message","id":"msg-004","role":"assistant","content":"I'll add error handling to make it more robust.","timestamp":1735776040}
