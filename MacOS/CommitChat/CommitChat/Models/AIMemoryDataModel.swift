@@ -201,7 +201,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     var conversations: [ConversationItem] = []
                     
                     while sqlite3_step(stmt) == SQLITE_ROW {
-                        let conversationId = sqlite3_column_int(stmt, 0)
+                        // let conversationId = sqlite3_column_int(stmt, 0)  // Not used in ConversationItem
                         let sessionId = String(cString: sqlite3_column_text(stmt, 1))
                         let title = String(cString: sqlite3_column_text(stmt, 2))
                         let projectPath = String(cString: sqlite3_column_text(stmt, 3))
@@ -341,10 +341,10 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 var stmt: OpaquePointer?
                 
                 let sql = """
-                    SELECT session_id, title, project, last_updated, summary
+                    SELECT session_id, title, project_path, updated_at, summary
                     FROM conversations
                     WHERE title LIKE '%\(query)%' OR summary LIKE '%\(query)%' OR topics LIKE '%\(query)%'
-                    ORDER BY last_updated DESC
+                    ORDER BY updated_at DESC
                     LIMIT \(limit)
                 """
                 
@@ -355,17 +355,17 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     while sqlite3_step(stmt) == SQLITE_ROW {
                         let sessionId = String(cString: sqlite3_column_text(stmt, 0))
                         let title = String(cString: sqlite3_column_text(stmt, 1))
-                        let project = String(cString: sqlite3_column_text(stmt, 2))
-                        let lastUpdatedString = String(cString: sqlite3_column_text(stmt, 3))
+                        let projectPath = String(cString: sqlite3_column_text(stmt, 2))
+                        let updatedAtString = String(cString: sqlite3_column_text(stmt, 3))
                         let summary = String(cString: sqlite3_column_text(stmt, 4))
                         
-                        let lastUpdated = formatter.date(from: lastUpdatedString) ?? Date()
+                        let updatedAt = formatter.date(from: updatedAtString) ?? Date()
                         
                         let resultDict: [String: Any] = [
                             "sessionId": sessionId,
                             "title": title,
-                            "project": project,
-                            "date": ISO8601DateFormatter().string(from: lastUpdated),
+                            "project": projectPath,
+                            "date": ISO8601DateFormatter().string(from: updatedAt),
                             "messageCount": 0, // Would need separate query for exact count
                             "snippet": summary,
                             "hasErrors": false // Placeholder
@@ -558,7 +558,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     let deleteFilesSql = "DELETE FROM file_references WHERE conversation_id = ?"
                     var deleteFilesStmt: OpaquePointer?
                     if sqlite3_prepare_v2(self.db, deleteFilesSql, -1, &deleteFilesStmt, nil) == SQLITE_OK {
-                        sqlite3_bind_text(deleteFilesStmt, 1, conversation.sessionId, -1, nil)
+                        sqlite3_bind_int64(deleteFilesStmt, 1, conversationId)
                         sqlite3_step(deleteFilesStmt)
                         sqlite3_finalize(deleteFilesStmt)
                     }
@@ -576,7 +576,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                             
                             for filePath in conversation.fileReferences {
                                 sqlite3_reset(fileStmt)
-                                sqlite3_bind_text(fileStmt, 1, conversation.sessionId, -1, nil)
+                                sqlite3_bind_int64(fileStmt, 1, conversationId)
                                 sqlite3_bind_text(fileStmt, 2, filePath, -1, nil)
                                 sqlite3_step(fileStmt)
                             }
