@@ -238,23 +238,27 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                             let context = try ConversationContext(from: contextDict)
                             
                             sqlite3_finalize(stmt)
-                            return context
+                            continuation.resume(returning: context)
                         } else {
                             let error = String(cString: sqlite3_errmsg(self.db))
                             sqlite3_finalize(stmt)
-                            throw AIMemoryError.databaseError(error)
+                            continuation.resume(throwing: AIMemoryError.databaseError(error))
                         }
                     } else {
                         sqlite3_finalize(stmt)
-                        throw AIMemoryError.conversationNotFound
+                        continuation.resume(throwing: AIMemoryError.conversationNotFound)
                     }
                 } else {
                     let error = String(cString: sqlite3_errmsg(self.db))
                     sqlite3_finalize(stmt)
-                    throw AIMemoryError.databaseError(error)
+                    continuation.resume(throwing: AIMemoryError.databaseError(error))
                 }
-            }.value
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
         }
+    }
     
     /// Search conversations in local database
     /// Replaces: mcpClient.searchConversations()
