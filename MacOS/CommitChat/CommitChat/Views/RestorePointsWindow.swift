@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import os
 
 struct RestorePointsWindow: View {
+    private static let logger = Logger(subsystem: "com.commitchat", category: "RestorePointsWindow")
     @StateObject private var appState = AppState()
     @State private var selectedRestorePoint: RestorePoint?
     @State private var showingConfirmation = false
@@ -240,7 +242,7 @@ struct RestorePointsWindow: View {
                 }
             } catch {
                 // Handle error - could show an alert
-                print("Failed to create restore point: \(error)")
+                Self.logger.error("Failed to create restore point: \(error.localizedDescription)")
             }
         }
     }
@@ -250,7 +252,7 @@ struct RestorePointsWindow: View {
         
         // In a real implementation, this would call an MCP tool to perform the restore
         // For now, we just log it
-        print("Restoring to restore point: \(point.label) (ID: \(point.restorePointId))")
+        Self.logger.debug("Restoring to restore point: \(point.label) (ID: \(point.restorePointId))")
         
         // The actual restore would involve:
         // 1. Calling an MCP restore tool
