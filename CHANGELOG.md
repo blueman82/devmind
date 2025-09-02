@@ -408,6 +408,47 @@ ok
 | **Indexing Pipeline** | ✅ FUNCTIONING | Race condition fixed, state synchronized |
 
 **MISSION ACCOMPLISHED**: CommitChat AI Memory system is fully operational with robust search capabilities and clean database architecture. Original user issue completely resolved with corruption recovery as bonus achievement. 🏆
+
+### ⚠️ RECURRING DATABASE CORRUPTION: DEEPER INVESTIGATION REQUIRED (❌ ONGOING ISSUE) - 2025-09-02
+- [❌] **CORRUPTION PATTERN**: Same SQLite error recurring - "index corruption at line 106515"
+- [❌] **AFFECTED CONVERSATION**: bbd709cb-12de-40ea-b55d-efab04804d1a (130 messages)
+- [❌] **SYMPTOM**: Fresh database still experiencing identical corruption at same line
+- [❌] **IMPACT**: Some conversations failing to index despite successful parsing and fresh database
+
+### Recurring Corruption Analysis
+- **Error Consistency**: Identical error "index corruption at line 106515 of [1b37c146ee]"
+- **Database Status**: Fresh database created but still experiencing SQLite-level corruption
+- **Pattern**: Specific conversations triggering consistent corruption at same SQLite internal line
+- **Fallback Working**: Search functionality maintained via JSONL Fallback method
+
+### Suspected Root Causes
+1. **SQLite Environment**: Corrupted SQLite installation or version incompatibility
+2. **System-Level Issue**: Hardware memory/disk corruption during database writes
+3. **Concurrency Bug**: Race conditions in database write operations still present
+4. **Data Pattern**: Specific conversation content triggering SQLite internal bugs
+5. **Resource Constraints**: Memory pressure or disk space causing write failures
+
+### Current Workaround Status
+- ✅ **Core Search Functionality**: Working via JSONL Fallback
+- ✅ **File Detection**: FSEvents monitoring operational
+- ✅ **JSON Parsing**: Messages parsed successfully (130 messages confirmed)
+- ❌ **Database Indexing**: Some conversations failing at SQLite level
+- ❌ **Database Search**: Limited by indexing failures
+
+### Next Investigation Steps Required
+1. **SQLite Diagnostics**: Check SQLite version and installation integrity
+2. **System Health**: Verify RAM/disk health for hardware-level corruption
+3. **Conversation Analysis**: Examine failing conversation for data patterns
+4. **Concurrency Review**: Implement database write serialization
+5. **Alternative Strategy**: Consider database write retry logic or alternative storage
+
+### Impact Assessment
+- **User Experience**: ✅ POSITIVE - Search works, original issue resolved
+- **Data Integrity**: ⚠️ PARTIAL - Some conversations not indexed to database
+- **System Stability**: ✅ STABLE - Application continues functioning with fallbacks
+- **Performance**: ✅ ACCEPTABLE - JSONL fallback provides search results
+
+**STATUS**: Original user issue RESOLVED ✅, but deeper SQLite corruption investigation ongoing ❌
   - Performance monitoring and automatic retry logic
   - Real-time indexing verification for new conversations
 
