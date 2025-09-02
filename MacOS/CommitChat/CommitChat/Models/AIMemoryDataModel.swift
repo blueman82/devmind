@@ -291,7 +291,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
             }.value
         }
-    }
     
     // MARK: - Data Indexing (FSEvents Integration)
     
@@ -443,7 +442,6 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                 }
             }.value
         }
-    }
     
     // MARK: - Helper Methods
     
