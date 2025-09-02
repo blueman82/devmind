@@ -98,25 +98,14 @@ struct MainBrowserWindow: View {
 }
 
 struct ConversationCard: View {
-                    if isLoadingConversations {
-                        VStack {
-                            ProgressView("Loading conversations...")
-                                .padding(50)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if let error = conversationError {
-                        VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.largeTitle)
-                                .foregroundColor(.orange)
-                            
-                            Text("Failed to load conversations")
-                                .font(.headline)
-                            
-                            Text(error.localizedDescription)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
+    let item: ConversationItem
+    let isSelected: Bool
+    @State private var isHovered = false
+    
+    var body: some View {
+        Text("Conversation Card - TODO: Restore full implementation")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
                             
                             Button("Retry") {
                                 loadRecentConversations()
