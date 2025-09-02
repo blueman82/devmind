@@ -530,6 +530,7 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
                     
                     continuation.resume(throwing: error)
                 }
+                }
             }
         }
     }
