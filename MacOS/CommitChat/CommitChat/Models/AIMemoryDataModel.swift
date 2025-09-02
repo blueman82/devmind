@@ -379,6 +379,17 @@ class AIMemoryDataManager: ObservableObject, @unchecked Sendable {
     // MARK: - Indexing Methods
     
     func indexConversation(_ conversation: IndexableConversation) async throws {
+        // Validate conversation data before processing
+        guard !conversation.sessionId.isEmpty else {
+            throw AIMemoryError.invalidData
+        }
+        guard !conversation.projectPath.isEmpty else {
+            throw AIMemoryError.invalidData
+        }
+        guard !conversation.title.isEmpty else {
+            throw AIMemoryError.invalidData
+        }
+        
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             databaseQueue.async { [weak self] in
                 guard let self = self else {
