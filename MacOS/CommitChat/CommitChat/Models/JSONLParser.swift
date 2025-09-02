@@ -312,6 +312,35 @@ class JSONLParser {
         // Otherwise create a deterministic ID from the filename
         return "session-\(filename.replacingOccurrences(of: " ", with: "-"))"
     }
+    
+    private func sanitizeUnicodeInJSON(_ jsonString: String) -> String {
+        // Fix common Unicode issues in JSON strings that cause parsing failures
+        var sanitized = jsonString
+        
+        // Replace problematic Unicode escape sequences
+        // Fix incomplete surrogate pairs - replace with replacement character
+        sanitized = sanitized.replacingOccurrences(of: #"\\u[dD][89aAbBcCdDeEfF][0-9a-fA-F]{2}(?!\\u[dD][cCdDeEfF][0-9a-fA-F]{2})"#, 
+                                                  with: "�", 
+                                                  options: .regularExpression)
+        
+        // Fix malformed Unicode escapes - replace with replacement character
+        sanitized = sanitized.replacingOccurrences(of: #"\\u[^0-9a-fA-F"]{1,4}"#, 
+                                                  with: "�", 
+                                                  options: .regularExpression)
+        
+        // Remove any standalone high/low surrogates that would cause JSON parsing to fail
+        sanitized = sanitized.replacingOccurrences(of: #"\\u[dD][89aAbB][0-9a-fA-F]{2}"#, 
+                                                  with: "�", 
+                                                  options: .regularExpression)
+        
+        // Handle any remaining problematic characters by converting to replacement character
+        if let data = sanitized.data(using: .utf8, allowLossyConversion: true),
+           let cleanString = String(data: data, encoding: .utf8) {
+            return cleanString
+        }
+        
+        return sanitized
+    }
 }
 
 // MARK: - DateFormatter Extensions
