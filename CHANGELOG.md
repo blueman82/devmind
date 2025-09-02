@@ -2,6 +2,26 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-02] - PARTIAL FIX APPLIED - Deeper Issue Remains
+
+### Task.detached Fix Applied But Issue Persists
+- **FIX ATTEMPTED**: Changed `Task {` to `Task.detached {` in ConversationIndexer.swift
+- **BUILD STATUS**: ✅ BUILD SUCCEEDED with zero errors/warnings
+- **RESULT**: ❌ Still only 1 conversation indexed after rebuild
+- **CONCLUSION**: Task execution was not the root cause - deeper issue exists
+
+### Current Status After Testing
+- **DATABASE TEST**: Still shows 1 conversation after rebuild with fix
+- **USER OBSERVATION**: "rebuilt - I bet you only find 1 again" (confirmed correct)
+- **ACTION TAKEN**: Deleted all database files (.db, .db-shm, .db-wal) for fresh start
+- **NEXT INVESTIGATION**: AIMemoryDataModel.indexConversation method may have blocking issue
+
+### Deeper Investigation Required
+- **Primary Suspect**: withCheckedThrowingContinuation in AIMemoryDataModel
+- **Debug Evidence**: Shows "Database indexing started" but never completes
+- **Pattern**: Async continuation might not be resuming properly
+- **Next Steps**: Investigate database transaction and continuation patterns
+
 ## [2025-09-02] - ROOT CAUSE FOUND AND FIXED - Task Execution Deadlock
 
 ### Critical Fix Applied - Task.detached Resolves Semaphore Deadlock
