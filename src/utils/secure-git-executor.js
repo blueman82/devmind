@@ -193,7 +193,7 @@ export class SecureGitExecutor {
     // Add subdirectory filtering for monorepo support
     if (options.subdirectory && typeof options.subdirectory === 'string') {
       // Validate subdirectory path to prevent injection
-      if (!/^[a-zA-Z0-9_\-\/\.]+$/.test(options.subdirectory)) {
+      if (!/^[a-zA-Z0-9_\-/.]+$/.test(options.subdirectory)) {
         throw new Error('Invalid subdirectory path format');
       }
       // Add -- <path> at the end to filter commits affecting only this path
