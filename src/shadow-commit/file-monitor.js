@@ -209,7 +209,7 @@ class FileMonitor {
             }
             
             // Create shadow commit
-            await this.createShadowCommit(repoPath, relativePath, config);
+            await this.createShadowCommit(repoPath, relativePath);
             
             // Update last commit time
             this.lastCommitTime.set(filePath, Date.now());
