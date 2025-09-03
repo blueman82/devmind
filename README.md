@@ -28,7 +28,8 @@
 - **Issue**: 4 of 5 git tools were failing with SQLite binding errors
 - **Root Cause**: Boolean values passed to SQLite (requires integers)
 - **Fix Applied**: Convert `isMonorepoSubdirectory` boolean to integer in `/src/database/git-schema.js`
-- **Status**: 🔄 **Fix implemented, MCP server restart required to activate**
+- **Module Caching Discovery**: Node.js cached pre-fix code, resolved with process restart
+- **Status**: ✅ **Fix implemented and MCP server restarted - ready for validation**
 
 ### Swift App: **PRODUCTION READY** ✅
 - **CommitChat macOS app fully functional** 
