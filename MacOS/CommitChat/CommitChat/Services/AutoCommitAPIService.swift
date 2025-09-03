@@ -207,6 +207,89 @@ class AutoCommitAPIService: ObservableObject {
         }
     }
     
+    /// Find the CLI script dynamically instead of using hardcoded path
+    private func findCLIScript() -> String {
+        // Try common development locations
+        let possiblePaths = [
+            "~/Documents/Github/devmind/src/shadow-commit/cli.js",
+            "../../../src/shadow-commit/cli.js",
+            "./src/shadow-commit/cli.js",
+            "/usr/local/share/devmind/cli.js"
+        ]
+        
+        for path in possiblePaths {
+            let expandedPath = NSString(string: path).expandingTildeInPath
+            if FileManager.default.fileExists(atPath: expandedPath) {
+                return expandedPath
+            }
+        }
+        
+        // Fallback to bundled resource if available
+        if let bundlePath = Bundle.main.path(forResource: "cli", ofType: "js") {
+            return bundlePath
+        }
+        
+        // Final fallback - assume development environment
+        return NSString(string: "~/Documents/Github/devmind/src/shadow-commit/cli.js").expandingTildeInPath
+    }
+    
+    /// Start monitoring for notifications from the Node.js service
+    func startNotificationMonitoring() {
+        let notificationFile = NSString(string: "~/.devmind-notifications.json").expandingTildeInPath
+        
+        // Create file watcher for notification file
+        let fileURL = URL(fileURLWithPath: notificationFile)
+        
+        // Start polling for notification file changes (simple approach)
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.checkForNewNotifications()
+        }
+    }
+    
+    /// Check for new notifications from Node.js service
+    private func checkForNewNotifications() {
+        let notificationFile = NSString(string: "~/.devmind-notifications.json").expandingTildeInPath
+        
+        guard FileManager.default.fileExists(atPath: notificationFile) else { return }
+        
+        do {
+            let data = try Data(contentsOf: URL(fileURLWithPath: notificationFile))
+            let notifications = try JSONDecoder().decode([NotificationData].self, from: data)
+            
+            // Process only new notifications (simple timestamp check)
+            for notification in notifications {
+                if shouldProcessNotification(notification) {
+                    Task { @MainActor in
+                        await self.processAutoCommitNotification(notification)
+                    }
+                }
+            }
+            
+        } catch {
+            logger.error("Failed to read notification file: \(error)")
+        }
+    }
+    
+    /// Process an auto-commit notification
+    @MainActor
+    private func processAutoCommitNotification(_ notification: NotificationData) async {
+        // Send notification through AppState
+        await AppState.shared.sendAutoCommitNotification(
+            repositoryPath: notification.repository,
+            fileName: URL(fileURLWithPath: notification.file).lastPathComponent,
+            commitHash: notification.commitHash,
+            branch: notification.branch
+        )
+    }
+    
+    /// Check if notification should be processed (avoid duplicates)
+    private func shouldProcessNotification(_ notification: NotificationData) -> Bool {
+        // Simple time-based check - only process notifications from last 30 seconds
+        let formatter = ISO8601DateFormatter()
+        guard let notificationTime = formatter.date(from: notification.timestamp) else { return false }
+        return Date().timeIntervalSince(notificationTime) < 30
+    }
+    
     private func parseRepositoryList(_ output: String) -> [RepositoryInfo] {
         // Parse the CLI output to extract repository information
         // This will depend on the actual output format from the CLI
