@@ -118,6 +118,26 @@ class ShadowBranchManager {
     }
 
     /**
+     * Check if repository has uncommitted changes
+     * @param {string} repoPath - Path to the git repository
+     * @returns {Promise<boolean>}
+     */
+    async hasUncommittedChanges(repoPath) {
+        try {
+            const { stdout } = await execAsync('git status --porcelain', {
+                cwd: repoPath
+            });
+            return stdout.trim().length > 0;
+        } catch (error) {
+            this.logger.warn('Failed to check for uncommitted changes', { 
+                error: error.message, 
+                repoPath 
+            });
+            return false;
+        }
+    }
+
+    /**
      * Switch to shadow branch temporarily for committing
      * @param {string} repoPath - Path to the git repository
      * @param {string} shadowBranch - Shadow branch name
