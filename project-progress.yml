@@ -357,6 +357,33 @@ sessionid_complete_fix_2025_09_02:
         implementation_simplicity: "if (claudeInstalled) { useFullFeatures() } else { useDiffOnly() }"
         
         final_recommendation: "✅ Adopt two-mode architecture for Phase 2"
+        
+      edge_case_refinement:
+        discovery: "Claude Code installed but user working in VSCode/terminal"
+        problem: "Can't assume conversation context just because Claude is installed"
+        impact: "Need to detect ACTIVE Claude usage, not just installation"
+        
+        refined_detection_options:
+          option_1_per_file: "Check JSONL for each file change (complex but accurate)"
+          option_2_session_activity: "Monitor if JSONL recently modified (simpler, good enough)"
+          option_3_user_toggle: "Manual mode selection in UI (user might forget)"
+          option_4_always_hybrid: "Include both diff + context when available (verbose but complete)"
+          
+        recommended_approach:
+          primary_method: "Session activity detection"
+          implementation:
+            - "Check Claude Code installed AND"
+            - "Check JSONL files modified in last 5 minutes"
+            - "If both true, attempt correlation"
+            - "Always fallback to diff if correlation fails"
+          benefits: "Simpler than per-file, accurate enough for most cases"
+          
+        final_architecture:
+          three_states:
+            no_claude: "Diff-only commits"
+            claude_inactive: "Claude installed but not active - diff-only"
+            claude_active: "Recent session activity - attempt correlation + diff fallback"
+          detection_simplified: "Session-level instead of file-level detection"
     
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
