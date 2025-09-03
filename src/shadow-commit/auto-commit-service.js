@@ -11,6 +11,7 @@ import DatabaseManager from '../database/database-manager.js';
 import ShadowBranchManager from './shadow-branch-manager.js';
 import FileMonitor from './file-monitor.js';
 import ConversationCorrelator from './conversation-correlator.js';
+import ErrorHandler from './error-handler.js';
 
 class AutoCommitService {
     constructor(options = {}) {
