@@ -8,8 +8,6 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { createLogger } from '../utils/logger.js';
 
-const execAsync = promisify(exec);
-
 class ShadowBranchManager {
     constructor(options = {}) {
         this.logger = createLogger('ShadowBranchManager');
