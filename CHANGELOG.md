@@ -2,6 +2,41 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-03] - Phase 2 Implementation Started - Auto-Commit Functionality
+
+### Week 1 Implementation Progress
+- **STATUS**: Phase 2 Week 1 in progress on `feature/phase-2-auto-commit` branch
+- **GIT WORKFLOW**: 
+  - Created and merged PR #3 for git tools fix
+  - Created safety backup branch `backup/main-2025-09-03-pre-phase2`
+  - Started Phase 2 feature branch
+
+### Database Schema Updates (v2.0.0)
+- **SQLite WAL Mode**: Already enabled (database-manager.js:47) - concurrent access ready
+- **New Tables Added**:
+  - `shadow_commits`: Tracks all auto-commits to shadow branches (11 fields, 5 indexes)
+  - `conversation_git_correlations`: Links conversations to git activity (7 fields, 4 indexes)
+  - `repository_settings`: Per-repository auto-commit configuration (11 fields, 2 indexes)
+- **Schema Version**: Updated from 1.0.0 → 2.0.0
+- **Statistics**: Added Phase 2 metrics tracking
+
+### Key Implementation Details
+- **Shadow Branch Pattern**: `shadow/[original-branch-name]` confirmed
+- **Conversation Detection**: Uses configurable `appState.projectPath` (not hardcoded)
+- **Current Implementation Note**: claudeProjectsPath hardcoded in ConversationIndexer.swift
+- **Phase 2 Fix**: Will use appState.projectPath for user flexibility
+
+### Completed Tasks
+- ✅ SQLite WAL mode verification
+- ✅ Database schema for Phase 2 tables
+- ✅ Project documentation updates
+
+### Next Steps
+- Shadow branch creation logic implementation
+- FSEvents file monitoring setup
+- Conversation correlation logic
+- Shadow branch manager module creation
+
 ## [2025-09-03] - COMPLETE FIX - SessionId SQLite Binding Issue Resolved + MCP Validation + Git Tools Fixed
 
 ### Git Tools Architecture Fix - SQLite Boolean Binding Issue ✅
