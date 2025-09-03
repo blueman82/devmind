@@ -1,10 +1,10 @@
 /**
  * File System Monitor
- * Uses macOS FSEvents API to monitor file changes and trigger shadow commits
+ * Uses chokidar to monitor file changes and trigger shadow commits
  * Phase 2 Implementation - AI Memory App
  */
 
-import { FSEvents } from 'fsevents';
+import chokidar from 'chokidar';
 import path from 'path';
 import fs from 'fs/promises';
 import { createLogger } from '../utils/logger.js';
