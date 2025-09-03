@@ -123,6 +123,21 @@ sessionid_complete_fix_2025_09_02:
     
     next_step: "MCP server restart required to activate fix"
     
+    session_2025_09_03_continuation:
+      discovery_date: "2025-09-03 11:25"
+      critical_finding: "Node.js module caching preventing fix activation"
+      issue_identified: "MCP server processes were using cached pre-fix code despite correct file content"
+      evidence: "git-schema.js:267 contained fix but error logs showed continued SQLite boolean binding failures"
+      resolution_action: "Killed all MCP server processes to force fresh module loading"
+      current_status: "✅ Fix verified present in code, MCP server restart successful"
+      validation_pending: "Requires new Claude Code session to test git tools functionality"
+      
+      technical_details:
+        problem: "Node.js require() cache retained old module versions"
+        impact: "Boolean binding fix present but not executing"
+        solution: "Process restart forces module cache invalidation"
+        file_verified: "/src/database/git-schema.js:267 - isMonorepoSubdirectory ? 1 : 0"
+    
 ## PREVIOUS UPDATE - 2025-09-02 - ROOT CAUSE FIXED - Empty SessionId Bug
 
 empty_sessionid_bug_fix_2025_09_02:
