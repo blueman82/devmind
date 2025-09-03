@@ -24,7 +24,22 @@
 - **Database size**: 82MB fully populated
 - **Performance**: 3ms average query time
 
-#### Recent Major Fix (2025-09-03): ✅ Git Tools SQLite Boolean Binding Issue Resolved
+#### Recent Major Achievements (2025-09-04): 🚨 Critical System Fixes + Phase 2c Priority 1 Complete
+
+**🚨 CRITICAL FIX: SPAWN EBADF Error Resolution**
+- **Issue**: Auto-commit service completely unusable - 100% SPAWN EBADF failures for 8/9 repositories  
+- **Root Cause**: Git operation concurrency overwhelmed file descriptor limits during startup
+- **Fix Applied**: Reduced PQueue concurrency (2→1) and rate limits (10→5 ops/sec) in `auto-commit-service.js`
+- **Result**: System now handles large repository sets without file descriptor exhaustion
+
+**✅ PRIORITY 1 COMPLETE: UNUserNotificationCenter Integration with Bridge**  
+- **Bridge Implemented**: File-based communication between Node.js service and Swift app via `~/.devmind-notifications.json`
+- **Real Notifications**: Replaced placeholder with functional `sendNotification()` method in Node.js
+- **Swift Integration**: Timer-based polling system in `AutoCommitAPIService.swift` for real-time notifications  
+- **Dynamic Paths**: Eliminated hard-coded development paths with fallback mechanism
+- **End-to-End**: Complete notification pipeline from auto-commit trigger to macOS notification delivery
+
+#### Previous Major Fix (2025-09-03): ✅ Git Tools SQLite Boolean Binding Issue Resolved
 - **Issue**: 4 of 5 git tools were failing with SQLite binding errors
 - **Root Cause**: Boolean values passed to SQLite (requires integers)
 - **Fix Applied**: Convert `isMonorepoSubdirectory` boolean to integer in `/src/database/git-schema.js`
