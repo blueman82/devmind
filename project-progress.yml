@@ -318,6 +318,45 @@ sessionid_complete_fix_2025_09_02:
           tradeoff: "Longer commit messages, potential redundancy"
           
         recommendation: "Accept imperfect detection with robust fallbacks"
+        
+      paradigm_shift_simplification:
+        discovery_date: "2025-09-03 12:20"
+        breakthrough: "Use Claude Code installation status instead of file-level detection"
+        
+        two_mode_architecture:
+          detection: "Simple check: which claude || command -v claude"
+          mode_1_diff_only:
+            when: "Claude Code not installed"
+            behavior: "Pure git auto-commit tool with diff-based messages"
+            features: "Shadow branches, intelligent diffs, notifications, repo management"
+            value: "Better ShadowGit alternative (shadow branches + native app)"
+            mcp_needed: "No - no conversations to correlate"
+            
+          mode_2_full_features:
+            when: "Claude Code installed"
+            behavior: "Full conversation-enriched commit system"
+            features: "Everything in diff mode + conversation context + MCP tools"
+            value: "Unique development memory solution"
+            correlation: "All Claude edits have conversation context available"
+            
+        migration_handling:
+          claude_installed_later:
+            detection: "Periodic check on app launch or daily"
+            user_prompt: "Claude Code detected! Enable AI conversation features?"
+            activation: "Start indexing, enable MCP, begin correlation"
+          claude_removed:
+            graceful_degradation: "Continue in diff-only mode"
+            
+        benefits_of_simplification:
+          - "Eliminates complex file-level correlation logic"
+          - "No timing windows or race conditions"
+          - "No JSONL parsing overhead when not needed"
+          - "Clear value proposition in both modes"
+          - "Broader market appeal (Claude users + general developers)"
+          
+        implementation_simplicity: "if (claudeInstalled) { useFullFeatures() } else { useDiffOnly() }"
+        
+        final_recommendation: "✅ Adopt two-mode architecture for Phase 2"
     
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
