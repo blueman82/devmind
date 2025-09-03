@@ -69,6 +69,8 @@ class FileMonitor {
         this.monitors = new Map(); // repo path -> FSEvents watcher
         this.lastCommitTime = new Map(); // file path -> timestamp
         this.activeRepositories = new Map(); // repo path -> config
+        this.pendingChanges = new Map(); // file path -> timeout handle
+        this.debouncedFiles = new Set(); // files currently being debounced
     }
 
     /**
