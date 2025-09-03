@@ -241,6 +241,15 @@ export class PreviewHandlers extends GitBaseHandler {
    */
   async getFileChangesBetweenCommits(projectPath, fromCommit, toCommit) {
     try {
+      // Ensure gitSchema is initialized
+      if (!this.gitSchema) {
+        console.error('[PreviewHandlers] gitSchema not initialized!');
+        await this.initialize(); // Try to initialize if not done
+        if (!this.gitSchema) {
+          throw new Error('GitSchema not available after initialization');
+        }
+      }
+      
       // Query database for file changes
       const repository = await this.gitSchema.getRepositoryByPath(projectPath);
       if (!repository) {
