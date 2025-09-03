@@ -31,13 +31,13 @@ describe('ShadowBranchManager', () => {
     let manager;
     let mockExecAsync;
     
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.clearAllMocks();
         
         // Create fresh mock for each test
         mockExecAsync = vi.fn();
         
-        // Configure the util mock's promisify to return our mockExecAsync
+        // Configure the util mock's promisify to return our mockExecAsync  
         const { promisify } = await import('util');
         promisify.mockReturnValue(mockExecAsync);
         
