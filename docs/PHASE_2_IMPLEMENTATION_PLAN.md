@@ -54,7 +54,10 @@ Phase 2 introduces auto-commit functionality with shadow branches, creating comp
 
 ### 3. Conversation Detection
 
-**Search Location**: `~/.claude/projects/*/conversations/*.jsonl`
+**Search Location**: User-configurable via UI (default: `~/.claude/projects/*/conversations/*.jsonl`)
+- **Already Implemented**: Project Path field in MCP Server Settings
+- **UI Location**: `MCPServerSettingsView.swift` - configurable text field with browse button
+- **Flexibility**: Users can point to custom Claude project locations
 
 **Match Criteria**:
 - File path exact match
