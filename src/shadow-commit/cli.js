@@ -8,10 +8,14 @@
 
 import { Command } from 'commander';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { createLogger } from '../utils/logger.js';
 import AutoCommitService from './auto-commit-service.js';
 import chalk from 'chalk';
 import ora from 'ora';
+
+const execAsync = promisify(exec);
 
 const logger = createLogger('AutoCommitCLI');
 const program = new Command();
