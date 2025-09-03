@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'vitest';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -24,15 +23,15 @@ describe('FileWatcher Integration Tests', () => {
       debounceDelay: 100 // Shorter delay for tests
     });
 
-    assert.ok(fileWatcher, 'FileWatcher should be created');
-    assert.strictEqual(fileWatcher.claudeProjectsPath, tempDir, 'Should use provided path');
-    assert.strictEqual(fileWatcher.isRunning, false, 'Should not be running initially');
+    expect(fileWatcher).toBeTruthy(); // FileWatcher should be created
+    expect(fileWatcher.claudeProjectsPath).toBe(tempDir); // Should use provided path
+    expect(fileWatcher.isRunning).toBe(false); // Should not be running initially
     console.log('✅ FileWatcher initialized successfully');
   });
 
   test('FileWatcher starts monitoring', { timeout: 10000 }, async () => {
     await fileWatcher.start();
-    assert.strictEqual(fileWatcher.isRunning, true, 'Should be running after start');
+    expect(fileWatcher.isRunning).toBe(true); // Should be running after start
     console.log('✅ FileWatcher started monitoring');
   });
 
@@ -68,7 +67,7 @@ describe('FileWatcher Integration Tests', () => {
 
     // Check if the conversation was indexed
     const dbConversations = fileWatcher.dbManager.db.prepare('SELECT COUNT(*) as count FROM conversations').get();
-    assert.ok(dbConversations.count >= 1, 'Should have indexed at least one conversation');
+    expect(dbConversations.count).toBeGreaterThanOrEqual(1); // Should have indexed at least one conversation
 
     console.log(`✅ FileWatcher detected and indexed conversation (${dbConversations.count} total)`);
   });
@@ -76,17 +75,17 @@ describe('FileWatcher Integration Tests', () => {
   test('FileWatcher provides status information', async () => {
     const status = fileWatcher.getStatus();
     
-    assert.ok(typeof status === 'object', 'Status should be an object');
-    assert.ok(typeof status.isRunning === 'boolean', 'Should include isRunning status');
-    assert.ok(Array.isArray(status.watchedDirectories), 'Should include watched directories array');
-    assert.ok(typeof status.pendingIndexes === 'number', 'Should include pending indexes count');
+    expect(typeof status).toBe('object'); // Status should be an object
+    expect(typeof status.isRunning).toBe('boolean'); // Should include isRunning status
+    expect(Array.isArray(status.watchedDirectories)).toBe(true); // Should include watched directories array
+    expect(typeof status.pendingIndexes).toBe('number'); // Should include pending indexes count
     
     console.log('✅ FileWatcher status information verified');
   });
 
   test('FileWatcher stops monitoring', async () => {
     fileWatcher.stop();
-    assert.strictEqual(fileWatcher.isRunning, false, 'Should not be running after stop');
+    expect(fileWatcher.isRunning).toBe(false); // Should not be running after stop
     console.log('✅ FileWatcher stopped monitoring');
   });
 
