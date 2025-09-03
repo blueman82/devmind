@@ -165,8 +165,8 @@ class AutoCommitAPIService: ObservableObject {
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: "/usr/bin/node")
                 
-                // Path to the CLI script
-                let cliPath = "/Users/harrison/Documents/Github/devmind/src/shadow-commit/cli.js"
+                // Path to the CLI script - resolve dynamically
+                let cliPath = self.findCLIScript()
                 process.arguments = [cliPath] + arguments
                 
                 let outputPipe = Pipe()
