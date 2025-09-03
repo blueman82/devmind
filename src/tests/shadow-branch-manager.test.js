@@ -340,8 +340,7 @@ describe('ShadowBranchManager Error Handling', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockExecAsync = vi.fn();
-        const { promisify } = require('util');
-        promisify.mockReturnValue(mockExecAsync);
+        vi.mocked(require('util').promisify).mockReturnValue(mockExecAsync);
         manager = new ShadowBranchManager();
     });
     
