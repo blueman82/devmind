@@ -187,11 +187,17 @@ class FileMonitor {
                 return;
             }
             
-            // Check if file is tracked by git
+            // Check if file is tracked by git or is a new file
             const isTracked = await this.isFileTracked(repoPath, relativePath);
-            if (!isTracked && !flags.isCreated) {
-                this.logger.debug('File not tracked by git', { filePath: relativePath });
-                return;
+            
+            // For untracked files, check if they should be auto-added
+            if (!isTracked) {
+                // Skip if it's not a new file and auto-add is disabled
+                if (!flags.isCreated && !config.autoAddUntracked) {
+                    this.logger.debug('File not tracked by git (use autoAddUntracked to include)', { filePath: relativePath });
+                    return;
+                }
+                // New files or auto-add enabled files will be added during commit
             }
             
             // Create shadow commit
