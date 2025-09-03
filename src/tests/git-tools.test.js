@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'vitest';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -48,9 +47,9 @@ describe('Git Tools Tests', () => {
 
   test('GitManager initializes correctly', async () => {
     gitManager = new GitManager();
-    assert.ok(gitManager, 'GitManager should be created');
+    expect(gitManager).toBeTruthy(); // GitManager should be created
     // GitManager doesn't expose repositories Map directly anymore
-    assert.ok(gitManager.discoverRepository, 'Should have discoverRepository method');
+    expect(gitManager.discoverRepository).toBeTruthy(); // Should have discoverRepository method
     console.log('✅ GitManager initialized');
   });
 
@@ -68,9 +67,9 @@ describe('Git Tools Tests', () => {
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
     const tableNames = tables.map(t => t.name);
     
-    assert.ok(tableNames.includes('git_repositories'), 'Should have git_repositories table');
-    assert.ok(tableNames.includes('git_commits'), 'Should have git_commits table');
-    assert.ok(tableNames.includes('restore_points'), 'Should have restore_points table');
+    expect(tableNames.includes('git_repositories')).toBe(true); // Should have git_repositories table
+    expect(tableNames.includes('git_commits')).toBe(true); // Should have git_commits table
+    expect(tableNames.includes('restore_points')).toBe(true); // Should have restore_points table
     
     console.log('✅ Database and Git schema initialized');
   });
@@ -91,11 +90,11 @@ describe('Git Tools Tests', () => {
         project_path: testRepoPath
       });
       
-      assert.ok(result.content, 'Should return content');
+      expect(result.content).toBeTruthy(); // Should return content
       const response = JSON.parse(result.content[0].text);
       
-      assert.strictEqual(response.project_path, testRepoPath, 'Should have correct project path');
-      assert.ok(response.repository, 'Should have repository info');
+      expect(response.project_path).toBe(testRepoPath); // Should have correct project path
+      expect(response.repository).toBeTruthy(); // Should have repository info
       // In test environment, git detection might fail - that's OK
       if (response.repository.is_git_repository === false) {
         console.log('⚠️ Git repository not detected (expected in test environment)');
@@ -241,12 +240,12 @@ describe('Git Tools Tests', () => {
         test_status: 'passing'
       });
       
-      assert.ok(result.content, 'Should return content');
+      expect(result.content).toBeTruthy(); // Should return content
       const response = JSON.parse(result.content[0].text);
       
       if (response.success) {
-        assert.strictEqual(response.success, true, 'Should create successfully');
-        assert.ok(response.restore_point, 'Should have restore point object');
+        expect(response.success).toBe(true); // Should create successfully
+        expect(response.restore_point).toBeTruthy(); // Should have restore point object
         assert.strictEqual(response.restore_point.label, 'Test create restore point', 'Should have correct label');
         assert.strictEqual(response.restore_point.description, 'Created by test suite', 'Should have correct description');
         assert.strictEqual(response.restore_point.test_status, 'passing', 'Should have correct test status');
