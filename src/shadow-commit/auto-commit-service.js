@@ -734,7 +734,7 @@ class AutoCommitService {
                     const existing = fsSync.readFileSync(notificationFile, 'utf8');
                     notifications = JSON.parse(existing);
                 }
-            } catch (error) {
+            } catch {
                 // If file is corrupted, start fresh
                 notifications = [];
             }
