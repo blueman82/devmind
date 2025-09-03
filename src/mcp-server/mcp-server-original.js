@@ -385,7 +385,7 @@ class AIMemoryMCPServer {
         const lines = text.split('\n');
         const keyLines = lines.filter(line => {
           const trimmed = line.trim();
-          return trimmed.match(/^[-*\d+\.]/g) ||
+          return trimmed.match(/^[-*\d+.]/g) ||
                  trimmed.toLowerCase().includes('important') ||
                  trimmed.toLowerCase().includes('error') ||
                  trimmed.toLowerCase().includes('summary') ||
