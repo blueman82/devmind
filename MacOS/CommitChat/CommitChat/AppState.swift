@@ -549,6 +549,48 @@ class AppState: ObservableObject {
             // Silently handle notification errors
         }
     }
+    
+    /// Send error notification from auto-commit service
+    func sendErrorNotification(
+        title: String,
+        body: String,
+        severity: String,
+        requiresAction: Bool
+    ) async {
+        guard notificationsAuthorized else { return }
+        guard showNotifications else { return }
+        
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.subtitle = "Severity: \(severity)"
+        
+        // Use different sound for critical errors
+        if severity == "critical" || severity == "high" {
+            content.sound = .defaultCritical
+        } else {
+            content.sound = .default
+        }
+        
+        // Add action category for errors requiring user action
+        if requiresAction {
+            content.categoryIdentifier = "ERROR_ACTION"
+            content.interruptionLevel = .critical
+        }
+        
+        let request = UNNotificationRequest(
+            identifier: "error-\(UUID().uuidString)",
+            content: content,
+            trigger: nil
+        )
+        
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            // Silently handle notification errors
+            print("Failed to send error notification: \(error)")
+        }
+    }
 }
 
 // MARK: - Supporting Types
