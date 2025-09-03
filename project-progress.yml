@@ -122,8 +122,6 @@ sessionid_complete_fix_2025_09_02:
       conversation_indexing: "✅ Unaffected - working perfectly"
     
     next_step: "MCP server restart required to activate fix"
-      - "Option 2: Grant MCP write permissions for git tables"
-      - "Option 3: Create separate git indexing service"
     
 ## PREVIOUS UPDATE - 2025-09-02 - ROOT CAUSE FIXED - Empty SessionId Bug
 
