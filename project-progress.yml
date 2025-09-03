@@ -165,6 +165,32 @@ sessionid_complete_fix_2025_09_02:
         after_validation: "100% git tools functional (all 5 working perfectly)"
         architecture_impact: "AI Memory App git-based restore points fully operational"
         next_phase_ready: "✅ Ready for Phase 2: Auto-commit functionality"
+        
+    phase_2_architectural_decision_2025_09_03:
+      decision_date: "2025-09-03 11:35"
+      context: "Database lock discovered during conversation-git correlation demonstration"
+      issue_identified: "Swift app (conversation indexing) conflicts with MCP server (git tools) database access"
+      architectural_options_considered:
+        - "Separate databases for conversations vs git data"
+        - "Queue-based writes with single database accessor"  
+        - "Concurrent connections with SQLite WAL mode"
+      
+      decision_made: "✅ Concurrent connections approach selected"
+      rationale:
+        - "Single database maintains data integrity and simplifies architecture"
+        - "SQLite WAL mode designed specifically for multiple readers + single writer"
+        - "No data synchronization complexity between separate databases"
+        - "Scalable to handle multiple Claude Code sessions accessing git tools"
+        - "Essential for Phase 2 auto-commit real-time indexing without blocking conversation indexing"
+        
+      implementation_requirements_phase_2:
+        - "Enable SQLite WAL (Write-Ahead Logging) mode"
+        - "Implement connection pooling in MCP server"
+        - "Optimize read operations for git tools while Swift app writes conversations"
+        - "Design auto-commit indexing to coexist with real-time conversation indexing"
+        - "Proper transaction handling for concurrent git commit operations"
+        
+      competitive_advantage_maintained: "Concurrent access ensures conversation indexing (our core strength) never gets blocked by git operations"
     
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
