@@ -5,13 +5,14 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-// Create mock execAsync function that will be returned by promisify
-const mockExecAsync = vi.fn();
-
-// Mock the util module to always return our mock function
-vi.mock('util', () => ({
-    promisify: vi.fn(() => mockExecAsync)
-}));
+// Mock the util module with a factory function approach
+vi.mock('util', () => {
+    const mockExecAsync = vi.fn();
+    return {
+        promisify: vi.fn(() => mockExecAsync),
+        __mockExecAsync: mockExecAsync  // Export reference for test access
+    };
+});
 
 // Mock the logger to prevent console output during tests
 vi.mock('../utils/logger.js', () => ({
