@@ -105,6 +105,31 @@ class AppState: ObservableObject {
         }
     }
     
+    // MARK: - Repository Management (Phase 2b)
+    
+    /// Auto-commit service enabled/disabled globally
+    @Published var autoCommitEnabled = false {
+        didSet {
+            UserDefaults.standard.set(autoCommitEnabled, forKey: "autoCommitEnabled")
+        }
+    }
+    
+    /// List of monitored repositories
+    @Published var monitoredRepositories: [RepositoryConfig] = []
+    
+    /// Auto-detect repositories from Claude projects
+    @Published var autoDetectRepositories = true {
+        didSet {
+            UserDefaults.standard.set(autoDetectRepositories, forKey: "autoDetectRepositories")
+        }
+    }
+    
+    /// Total auto-commits created across all repositories
+    @Published var totalAutoCommits = 0
+    
+    /// Auto-commit service connection status
+    @Published var autoCommitServiceConnected = false
+    
     // MARK: - Initialization
     
     init() {
