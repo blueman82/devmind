@@ -17,7 +17,7 @@ struct CommitChatApp: App {
         
         // Initialize database with detailed logging
         Self.logger.debug("🗄️ Initializing AIMemoryDataManagerFixed...")
-        let dataManager = AIMemoryDataManagerFixed.shared
+        _ = AIMemoryDataManagerFixed.shared
         Self.logger.debug("✅ AIMemoryDataManager initialized")
         
         // Start conversation monitoring with detailed status
