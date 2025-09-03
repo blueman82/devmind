@@ -7,10 +7,14 @@
 import chokidar from 'chokidar';
 import path from 'path';
 import fs from 'fs/promises';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { createLogger } from '../utils/logger.js';
 import { minimatch } from 'minimatch';
 import ShadowBranchManager from './shadow-branch-manager.js';
 import ConversationCorrelator from './conversation-correlator.js';
+
+const execAsync = promisify(exec);
 
 class FileMonitor {
     constructor(options = {}) {
