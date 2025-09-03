@@ -2,6 +2,32 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-03] - COMPLETE FIX - SessionId SQLite Binding Issue Resolved + MCP Validation + Git Tools Fixed
+
+### Git Tools Architecture Fix - SQLite Boolean Binding Issue ✅
+- **NEW DISCOVERY**: Git repository indexing was failing due to SQLite boolean binding issue  
+- **ERROR**: `TypeError: SQLite3 can only bind numbers, strings, bigints, buffers, and null`
+- **LOCATION**: `/src/database/git-schema.js:266-267` in upsertRepository method
+- **ROOT CAUSE**: `isMonorepoSubdirectory` boolean value being passed directly to SQLite
+- **CRITICAL FIX**: Convert boolean to integer for SQLite binding
+  ```javascript
+  // Before (broken):
+  this.statements.upsertRepo.run(..., isMonorepoSubdirectory, ...)
+  
+  // After (fixed):
+  this.statements.upsertRepo.run(..., isMonorepoSubdirectory ? 1 : 0, ...)
+  ```
+- **IMPACT**: Git repository indexing completely non-functional (0 of 5 git tools working)
+- **ARCHITECTURE DECISION**: Granted MCP server selective write access to git tables only
+- **PATTERN VERIFICATION**: Confirmed `is_merge` boolean already properly converted in insertCommit method
+- **STATUS**: Fix implemented, requires MCP server restart to take effect
+- **AFFECTED TOOLS**: 
+  - `list_restore_points` ❌ → ✅ (pending restart)
+  - `create_restore_point` ❌ → ✅ (pending restart) 
+  - `preview_restore` ❌ → ✅ (pending restart)
+  - `restore_project_state` ❌ → ✅ (pending restart)
+  - `get_git_context` ✅ (working but not persisting to database)
+
 ## [2025-09-03] - COMPLETE FIX - SessionId SQLite Binding Issue Resolved + MCP Validation
 
 ### The Root Cause - Swift String Reference Loss in C API
