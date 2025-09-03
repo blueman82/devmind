@@ -293,7 +293,7 @@ class FileMonitor {
      * @param {Object} config - Repository configuration
      * @returns {Promise<void>}
      */
-    async createShadowCommit(repoPath, filePath, config) {
+    async createShadowCommit(repoPath, filePath) {
         try {
             // Get current branch info
             const { shadowBranch, originalBranch } = await this.shadowManager.ensureShadowBranch(repoPath);
@@ -405,7 +405,7 @@ class FileMonitor {
                     `Changes: ${stats}`,
                     `Timestamp: ${timestamp}`
                 ].join('\n');
-            } catch (error) {
+            } catch {
                 return `Auto-save: ${fileName} - ${shadowBranch}\n\nTimestamp: ${timestamp}`;
             }
         }
