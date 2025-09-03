@@ -188,11 +188,11 @@ class AutoCommitAPIService: ObservableObject {
                         error: error.isEmpty ? nil : error
                     )
                     
-                    self.logger.debug("Command executed: \(arguments.joined(separator: " ")) - Success: \(result.success)")
+                    logger.debug("Command executed: \(arguments.joined(separator: " ")) - Success: \(result.success)")
                     
                     continuation.resume(returning: result)
                 } catch {
-                    self.logger.error("Failed to execute command: \(arguments.joined(separator: " ")) - Error: \(error.localizedDescription)")
+                    logger.error("Failed to execute command: \(arguments.joined(separator: " ")) - Error: \(error.localizedDescription)")
                     
                     let result = ProcessResult(
                         success: false,
