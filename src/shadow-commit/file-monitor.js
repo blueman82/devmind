@@ -262,7 +262,7 @@ class FileMonitor {
             const stringMatch = config.sensitiveStrings?.some(str => firstKb.includes(str.toLowerCase())) || false;
             
             return regexMatch || stringMatch;
-        } catch (error) {
+        } catch {
             // If can't read file, assume it's safe (binary files etc)
             return false;
         }
@@ -281,7 +281,7 @@ class FileMonitor {
                 cwd: repoPath
             });
             return true;
-        } catch (error) {
+        } catch {
             return false;
         }
     }
