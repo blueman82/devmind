@@ -22,35 +22,51 @@ vi.mock('child_process', () => ({
     })
 }));
 
-// Store mock implementation for dynamic control
-let mockExecAsync = vi.fn();
+// Mock promisify to return our controlled mock function
+vi.mock('util', () => ({
+    promisify: vi.fn(() => {
+        return vi.fn().mockImplementation((cmd, options = {}) => {
+            return Promise.resolve(getMockResponse(cmd, options));
+        });
+    })
+}));
 
 // Helper to provide mock responses based on git commands
 function getMockResponse(cmd, options) {
+    // Special test flags
+    if (options.testError) {
+        throw new Error(options.testError);
+    }
     // Get current branch
     if (cmd.includes('git symbolic-ref --short HEAD')) {
-        return { stdout: 'main\n' };
+        if (options.testDetachedHead) {
+            throw new Error('fatal: ref HEAD is not a symbolic ref');
+        }
+        return { stdout: options.testBranch || 'main\n', stderr: '' };
     }
     
     // Check if branch exists
-    if (cmd.includes('git show-ref --verify refs/heads/shadow/main')) {
-        return { stdout: 'abc123def refs/heads/shadow/main\n' };
-    }
-    if (cmd.includes('git show-ref --verify refs/heads/shadow/feature-test')) {
-        return { error: 'branch not found' };
+    if (cmd.includes('git show-ref --verify')) {
+        if (cmd.includes('shadow/main')) {
+            return { stdout: 'abc123def refs/heads/shadow/main\n', stderr: '' };
+        }
+        if (cmd.includes('shadow/feature-test') && !options.branchExists) {
+            throw new Error('branch not found');
+        }
+        return { stdout: '', stderr: '' };
     }
     
     // Create branch
-    if (cmd.includes('git branch "shadow/')) {
-        return { stdout: '' };
+    if (cmd.includes('git branch')) {
+        return { stdout: '', stderr: '' };
     }
     
     // Check uncommitted changes
     if (cmd.includes('git status --porcelain')) {
         if (options.testHasChanges) {
-            return { stdout: 'M  file.txt\n' };
+            return { stdout: 'M  file.txt\n', stderr: '' };
         }
-        return { stdout: '' };
+        return { stdout: '', stderr: '' };
     }
     
     // Stash operations
@@ -81,18 +97,25 @@ function getMockResponse(cmd, options) {
     // Diff stats
     if (cmd.includes('git diff --stat')) {
         return { 
-            stdout: ' file1.js | 10 ++\n file2.js | 5 +-\n 2 files changed, 12 insertions(+), 3 deletions(-)' 
+            stdout: ' file1.js | 10 ++\n file2.js | 5 +-\n 2 files changed, 12 insertions(+), 3 deletions(-)', 
+            stderr: ''
         };
     }
     
     // List shadow branches
     if (cmd.includes('git branch --list "shadow/*"')) {
-        return { stdout: '  shadow/main\n* shadow/feature-auth\n  shadow/feature-test\n' };
+        if (options.emptyBranchList) {
+            return { stdout: '', stderr: '' };
+        }
+        return { stdout: '  shadow/main\n* shadow/feature-auth\n  shadow/feature-test\n', stderr: '' };
     }
     
     // Count commits behind
     if (cmd.includes('git rev-list')) {
-        return { stdout: '3\n' };
+        if (options.noBehind) {
+            return { stdout: '0\n', stderr: '' };
+        }
+        return { stdout: '3\n', stderr: '' };
     }
     
     // Merge branches
@@ -106,7 +129,7 @@ function getMockResponse(cmd, options) {
     }
     
     // Default response
-    return { stdout: '' };
+    return { stdout: '', stderr: '' };
 }
 
 describe('ShadowBranchManager', () => {
