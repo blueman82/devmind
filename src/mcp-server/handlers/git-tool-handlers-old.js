@@ -3,6 +3,7 @@ import GitSchema from '../../database/git-schema.js';
 import { createLogger } from '../../utils/logger.js';
 import pathValidator from '../../utils/path-validator.js';
 import errorSanitizer from '../../utils/error-sanitizer.js';
+import SecureGitExecutor from '../../utils/secure-git-executor.js';
 
 export class GitToolHandlers {
   /**
