@@ -165,7 +165,7 @@ class FileMonitor {
     }
 
     /**
-     * Handle file change event
+     * Handle file change event with debouncing
      * @param {string} repoPath - Repository path
      * @param {Object} config - Repository configuration
      * @param {string} filePath - Changed file path
@@ -176,6 +176,55 @@ class FileMonitor {
         try {
             // Check if it's a file (not directory)
             if (flags.isDirectory) return;
+            
+            // Implement debouncing to prevent rapid successive commits
+            const debounceKey = `${repoPath}:${filePath}`;
+            
+            // Clear any pending timeout for this file
+            if (this.pendingChanges.has(debounceKey)) {
+                clearTimeout(this.pendingChanges.get(debounceKey));
+                this.pendingChanges.delete(debounceKey);
+            }
+            
+            // If file is already being processed, skip
+            if (this.debouncedFiles.has(debounceKey)) {
+                this.logger.debug('File change debounced (already processing)', { filePath });
+                return;
+            }
+            
+            // Set up debounced execution
+            const debounceDelay = config.debounceDelay || 500; // 500ms default debounce
+            const timeoutHandle = setTimeout(async () => {
+                this.pendingChanges.delete(debounceKey);
+                this.debouncedFiles.add(debounceKey);
+                
+                try {
+                    await this.processFileChange(repoPath, config, filePath, flags);
+                } finally {
+                    this.debouncedFiles.delete(debounceKey);
+                }
+            }, debounceDelay);
+            
+            this.pendingChanges.set(debounceKey, timeoutHandle);
+        } catch (error) {
+            this.logger.error('Failed to handle file change', {
+                error: error.message,
+                filePath,
+                repoPath
+            });
+        }
+    }
+    
+    /**
+     * Process file change after debouncing
+     * @param {string} repoPath - Repository path
+     * @param {Object} config - Repository configuration
+     * @param {string} filePath - Changed file path
+     * @param {Object} flags - FSEvents flags
+     * @returns {Promise<void>}
+     */
+    async processFileChange(repoPath, config, filePath, flags) {
+        try {
             
             // Get relative path
             const relativePath = path.relative(repoPath, filePath);
