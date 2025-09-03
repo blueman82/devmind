@@ -194,7 +194,7 @@ class SimplifiedPerformanceTest {
             );
             
             // Restore original branch
-            await this.shadowBranchManager.restoreOriginalBranch(repo.path);
+            await this.shadowBranchManager.switchBackToOriginalBranch(repo.path, 'main', false);
             
             repo.commits++;
             this.results.totalCommits++;
