@@ -195,6 +195,7 @@ Changes: +145/-23 lines
 **Week 5**:
 - Statistics dashboard
 - Advanced settings UI
+- Documentation and help system
 - Optional local LLM integration
 - Comprehensive testing
 
