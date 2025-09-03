@@ -48,6 +48,15 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Multi-Directory Scanning**: Scans common developer directories (~/Documents/Github, ~/Projects, ~/Code, etc.)
 - **Git Validation**: Validates repositories using `git status` command to ensure they're legitimate git repos
 - **Smart Recursion**: Two-level deep directory scanning with protection against infinite loops
+- **Branch Detection**: Automatically detects current branch name and repository status for each discovered repo
+- **Repository Information**: Extracts repository status (clean/modified) and file change counts
+
+### 🔗 AppState Repository Integration (19:15)
+- **Repository Management Methods**: Added discoverRepositories(), addRepository(), removeRepository() to AppState
+- **Settings Persistence**: Implemented UserDefaults-based repository configuration storage with JSON encoding
+- **Async Discovery**: Repository scanning runs asynchronously with MainActor updates for UI responsiveness
+- **Deduplication Logic**: Smart merging of discovered repos with existing monitored repositories
+- **Settings Integration**: loadRepositorySettings() called during AppState initialization for persistent state
 - **Repository Status**: Extracts current branch name and change status for discovered repositories
 - **Auto-Detection Ready**: Designed to populate monitoredRepositories array with real git repository data
 - **Build Verification**: xcodebuild clean && build SUCCESS - zero compilation errors
