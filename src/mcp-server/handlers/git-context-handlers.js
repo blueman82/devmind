@@ -202,6 +202,15 @@ export class GitContextHandlers extends GitBaseHandler {
    */
   async indexCommitsIfNeeded(projectPath, commits) {
     try {
+      // Ensure gitSchema is initialized
+      if (!this.gitSchema) {
+        console.error('[GitContextHandler] gitSchema not initialized in indexCommitsIfNeeded!');
+        await this.initialize(); // Try to initialize if not done
+        if (!this.gitSchema) {
+          throw new Error('GitSchema not available after initialization');
+        }
+      }
+      
       const repository = await this.gitSchema.getRepositoryByPath(projectPath);
       if (!repository) {
         this.logger.warn('Repository not found in database for commit indexing', { projectPath });
