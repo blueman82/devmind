@@ -44,7 +44,7 @@ class FileMonitor {
                 /secret[_-]?key/i,
                 /password/i,
                 /token/i,
-                /bearer\s+[a-z0-9\-._~\+\/]+=*/i,
+                /bearer\s+[a-z0-9\-._~+/]+=*/i,
                 /aws[_-]?access[_-]?key/i,
                 /aws[_-]?secret/i
             ],
