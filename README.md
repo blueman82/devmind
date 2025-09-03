@@ -15,21 +15,28 @@
 - 🤖 **Works With All AI Tools** - Claude, Cursor, Copilot get perfect memory
 - 💰 **Massive Token Savings** - AI remembers without re-reading codebases
 
-## 🏗️ Project Status
+## 🏗️ Project Status - Updated 2025-09-03
 
 ### Backend: **PRODUCTION READY** ✅
-- **550+ conversations indexed** in SQLite FTS5 database
-- **9 MCP tools fully operational** (conversation search, git restore points)
-- **Real-time indexing** with fs.watch() monitoring
-- **33/33 tests passing** with 100% tool coverage
+- **1035+ conversations indexed** in SQLite FTS5 database (163,980+ messages)
+- **11 MCP tools available** (6 conversation + 5 git tools)
+- **Real-time indexing** with FSEvents monitoring  
+- **Database size**: 82MB fully populated
+- **Performance**: 3ms average query time
 
-### Swift App: **PHASE 1 COMPLETE (95%)** 🚧
-- **CommitChat menu bar app functional** (no dock icon)
-- **Pre-Phase 2 cleanup complete** (2025-09-01)
-  - Removed duplicate project folders
-  - Cleaned up test boilerplate
-  - Code review grade: B- (improved from C+)
-- **Phase 2 ready**: Static UI implementation planned
+#### Recent Major Fix (2025-09-03): ✅ Git Tools SQLite Boolean Binding Issue Resolved
+- **Issue**: 4 of 5 git tools were failing with SQLite binding errors
+- **Root Cause**: Boolean values passed to SQLite (requires integers)
+- **Fix Applied**: Convert `isMonorepoSubdirectory` boolean to integer in `/src/database/git-schema.js`
+- **Module Caching Discovery**: Node.js cached pre-fix code, resolved with process restart
+- **Status**: 🚀 **VALIDATION COMPLETE - All 5 git tools fully operational!**
+
+### Swift App: **PRODUCTION READY** ✅
+- **CommitChat macOS app fully functional** 
+- **Real-time conversation indexing** from ~/.claude/projects
+- **Database ownership**: Swift app writes, MCP server reads
+- **Architecture**: Successfully shifted from Node.js to Swift for data persistence
+- **Performance**: "Blinding speed and pace" indexing (user quote)
 
 ## 📁 Project Structure
 

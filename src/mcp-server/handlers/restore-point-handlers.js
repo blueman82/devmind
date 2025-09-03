@@ -351,23 +351,40 @@ export class RestorePointHandlers extends GitBaseHandler {
    */
   async ensureRepositoryInDatabase(projectPath, repository) {
     try {
+      // Ensure gitSchema is initialized
+      if (!this.gitSchema) {
+        console.error('[RestorePointHandlers] gitSchema not initialized!');
+        await this.initialize(); // Try to initialize if not done
+        if (!this.gitSchema) {
+          throw new Error('GitSchema not available after initialization');
+        }
+      }
+      
       const repositoryData = {
         projectPath,
         workingDirectory: repository.workingDirectory,
         gitDirectory: repository.gitDirectory,
+        repositoryRoot: repository.repositoryRoot,
+        subdirectoryPath: repository.subdirectoryPath || '.',
+        isMonorepoSubdirectory: repository.isMonorepoSubdirectory || false,
         remoteUrl: repository.remoteUrl,
         currentBranch: repository.currentBranch
       };
 
-      await this.gitSchema.upsertRepository(repositoryData);
+      console.log('[RestorePointHandlers] Upserting repository:', repositoryData.projectPath);
+      const result = await this.gitSchema.upsertRepository(repositoryData);
+      console.log('[RestorePointHandlers] Upsert result:', result);
       
       this.logger.debug('Repository ensured in database', { projectPath });
     } catch (error) {
+      console.error('[RestorePointHandlers] Failed to ensure repository in database:', error.message);
       this.logger.error('Failed to ensure repository in database', {
         projectPath,
         error: error.message,
         stack: error.stack
       });
+      // Re-throw to propagate the error
+      throw error;
     }
   }
 

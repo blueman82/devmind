@@ -425,6 +425,33 @@ class AIMemoryMCPServer extends Server {
 - **Secure git operations** - Safe git operations with user confirmation
 - **Privacy compliance** - No telemetry or usage tracking
 
+## Competitive Landscape
+
+### Primary Competitor: ShadowGit
+**Core Capabilities:**
+- **Auto-commit on save**: Creates git commit on every file save for perfect granularity
+- **MCP Integration**: Read-only git history access via Model Context Protocol  
+- **Token Efficiency**: 66% token reduction (15k → 5k tokens) in AI interactions
+- **Focus**: Never lose work + comprehensive git tracking
+
+### Our Competitive Advantages
+**Unique Value Propositions:**
+1. **Conversation + Git Linking**: We index Claude Code conversations AND link them to git commits
+2. **Broader Context**: AI knows what you DISCUSSED and what you BUILT (not just commits)
+3. **Cross-Project Intelligence**: Solution discovery across different projects
+4. **Complete Development Memory**: Both conversation history and code evolution tracking
+
+**Strategic Positioning:**
+- **Match**: ShadowGit's auto-commit functionality for git tracking
+- **Exceed**: Add conversation indexing and intelligent linking
+- **Differentiate**: Provide superior context for AI assistants with combined data
+
+### Competitive Strategy
+- **Phase 1**: Launch with superior conversation memory (our current strength)
+- **Phase 2**: Add auto-commit functionality to match ShadowGit
+- **Phase 3**: Leverage unique conversation-git correlation for advanced features
+- **Long-term**: Become the comprehensive AI development memory solution
+
 ## Business Model
 
 ### Pricing Strategy
@@ -574,8 +601,11 @@ npm run test:git        # Git tools specific tests
 - **Git operation safety**: Risk of data loss during restores
 
 ### Business Risks
+- **Direct Competition - ShadowGit**: Established competitor with automatic git commits on every file save
+  - Their MCP provides read-only git history access with 66% token reduction
+  - Our differentiation: conversation indexing + git linking (broader scope)
 - **Competition**: Similar products from larger companies
-- **Market adoption**: Slower than expected user growth
+- **Market adoption**: Slower than expected user growth  
 - **Pricing pressure**: Race to bottom with competitors
 - **Platform dependency**: Over-reliance on Claude Code ecosystem
 
