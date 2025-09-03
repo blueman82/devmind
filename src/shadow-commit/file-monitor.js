@@ -247,15 +247,21 @@ class FileMonitor {
     /**
      * Check if file contains sensitive content
      * @param {string} filePath - File path
-     * @param {Array<RegExp>} patterns - Sensitive patterns
+     * @param {Object} config - Configuration with sensitivePatterns and sensitiveStrings
      * @returns {Promise<boolean>}
      */
-    async containsSensitiveContent(filePath, patterns) {
+    async containsSensitiveContent(filePath, config) {
         try {
             const content = await fs.readFile(filePath, 'utf-8');
-            const firstKb = content.substring(0, 1024); // Check first 1KB
+            const firstKb = content.substring(0, 1024).toLowerCase(); // Check first 1KB, case insensitive
             
-            return patterns.some(pattern => pattern.test(firstKb));
+            // Check regex patterns (for complex patterns like Bearer tokens)
+            const regexMatch = config.sensitivePatterns?.some(pattern => pattern.test(firstKb)) || false;
+            
+            // Check simple string patterns (more efficient for common cases)
+            const stringMatch = config.sensitiveStrings?.some(str => firstKb.includes(str.toLowerCase())) || false;
+            
+            return regexMatch || stringMatch;
         } catch (error) {
             // If can't read file, assume it's safe (binary files etc)
             return false;
