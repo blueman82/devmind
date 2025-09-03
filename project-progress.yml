@@ -67,9 +67,22 @@ phase_2b_week4_backend_integration_2025_09_03_20_20:
     current_service_status: "Git commands execute successfully without process spawning errors"
     minor_issue_found: "Path resolution issue (not SPAWN related) - service using home dir instead of repo path"
     
+  appstate_autocommit_integration:
+    status: "✅ Complete"
+    file: "CommitChat/AppState.swift"
+    features:
+      - "AutoCommitAPIService.shared integration with centralized state management"
+      - "Real-time service connection status monitoring via Combine publishers"
+      - "Automatic commit statistics synchronization from SQLite database"
+      - "Service error propagation through unified error handling pipeline"
+      - "checkAutoCommitServiceStatus(), startAutoCommitService(), stopAutoCommitService() methods"
+      - "syncRepositoriesWithService() for backend repository synchronization"
+      - "setupAutoCommitMonitoring() with reactive Combine subscriptions"
+      
   remaining_week_4_priorities:
-    - "❌ Integrate AutoCommitAPIService with AppState for service monitoring"
-    - "❌ Implement commit statistics synchronization from SQLite database" 
+    - "✅ Integrate AutoCommitAPIService with AppState for service monitoring"
+    - "✅ Create auto-commit service status monitoring in AppState"
+    - "⏳ Implement commit statistics synchronization from SQLite database (partially complete)" 
     - "❌ Integrate UNUserNotificationCenter for auto-commit notifications"
     - "❌ Test end-to-end auto-commit flow with correct repository paths"
     
