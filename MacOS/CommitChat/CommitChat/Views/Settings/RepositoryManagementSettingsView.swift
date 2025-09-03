@@ -288,7 +288,6 @@ struct RepositorySettingsSheet: View {
                 }
             }
             .navigationTitle("Repository Settings")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
