@@ -180,7 +180,7 @@ class ConversationCorrelator {
                             }
                         }
                     }
-                } catch (parseError) {
+                } catch {
                     // Skip malformed JSON lines
                     continue;
                 }
@@ -285,7 +285,7 @@ class ConversationCorrelator {
                         dirs.push(projectPath);
                     }
                 }
-            } catch (error) {
+            } catch {
                 this.logger.debug('Claude projects directory not found', {
                     path: this.config.claudeProjectsPath
                 });
