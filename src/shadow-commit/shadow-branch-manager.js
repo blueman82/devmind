@@ -97,7 +97,7 @@ class ShadowBranchManager {
                 { cwd: repoPath }
             );
             return stdout.length > 0;
-        } catch (error) {
+        } catch {
             // Branch doesn't exist if command fails
             return false;
         }
