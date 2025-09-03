@@ -134,6 +134,16 @@ class AppState: ObservableObject {
     /// Auto-commit service connection status
     @Published var autoCommitServiceConnected = false
     
+    /// Notification authorization status
+    @Published var notificationsAuthorized = false
+    
+    /// Notification frequency setting
+    @Published var notificationFrequency: NotificationFrequency = .everyCommit {
+        didSet {
+            UserDefaults.standard.set(notificationFrequency.rawValue, forKey: "notificationFrequency")
+        }
+    }
+    
     // MARK: - Initialization
     
     init() {
