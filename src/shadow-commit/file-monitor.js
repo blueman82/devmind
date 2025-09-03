@@ -269,9 +269,6 @@ class FileMonitor {
      * @returns {Promise<boolean>}
      */
     async isFileTracked(repoPath, filePath) {
-        const { exec } = await import('child_process');
-        const { promisify } = await import('util');
-        const execAsync = promisify(exec);
         
         try {
             await execAsync(`git ls-files --error-unmatch "${filePath}"`, {
