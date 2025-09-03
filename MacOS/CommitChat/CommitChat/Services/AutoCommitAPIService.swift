@@ -157,6 +157,7 @@ class AutoCommitAPIService: ObservableObject {
     // MARK: - Private Methods
     
     private func executeCommand(_ arguments: [String]) async -> ProcessResult {
+        let logger = self.logger
         return await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .background).async {
                 let process = Process()
