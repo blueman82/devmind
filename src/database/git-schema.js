@@ -262,9 +262,9 @@ export default class GitSchema {
         currentBranch
       } = repositoryData;
 
-      // Use cached prepared statement
+      // Use cached prepared statement (convert boolean to integer for SQLite)
       const result = this.statements.upsertRepo.run(
-        projectPath, workingDirectory, gitDirectory, repositoryRoot, subdirectoryPath, isMonorepoSubdirectory, remoteUrl, currentBranch
+        projectPath, workingDirectory, gitDirectory, repositoryRoot, subdirectoryPath, isMonorepoSubdirectory ? 1 : 0, remoteUrl, currentBranch
       );
       
       let repositoryId;
