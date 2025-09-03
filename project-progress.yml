@@ -86,6 +86,29 @@ phase_2_week_1_progress_2025_09_03:
       - "chalk: ^5.6.0 (terminal colors)"
       - "ora: ^8.2.0 (terminal spinners)"
   
+  critical_discovery:
+    issue_found: "Untracked files won't be auto-committed by default"
+    impact: "New files created but not git added would be lost"
+    solution_implemented: "Added autoAddUntracked config option in file-monitor.js"
+    behavior:
+      - "New files (isCreated flag) are always considered for auto-add"
+      - "Modified untracked files require autoAddUntracked: true config"
+      - "Respects .gitignore patterns always"
+      - "Ensures no work is lost even if files aren't staged"
+    
+  shadow_branch_discovery:
+    found: "shadow/feature/phase-2-auto-commit branch already exists"
+    evidence: "18+ auto-commits already created during development"
+    insight: "System is already partially operational via existing hooks"
+    implication: "Our implementation is being tested in real-time"
+    
+    dependencies_added:
+      - "chokidar: ^4.0.3 (file watching)"
+      - "minimatch: ^10.0.3 (pattern matching)"
+      - "commander: ^14.0.0 (CLI framework)"
+      - "chalk: ^5.6.0 (terminal colors)"
+      - "ora: ^8.2.0 (terminal spinners)"
+  
   total_lines_written: 2445
   modules_created: 6
   tests_run: "✅ Shadow branch creation successful"
