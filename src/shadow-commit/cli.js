@@ -270,9 +270,6 @@ program
             await initService();
             
             // Get repository path from file path
-            const { exec } = await import('child_process');
-            const { promisify } = await import('util');
-            const execAsync = promisify(exec);
             
             const absolutePath = path.resolve(filePath);
             const dir = path.dirname(absolutePath);
