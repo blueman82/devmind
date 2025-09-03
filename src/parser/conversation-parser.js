@@ -278,8 +278,8 @@ class ConversationParser {
   searchInConversation(conversation, queryTerms, options) {
     const { fuzzyThreshold, searchMode, logic } = options;
     let totalScore = 0;
-    let matchedTerms = [];
-    let termMatches = [];
+    const matchedTerms = [];
+    const termMatches = [];
     
     // Combine all text content for searching
     const fullText = conversation.messages
@@ -458,11 +458,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   
   try {
     switch (command) {
-      case 'list':
+      case 'list': {
         console.log('Available conversation files:');
         const files = parser.findConversationFiles();
         files.forEach(f => console.log(`  ${f.projectHash}/${f.fileName}`));
         break;
+      }
         
       case 'projects':
         console.log('Projects with conversations:');
