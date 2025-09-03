@@ -310,15 +310,116 @@ func sendAutoCommitNotification(for file: String, branch: String) {
 - Test concurrent database access
 - Repository auto-detection system
 
+## Testing Strategy
+
+### Unit Testing
+
+**Shadow Branch Manager Tests** (`test/shadow-branch-manager.test.js`):
+- Test shadow branch creation for new repositories
+- Test branch switching with uncommitted changes
+- Test commit creation and message formatting
+- Test branch synchronization scenarios
+- Test cleanup of orphaned branches
+- Mock git commands to avoid repository dependencies
+
+**Conversation Correlation Tests** (`test/conversation-correlation.test.js`):
+- Test JSONL parsing and tool_use detection
+- Test timing window matching (10-second threshold)
+- Test sessionId extraction and validation
+- Test fallback to diff-based messages
+- Mock file system for consistent test data
+
+**Database Tests** (`test/phase2-database.test.js`):
+- Test concurrent read/write with WAL mode
+- Test shadow_commits table operations
+- Test correlation table foreign key constraints
+- Test repository_settings CRUD operations
+- Verify index performance
+
+### Integration Testing
+
+**End-to-End Flow Tests**:
+1. **File Save → Shadow Commit**:
+   - Create test repository
+   - Trigger file save event
+   - Verify shadow branch creation
+   - Confirm commit with correct message
+   - Check database record creation
+
+2. **Conversation Context Integration**:
+   - Simulate Claude Code session
+   - Create matching JSONL entry
+   - Trigger file save within time window
+   - Verify rich commit message with context
+   - Confirm correlation in database
+
+3. **Repository Management**:
+   - Test auto-detection of new repositories
+   - Verify enable/disable functionality
+   - Test exclusion patterns
+   - Confirm throttling behavior
+
+### Performance Testing
+
+**Benchmarks to Achieve**:
+- File save to commit: < 50ms
+- Shadow branch creation: < 100ms
+- Conversation correlation: < 20ms
+- Database write: < 10ms
+- Memory usage: < 50MB for monitoring 10 repos
+
+**Load Testing**:
+- Monitor 100 repositories simultaneously
+- Handle 1000 file saves per minute
+- Process 10,000 shadow commits
+- Verify no memory leaks over 24 hours
+
+### Test Environments
+
+**Development Testing**:
+- Single test repository with known structure
+- Mock Claude project directory
+- In-memory SQLite for fast iteration
+
+**Staging Testing**:
+- Real repositories (3-5 active projects)
+- Actual Claude Code conversations
+- Production-like database
+
+**Beta Testing (Week 6)**:
+- 5-10 volunteer users
+- Real development workflows
+- Performance monitoring
+- Feedback collection system
+
+### Test Data
+
+**Required Test Fixtures**:
+- Sample JSONL conversations with tool_use events
+- Git repositories with various branch structures
+- Files with sensitive content (API keys, passwords)
+- Large files exceeding size limits
+- Binary files to exclude
+
+### Acceptance Criteria
+
+**Each Component Must**:
+- Have >80% code coverage
+- Pass all unit tests
+- Complete integration tests successfully
+- Meet performance benchmarks
+- Handle error cases gracefully
+
 ## Next Steps
 
 1. ~~Begin Phase 2a implementation with SQLite WAL mode~~ ✅ Already enabled
-2. Create shadow branch management system (IN PROGRESS)
-3. Implement basic FSEvents monitoring (NEXT)
-4. Test with single repository before expanding
+2. ~~Create shadow branch management system~~ ✅ Module created
+3. Write unit tests for shadow branch manager (NEXT)
+4. Implement basic FSEvents monitoring
+5. Test with single repository before expanding
 
 ---
 
 *Generated: 2025-09-03*
-*Last Updated: 2025-09-03 (Week 1 Implementation Started)*
+*Last Updated: 2025-09-03 (Week 1 Implementation Started, Testing Strategy Added)*
 *Status: Week 1 In Progress*
