@@ -560,10 +560,32 @@ func sendAutoCommitNotification(for file: String, branch: String) {
 
 **Week 4 Priorities:**
 1. **UNUserNotificationCenter Integration**: macOS notification system for auto-commit alerts
-2. **Per-Repository Settings Persistence**: UserDefaults integration for repository configurations
+2. **✅ Per-Repository Settings Persistence**: UserDefaults integration for repository configurations - **COMPLETE**
 3. **File System Monitoring Integration**: Connect SwiftUI app with Node.js auto-commit service
-4. **Repository Discovery Auto-Detection**: Enhanced repository discovery and validation
+4. **✅ Repository Discovery Auto-Detection**: Enhanced repository discovery and validation - **COMPLETE**
 5. **Commit Statistics Synchronization**: Real-time data from SQLite auto-commit database
+
+## Week 4 PROGRESS - Phase 2b Backend Integration (2025-09-03 19:30) 🔧 IN PROGRESS
+
+**✅ MAJOR PROGRESS - Repository Discovery Backend Integration Complete**:
+
+**✅ Repository Discovery Service Implementation**:
+- **✅ RepositoryDiscoveryService.swift**: Comprehensive git repository scanning with file system discovery
+- **✅ Multi-Directory Scanning**: Scans ~/Documents/Github, ~/Projects, ~/Code, ~/Development, etc.
+- **✅ Git Validation**: Uses `git status` commands to validate legitimate repositories
+- **✅ Smart Recursion**: Two-level deep scanning with infinite loop protection
+- **✅ Branch Detection**: Extracts current branch names and repository status information
+
+**✅ AppState Repository Integration Complete**:
+- **✅ Repository Management Methods**: discoverRepositories(), addRepository(), removeRepository()
+- **✅ UserDefaults Persistence**: JSON encoding/decoding for repository configurations
+- **✅ Async/Await Integration**: Proper MainActor updates for SwiftUI responsiveness
+- **✅ Deduplication Logic**: Smart merging of discovered repos with existing monitored repos
+
+**✅ SwiftUI Repository Discovery UI Complete**:
+- **✅ "Scan for Repositories" Button**: UI trigger for repository discovery in RepositoryManagementSettingsView
+- **✅ Async Task Integration**: Connected to AppState.discoverRepositories() with proper async/await pattern
+- **✅ Complete Backend Integration**: Repository discovery service fully connected to user interface
 
 **Implementation Focus:**
 - Native macOS notifications for auto-commit events
