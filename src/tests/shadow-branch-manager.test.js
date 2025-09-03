@@ -5,13 +5,13 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-// Create mock outside of any imports to avoid temporal dead zone
-const mockExecAsync = vi.fn();
-
-// Mock the entire util module  
+// Mock the util module with factory function that creates fresh mocks
 vi.mock('util', () => {
     return {
-        promisify: vi.fn(() => mockExecAsync)
+        promisify: vi.fn((fn) => {
+            // Return a mock function that can be configured in tests
+            return vi.fn();
+        })
     };
 });
 
