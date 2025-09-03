@@ -48,6 +48,13 @@ struct RepositoryManagementSettingsView: View {
                                 showingFolderPicker = true
                             }
                             .buttonStyle(.bordered)
+                            
+                            Button("Scan for Repositories") {
+                                Task {
+                                    await appState.discoverRepositories()
+                                }
+                            }
+                            .buttonStyle(.bordered)
                         }
                     }
                 }
