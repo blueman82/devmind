@@ -97,7 +97,7 @@ class FileMonitor {
                     pollInterval: 100
                 },
                 ignored: [
-                    /(^|[\/\\])\../, // Ignore dotfiles
+                    /(^|[/\\])\../, // Ignore dotfiles
                     '**/node_modules/**',
                     '**/.git/**'
                 ]
