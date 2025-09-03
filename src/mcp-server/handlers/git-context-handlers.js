@@ -158,6 +158,15 @@ export class GitContextHandlers extends GitBaseHandler {
    */
   async ensureRepositoryInDatabase(projectPath, repository) {
     try {
+      // Ensure gitSchema is initialized
+      if (!this.gitSchema) {
+        console.error('[GitContextHandler] gitSchema not initialized!');
+        await this.initialize(); // Try to initialize if not done
+        if (!this.gitSchema) {
+          throw new Error('GitSchema not available after initialization');
+        }
+      }
+      
       const repositoryData = {
         projectPath,
         workingDirectory: repository.workingDirectory,
@@ -169,15 +178,20 @@ export class GitContextHandlers extends GitBaseHandler {
         currentBranch: repository.currentBranch
       };
 
-      await this.gitSchema.upsertRepository(repositoryData);
+      console.log('[GitContextHandler] Upserting repository:', repositoryData.projectPath);
+      const result = await this.gitSchema.upsertRepository(repositoryData);
+      console.log('[GitContextHandler] Upsert result:', result);
       
       this.logger.debug('Repository ensured in database', { projectPath });
     } catch (error) {
+      console.error('[GitContextHandler] Failed to ensure repository in database:', error.message);
       this.logger.error('Failed to ensure repository in database', {
         projectPath,
         error: error.message,
         stack: error.stack
       });
+      // Re-throw to propagate the error
+      throw error;
     }
   }
 
