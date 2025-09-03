@@ -465,7 +465,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         break;
       }
         
-      case 'projects':
+      case 'projects': {
         console.log('Projects with conversations:');
         const projects = parser.listProjects();
         projects.forEach(p => {
@@ -475,6 +475,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           console.log(`    Last activity: ${p.lastActivity}`);
         });
         break;
+      }
         
       case 'search':
         const query = process.argv[3];
