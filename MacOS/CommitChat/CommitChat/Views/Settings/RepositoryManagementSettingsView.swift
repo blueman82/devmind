@@ -24,6 +24,16 @@ struct RepositoryManagementSettingsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Toggle("Enable Auto-Commit Service", isOn: $appState.autoCommitEnabled)
+                            .onChange(of: appState.autoCommitEnabled) { oldValue, newValue in
+                                Task {
+                                    if newValue {
+                                        _ = await appState.startAutoCommitService()
+                                        await appState.syncRepositoriesWithService()
+                                    } else {
+                                        _ = await appState.stopAutoCommitService()
+                                    }
+                                }
+                            }
                         
                         Spacer()
                         
