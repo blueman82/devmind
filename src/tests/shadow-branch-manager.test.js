@@ -25,6 +25,10 @@ vi.mock('../utils/logger.js', () => ({
 }));
 
 import ShadowBranchManager from '../shadow-commit/shadow-branch-manager.js';
+import * as util from 'util';
+
+// Get reference to the mocked execAsync function
+const mockExecAsync = util.__mockExecAsync;
 
 describe('ShadowBranchManager', () => {
     let manager;
