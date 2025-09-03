@@ -16,6 +16,7 @@ class AutoCommitService {
     constructor(options = {}) {
         this.logger = createLogger('AutoCommitService');
         this.db = new DatabaseManager();
+        this.db.initialize(); // Ensure database is initialized
         
         // Initialize sub-modules
         this.shadowManager = new ShadowBranchManager(options.shadow);
