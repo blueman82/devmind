@@ -22,6 +22,11 @@ class FileMonitor {
         this.logger = createLogger('FileMonitor');
         this.shadowManager = new ShadowBranchManager();
         this.correlator = new ConversationCorrelator();
+        this.errorHandler = new ErrorHandler({
+            maxRetries: options.maxRetries || 3,
+            baseDelay: options.baseDelay || 1000,
+            maxDelay: options.maxDelay || 30000
+        });
         
         // Configuration
         this.config = {
