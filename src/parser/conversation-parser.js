@@ -477,7 +477,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         break;
       }
         
-      case 'search':
+      case 'search': {
         const query = process.argv[3];
         const timeframe = process.argv[4];
         if (!query) {
@@ -496,6 +496,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           console.log(`  Preview: ${r.preview}`);
         });
         break;
+      }
         
       case 'parse':
         const filePath = process.argv[3];
