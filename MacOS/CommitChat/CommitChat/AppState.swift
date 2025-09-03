@@ -478,6 +478,77 @@ class AppState: ObservableObject {
         // Update commit statistics
         await autoCommitAPI.updateCommitStatistics()
     }
+    
+    // MARK: - Notification Management
+    
+    /// Setup notifications system
+    private func setupNotifications() {
+        // Load notification settings
+        if let frequencyRawValue = UserDefaults.standard.string(forKey: "notificationFrequency"),
+           let frequency = NotificationFrequency(rawValue: frequencyRawValue) {
+            notificationFrequency = frequency
+        }
+        
+        // Check authorization status
+        checkNotificationAuthorization()
+    }
+    
+    /// Check current notification authorization status
+    private func checkNotificationAuthorization() {
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            DispatchQueue.main.async {
+                self?.notificationsAuthorized = settings.authorizationStatus == .authorized
+            }
+        }
+    }
+    
+    /// Request notification permissions from the user
+    func requestNotificationPermissions() async -> Bool {
+        do {
+            let granted = try await UNUserNotificationCenter.current().requestAuthorization(
+                options: [.alert, .sound, .badge]
+            )
+            
+            await MainActor.run {
+                notificationsAuthorized = granted
+            }
+            
+            return granted
+        } catch {
+            return false
+        }
+    }
+    
+    /// Send notification for auto-commit
+    func sendAutoCommitNotification(
+        repositoryPath: String,
+        fileName: String, 
+        commitHash: String,
+        branch: String
+    ) async {
+        guard notificationsAuthorized else { return }
+        guard notificationFrequency != .disabled else { return }
+        
+        let repositoryName = URL(fileURLWithPath: repositoryPath).lastPathComponent
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Auto-commit Created"
+        content.body = "\(fileName) committed to \(repositoryName)/\(branch)"
+        content.subtitle = "Commit: \(String(commitHash.prefix(8)))"
+        content.sound = .default
+        
+        let request = UNNotificationRequest(
+            identifier: "auto-commit-\(commitHash)",
+            content: content,
+            trigger: nil
+        )
+        
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            // Silently handle notification errors
+        }
+    }
 }
 
 // MARK: - Supporting Types
