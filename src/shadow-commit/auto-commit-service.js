@@ -713,14 +713,52 @@ class AutoCommitService {
      * @returns {Promise<void>}
      */
     async sendNotification(repoPath, filePath, shadowBranch, correlation) {
-        // This would integrate with macOS notification system
-        // Placeholder for now
-        this.logger.debug('Notification would be sent', {
-            repoPath,
-            filePath,
-            shadowBranch,
-            hasCorrelation: !!correlation
-        });
+        try {
+            const notificationData = {
+                timestamp: new Date().toISOString(),
+                type: 'auto_commit',
+                repository: repoPath,
+                file: filePath,
+                branch: shadowBranch,
+                commitHash: correlation?.commitHash || 'unknown',
+                sessionId: correlation?.sessionId || null
+            };
+            
+            // Write notification to shared file for Swift app to read
+            const notificationFile = path.join(process.env.HOME || '/tmp', '.devmind-notifications.json');
+            
+            // Read existing notifications
+            let notifications = [];
+            try {
+                if (fsSync.existsSync(notificationFile)) {
+                    const existing = fsSync.readFileSync(notificationFile, 'utf8');
+                    notifications = JSON.parse(existing);
+                }
+            } catch (error) {
+                // If file is corrupted, start fresh
+                notifications = [];
+            }
+            
+            // Add new notification
+            notifications.push(notificationData);
+            
+            // Keep only last 10 notifications to prevent file growth
+            if (notifications.length > 10) {
+                notifications = notifications.slice(-10);
+            }
+            
+            // Write updated notifications
+            fsSync.writeFileSync(notificationFile, JSON.stringify(notifications, null, 2));
+            
+            this.logger.info('Notification written to file', {
+                file: notificationFile,
+                repository: path.basename(repoPath),
+                fileName: path.basename(filePath)
+            });
+            
+        } catch (error) {
+            this.logger.error('Failed to write notification file', { error: error.message });
+        }
     }
 
     /**
