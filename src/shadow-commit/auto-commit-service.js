@@ -249,40 +249,69 @@ class AutoCommitService {
      * @returns {Promise<void>}
      */
     async handleFileChange(repoPath, filePath, flags, config) {
-        try {
-            const relativePath = path.relative(repoPath, filePath);
-            
-            // Check for conversation correlation
-            const correlation = await this.correlator.findConversationContext(repoPath, filePath);
-            
-            // Get shadow branch info
-            const { shadowBranch, originalBranch } = await this.shadowManager.ensureShadowBranch(repoPath);
-            
-            // Generate commit message
-            const message = this.generateCommitMessage(relativePath, shadowBranch, correlation);
-            
-            // Create shadow commit
-            await this.createShadowCommit(repoPath, relativePath, shadowBranch, originalBranch, message, correlation);
-            
-            // Update statistics
-            this.statistics.totalCommits++;
-            if (correlation) {
-                this.statistics.correlatedCommits++;
-            }
-            
-            // Notify if configured
-            if (config.notifications) {
-                await this.sendNotification(repoPath, relativePath, shadowBranch, correlation);
-            }
-            
-        } catch (error) {
-            this.logger.error('Failed to handle file change', {
-                error: error.message,
-                filePath,
-                repoPath
+        // Queue the file change operation to prevent overwhelming the system
+        return this.fileOperationQueue.add(async () => {
+            const perfId = `file-change-${Date.now()}`;
+            this.performanceMonitor.startOperation(perfId, {
+                type: 'file-change',
+                repository: repoPath,
+                file: filePath
             });
-            this.statistics.errors++;
-        }
+            
+            try {
+                const relativePath = path.relative(repoPath, filePath);
+                
+                // Check for conversation correlation
+                const correlation = await this.correlator.findConversationContext(repoPath, filePath);
+                
+                // Queue git operations
+                await this.gitOperationQueue.add(async () => {
+                    const gitPerfId = `git-op-${Date.now()}`;
+                    this.performanceMonitor.startOperation(gitPerfId, {
+                        type: 'commit',
+                        repository: repoPath
+                    });
+                    
+                    try {
+                        // Get shadow branch info
+                        const { shadowBranch, originalBranch } = await this.shadowManager.ensureShadowBranch(repoPath);
+                        
+                        // Generate commit message
+                        const message = this.generateCommitMessage(relativePath, shadowBranch, correlation);
+                        
+                        // Create shadow commit
+                        await this.createShadowCommit(repoPath, relativePath, shadowBranch, originalBranch, message, correlation);
+                        
+                        this.performanceMonitor.endOperation(gitPerfId, { success: true });
+                    } catch (error) {
+                        this.performanceMonitor.endOperation(gitPerfId, { error: error.message });
+                        throw error;
+                    }
+                });
+                
+                // Update statistics
+                this.statistics.totalCommits++;
+                if (correlation) {
+                    this.statistics.correlatedCommits++;
+                }
+                
+                // Notify if configured
+                if (config.notifications) {
+                    await this.sendNotification(repoPath, relativePath, filePath, correlation);
+                }
+                
+                this.performanceMonitor.endOperation(perfId, { success: true });
+            } catch (error) {
+                this.performanceMonitor.endOperation(perfId, { error: error.message });
+                this.logger.error('Failed to handle file change', {
+                    error: error.message,
+                    filePath,
+                    repoPath
+                });
+                this.statistics.errors++;
+                throw error;
+            }
+        });
     }
 
     /**
