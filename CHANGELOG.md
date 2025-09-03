@@ -58,6 +58,17 @@ All notable changes to the AI Memory App project will be documented in this file
   - `health_check`: Database healthy with 655 indexed, 163,980 messages, 82MB size
   - `performance_metrics`: 3ms average query time - excellent performance
 
+### Git Tools Status - Architectural Gap Identified ⚠️
+- **Git Tools Test Results** (1 of 5 working):
+  - `get_git_context`: ✅ Working - reads git history directly from filesystem
+  - `list_restore_points`: ❌ Not working - "No git repository found in database"
+  - `create_restore_point`: ❌ Not working - "Failed to index repository in database"
+  - `preview_restore`: ❌ Not working - "Repository not found in database"
+  - `restore_project_state`: ❌ Not working - "Repository not found in database"
+- **Root Cause**: Git repositories table not populated - MCP server is read-only, Swift app doesn't have git indexing logic
+- **Architecture Gap**: No component currently handles git repository indexing to database
+- **Impact**: Git restore point functionality unavailable, conversation indexing unaffected
+
 ## [2025-09-02] - DEBUGGING EMPTY SESSIONID - Issue Persists
 
 ### Debug Logging Added
