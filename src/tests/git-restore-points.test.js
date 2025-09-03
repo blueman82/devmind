@@ -53,7 +53,7 @@ describe('Git Restore Points Management', () => {
     dbManager = new DatabaseManager(tempDbPath);
     await dbManager.initialize();
     gitSchema = new GitSchema(dbManager.db);
-    await gitSchema.initializeSchema();
+    await gitSchema.initialize();
     
     gitToolHandlers = new GitToolHandlers(dbManager, gitSchema);
     
