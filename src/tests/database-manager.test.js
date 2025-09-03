@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'vitest';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -18,8 +17,8 @@ describe('DatabaseManager Tests', () => {
 
   test('initialize database and apply schema', async () => {
     const result = await dbManager.initialize();
-    assert.strictEqual(result, true, 'Database should initialize successfully');
-    assert.strictEqual(dbManager.isInitialized, true, 'Database should be marked as initialized');
+    expect(result).toBe(true); // Database should initialize successfully
+    expect(dbManager.isInitialized).toBe(true); // Database should be marked as initialized
     
     // Check if tables exist
     const tables = dbManager.db.prepare(`
@@ -27,10 +26,10 @@ describe('DatabaseManager Tests', () => {
     `).all();
     
     const tableNames = tables.map(t => t.name);
-    assert.ok(tableNames.includes('conversations'), 'conversations table should exist');
-    assert.ok(tableNames.includes('messages'), 'messages table should exist');
-    assert.ok(tableNames.includes('messages_fts'), 'messages_fts FTS5 table should exist');
-    assert.ok(tableNames.includes('index_stats'), 'index_stats table should exist');
+    expect(tableNames.includes('conversations')).toBeTruthy(); // conversations table should exist
+    expect(tableNames.includes('messages')).toBeTruthy(); // messages table should exist
+    expect(tableNames.includes('messages_fts')).toBeTruthy(); // messages_fts FTS5 table should exist
+    expect(tableNames.includes('index_stats')).toBeTruthy(); // index_stats table should exist
     
     console.log('✅ Database initialized with tables:', tableNames.join(', '));
   });
@@ -52,7 +51,7 @@ describe('DatabaseManager Tests', () => {
 
     // Insert conversation
     const result = await dbManager.upsertConversation(testConversation);
-    assert.ok(result.lastInsertRowid, 'Should return insert row ID');
+    expect(result.lastInsertRowid).toBeTruthy(); // Should return insert row ID
     console.log('✅ Conversation inserted with ID:', result.lastInsertRowid);
 
     // Retrieve conversation
@@ -60,13 +59,13 @@ describe('DatabaseManager Tests', () => {
       SELECT * FROM conversations WHERE session_id = ?
     `).get('test-session-123');
 
-    assert.ok(retrieved, 'Should retrieve conversation');
-    assert.strictEqual(retrieved.session_id, 'test-session-123');
-    assert.strictEqual(retrieved.project_name, 'Test Project');
-    assert.strictEqual(retrieved.message_count, 3);
+    expect(retrieved).toBeTruthy(); // Should retrieve conversation
+    expect(retrieved.session_id).toBe('test-session-123');
+    expect(retrieved.project_name).toBe('Test Project');
+    expect(retrieved.message_count).toBe(3);
     
     const topics = JSON.parse(retrieved.topics);
-    assert.deepStrictEqual(topics, ['authentication', 'database']);
+    expect(topics).toEqual(['authentication', 'database']);
     console.log('✅ Conversation retrieved successfully');
   });
 
@@ -117,7 +116,7 @@ describe('DatabaseManager Tests', () => {
       SELECT COUNT(*) as count FROM messages WHERE conversation_id = ?
     `).get(conversationId).count;
     
-    assert.strictEqual(messageCount, 3, 'Should have 3 messages');
+    expect(messageCount).toBe(3); // Should have 3 messages
 
     // Test FTS5 indexing - wait a moment for triggers to execute
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -126,7 +125,7 @@ describe('DatabaseManager Tests', () => {
       SELECT COUNT(*) as count FROM messages_fts
     `).get().count;
     
-    assert.strictEqual(ftsCount, 3, 'FTS5 table should have 3 entries');
+    expect(ftsCount).toBe(3); // FTS5 table should have 3 entries
     console.log('✅ FTS5 indexing working');
   });
 
@@ -137,9 +136,9 @@ describe('DatabaseManager Tests', () => {
       searchMode: 'mixed'
     });
 
-    assert.ok(results.length > 0, 'Should find authentication-related conversations');
-    assert.ok(results[0].snippet, 'Should include search snippets');
-    assert.ok(results[0].relevance_score, 'Should include relevance scores');
+    expect(results.length).toBeGreaterThan(0); // Should find authentication-related conversations
+    expect(results[0].snippet).toBeTruthy(); // Should include search snippets
+    expect(results[0].relevance_score).toBeTruthy(); // Should include relevance scores
     
     console.log('✅ FTS5 search results:', results.length);
     console.log('Sample result:', {
@@ -154,7 +153,7 @@ describe('DatabaseManager Tests', () => {
       searchMode: 'exact'
     });
 
-    assert.ok(sqliteResults.length > 0, 'Should find SQLite-related content');
+    expect(sqliteResults.length).toBeGreaterThan(0); // Should find SQLite-related content
     console.log('✅ Specific search found', sqliteResults.length, 'results');
   });
 
@@ -166,14 +165,14 @@ describe('DatabaseManager Tests', () => {
       summaryMode: 'full'
     });
 
-    assert.ok(context, 'Should retrieve conversation context');
-    assert.ok(context.conversation, 'Should have conversation metadata');
-    assert.ok(context.messages, 'Should have messages array');
-    assert.ok(context.pagination, 'Should have pagination info');
+    expect(context).toBeTruthy(); // Should retrieve conversation context
+    expect(context.conversation).toBeTruthy(); // Should have conversation metadata
+    expect(context.messages).toBeTruthy(); // Should have messages array
+    expect(context.pagination).toBeTruthy(); // Should have pagination info
 
-    assert.strictEqual(context.conversation.session_id, 'test-session-123');
-    assert.strictEqual(context.messages.length, 2, 'Should return 2 messages per page');
-    assert.strictEqual(context.pagination.page, 1, 'Should be page 1');
+    expect(context.conversation.session_id).toBe('test-session-123');
+    expect(context.messages.length).toBe(2); // Should return 2 messages per page
+    expect(context.pagination.page).toBe(1); // Should be page 1
     
     console.log('✅ Context retrieval with pagination working');
     console.log('Pagination:', context.pagination);
@@ -185,9 +184,9 @@ describe('DatabaseManager Tests', () => {
     await dbManager.updateStats('total_conversations', '1');
     
     const stats = dbManager.getStats();
-    assert.ok(stats, 'Should retrieve stats');
-    assert.strictEqual(stats.test_stat, 'test_value');
-    assert.strictEqual(stats.total_conversations, '1');
+    expect(stats).toBeTruthy(); // Should retrieve stats
+    expect(stats.test_stat).toBe('test_value');
+    expect(stats.total_conversations).toBe('1');
     
     console.log('✅ Statistics tracking working');
   });
@@ -200,9 +199,9 @@ describe('DatabaseManager Tests', () => {
         content: 'test'
         // missing required fields
       });
-      assert.fail('Should have thrown an error');
+      expect.fail('Should have thrown an error');
     } catch (error) {
-      assert.ok(error.message.includes('NOT NULL'), 'Should get constraint error');
+      expect(error.message.includes('NOT NULL')).toBeTruthy(); // Should get constraint error
       console.log('✅ Error handling working:', error.message.split('\n')[0]);
     }
   });
