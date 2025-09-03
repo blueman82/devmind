@@ -1,0 +1,6 @@
+Testing SPAWN EBADF fix after function signature correction
+Timestamp: 2025-09-03 17:20:00
+Expected: Auto-commit should work without SPAWN EBADF errors
+Function signature fix: createShadowCommit(repoPath, filePath, config) restored
+
+Testing with devmind repository only to verify the fix works.
