@@ -4,10 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { promisify } from 'util';
-import ShadowBranchManager from '../shadow-commit/shadow-branch-manager.js';
 
-// Mock execAsync function that will be used by shadow-branch-manager
+// Create mock outside of any imports to avoid temporal dead zone
 const mockExecAsync = vi.fn();
 
 // Mock the entire util module  
@@ -16,6 +14,8 @@ vi.mock('util', () => {
         promisify: vi.fn(() => mockExecAsync)
     };
 });
+
+import ShadowBranchManager from '../shadow-commit/shadow-branch-manager.js';
 
 // Mock the logger to prevent console output during tests
 vi.mock('../utils/logger.js', () => ({
