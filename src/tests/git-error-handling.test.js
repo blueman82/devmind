@@ -50,7 +50,7 @@ describe('Git Error Handling and Edge Cases', () => {
     dbManager = new DatabaseManager(tempDbPath);
     await dbManager.initialize();
     gitSchema = new GitSchema(dbManager.db);
-    await gitSchema.initializeSchema();
+    await gitSchema.initialize();
     
     gitToolHandlers = new GitToolHandlers(dbManager, gitSchema);
     
