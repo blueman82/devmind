@@ -243,25 +243,6 @@ class ShadowBranchManager {
         }
     }
 
-    /**
-     * Check if repository has uncommitted changes
-     * @param {string} repoPath - Path to the git repository
-     * @returns {Promise<boolean>}
-     */
-    async hasUncommittedChanges(repoPath) {
-        try {
-            const { stdout } = await execAsync('git status --porcelain', {
-                cwd: repoPath
-            });
-            return stdout.trim().length > 0;
-        } catch (error) {
-            this.logger.error('Failed to check git status', {
-                error: error.message,
-                repoPath
-            });
-            return false;
-        }
-    }
 
     /**
      * Sync shadow branch with original branch
