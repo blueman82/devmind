@@ -574,8 +574,11 @@ npm run test:git        # Git tools specific tests
 - **Git operation safety**: Risk of data loss during restores
 
 ### Business Risks
+- **Direct Competition - ShadowGit**: Established competitor with automatic git commits on every file save
+  - Their MCP provides read-only git history access with 66% token reduction
+  - Our differentiation: conversation indexing + git linking (broader scope)
 - **Competition**: Similar products from larger companies
-- **Market adoption**: Slower than expected user growth
+- **Market adoption**: Slower than expected user growth  
 - **Pricing pressure**: Race to bottom with competitors
 - **Platform dependency**: Over-reliance on Claude Code ecosystem
 
