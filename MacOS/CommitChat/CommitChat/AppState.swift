@@ -157,6 +157,8 @@ class AppState: ObservableObject {
         setupMCPMonitoring()
         // Setup Auto-Commit service monitoring
         setupAutoCommitMonitoring()
+        // Setup notifications
+        setupNotifications()
     }
     
     /// Loads settings from UserDefaults
