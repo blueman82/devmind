@@ -444,6 +444,13 @@ sessionid_complete_fix_2025_09_02:
             - "✅ Global exclusion patterns configuration"
           status: "✅ All missing elements now incorporated"
           note: "Phase 2 plan now complete with all features and security considerations"
+          
+        ui_discovery_2025_09_03:
+          finding: "Project Path already configurable in Swift UI"
+          location: "MCPServerSettingsView.swift lines 34-40"
+          impact: "Search location for Claude projects is user-configurable"
+          benefit: "More flexible than hardcoded ~/.claude/projects path"
+          implementation_note: "Use appState.projectPath instead of hardcoded path in Phase 2"
     
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
