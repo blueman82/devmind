@@ -13,6 +13,7 @@ import { createLogger } from '../utils/logger.js';
 import { minimatch } from 'minimatch';
 import ShadowBranchManager from './shadow-branch-manager.js';
 import ConversationCorrelator from './conversation-correlator.js';
+import ErrorHandler from './error-handler.js';
 
 const execAsync = promisify(exec);
 
