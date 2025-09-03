@@ -673,6 +673,26 @@ class AutoCommitService {
     }
 
     /**
+     * Send error notification to user
+     * @param {Object} errorInfo - Error notification details
+     * @returns {Promise<void>}
+     */
+    async sendErrorNotification(errorInfo) {
+        this.logger.error('Error notification', {
+            title: errorInfo.title,
+            body: errorInfo.body,
+            severity: errorInfo.severity,
+            requiresAction: errorInfo.requiresAction
+        });
+
+        // Increment error statistics
+        this.statistics.errors++;
+
+        // TODO: Integrate with UNUserNotificationCenter in Phase 2c Priority 2 completion
+        // This will connect to the macOS notification system through AppState
+    }
+
+    /**
      * Get service statistics
      * @returns {Object}
      */
