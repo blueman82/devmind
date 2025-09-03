@@ -23,6 +23,9 @@ class AppState: ObservableObject {
     /// Reference to the MCPClient for API communication
     private let mcpClient = MCPClient.shared
     
+    /// Reference to the AutoCommitAPIService for auto-commit functionality
+    private let autoCommitAPI = AutoCommitAPIService.shared
+    
     /// Cancellables for Combine subscriptions
     private var cancellables = Set<AnyCancellable>()
     // MARK: - Window Visibility
@@ -141,6 +144,8 @@ class AppState: ObservableObject {
         setupInitialState()
         // Setup MCP server monitoring
         setupMCPMonitoring()
+        // Setup Auto-Commit service monitoring
+        setupAutoCommitMonitoring()
     }
     
     /// Loads settings from UserDefaults
@@ -213,6 +218,48 @@ class AppState: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    /// Sets up monitoring of Auto-Commit service status using Combine
+    private func setupAutoCommitMonitoring() {
+        // Monitor AutoCommit service connection status
+        autoCommitAPI.$isConnected
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] connected in
+                self?.autoCommitServiceConnected = connected
+                
+                // Update statistics when connected
+                if connected {
+                    Task {
+                        await self?.autoCommitAPI.updateCommitStatistics()
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        
+        // Monitor AutoCommit service errors
+        autoCommitAPI.$lastError
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                if let error = errorMessage {
+                    // Log the error or handle it as needed
+                    print("Auto-commit service error: \(error)")
+                }
+            }
+            .store(in: &cancellables)
+        
+        // Monitor commit statistics updates
+        autoCommitAPI.$commitStats
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] stats in
+                self?.totalAutoCommits = stats.totalCommits
+            }
+            .store(in: &cancellables)
+        
+        // Check initial service status
+        Task {
+            await checkAutoCommitServiceStatus()
+        }
     }
     
     /// Updates connection status based on ProcessManager state
