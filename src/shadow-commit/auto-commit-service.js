@@ -29,6 +29,25 @@ class AutoCommitService {
             notificationCallback: this.sendErrorNotification.bind(this)
         });
         
+        // Initialize performance monitoring
+        this.performanceMonitor = new PerformanceMonitor({
+            sampleInterval: options.performanceSampleInterval || 1000,
+            maxHistorySize: options.performanceHistorySize || 100
+        });
+        
+        // Initialize operation queues with concurrency limits
+        this.gitOperationQueue = new PQueue({ 
+            concurrency: options.gitConcurrency || 2,
+            interval: 1000,
+            intervalCap: options.gitOperationsPerSecond || 10
+        });
+        
+        this.fileOperationQueue = new PQueue({
+            concurrency: options.fileConcurrency || 5,
+            interval: 100,
+            intervalCap: options.fileOperationsPerInterval || 20
+        });
+        
         // Initialize sub-modules
         this.shadowManager = new ShadowBranchManager(options.shadow);
         this.fileMonitor = new FileMonitor(options.monitor);
