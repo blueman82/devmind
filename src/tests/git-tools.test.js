@@ -538,9 +538,9 @@ describe('Git Tools Tests', () => {
           expect(previewResponse.preview.status).toBe('no_changes'); // Should detect no changes
         } else if (previewResponse.project_path) {
           console.log('✅ Preview generated successfully');
-          assert.ok(previewResponse.current_state, 'Should have current state');
-          assert.ok(previewResponse.target_state, 'Should have target state');
-          assert.ok(previewResponse.restore_commands, 'Should have restore commands');
+          expect(previewResponse.current_state).toBeTruthy(); // Should have current state
+          expect(previewResponse.target_state).toBeTruthy(); // Should have target state
+          expect(previewResponse.restore_commands).toBeTruthy(); // Should have restore commands
         }
       } else {
         console.log('⚠️ Could not create restore point for preview test (expected in test environment)');
@@ -552,12 +552,8 @@ describe('Git Tools Tests', () => {
         // Missing both restore_point_id and commit_hash
       });
       
-      assert.ok(missingParamsResult.content, 'Should return content for missing params');
-      assert.strictEqual(
-        missingParamsResult.content[0].text,
-        'Error: Either restore_point_id or commit_hash is required',
-        'Should error on missing target'
-      );
+      expect(missingParamsResult.content).toBeTruthy(); // Should return content for missing params
+      expect(missingParamsResult.content[0].text).toBe('Error: Either restore_point_id or commit_hash is required'); // Should error on missing target
       
       // Test with non-existent restore point
       const nonExistentResult = await gitToolHandlers.handlePreviewRestore({
@@ -612,17 +608,17 @@ describe('Git Tools Tests', () => {
           dry_run: true
         });
         
-        assert.ok(restoreResult.content, 'Should return content');
+        expect(restoreResult.content).toBeTruthy(); // Should return content
         const restoreResponse = JSON.parse(restoreResult.content[0].text);
         
         if (restoreResponse.status === 'already_at_target') {
           console.log('✅ Correctly detected already at target commit');
-          assert.strictEqual(restoreResponse.status, 'already_at_target', 'Should detect same commit');
+          expect(restoreResponse.status).toBe('already_at_target'); // Should detect same commit
         } else if (restoreResponse.status === 'dry_run') {
           console.log('✅ Dry run commands generated successfully');
-          assert.ok(restoreResponse.restoration_plan, 'Should have restoration plan');
-          assert.ok(restoreResponse.restoration_commands, 'Should have commands');
-          assert.strictEqual(restoreResponse.execution_notes.includes('DRY RUN'), true, 'Should indicate dry run');
+          expect(restoreResponse.restoration_plan).toBeTruthy(); // Should have restoration plan
+          expect(restoreResponse.restoration_commands).toBeTruthy(); // Should have commands
+          expect(restoreResponse.execution_notes.includes('DRY RUN')).toBe(true); // Should indicate dry run
         }
         
         // Test with invalid restore method
@@ -632,7 +628,7 @@ describe('Git Tools Tests', () => {
           restore_method: 'invalid'
         });
         
-        assert.ok(invalidMethodResult.content[0].text.includes('Invalid restore_method'), 'Should error on invalid method');
+        expect(invalidMethodResult.content[0].text.includes('Invalid restore_method')).toBe(true); // Should error on invalid method
         console.log('✅ Invalid restore method handled correctly');
       } else {
         console.log('⚠️ Could not create restore point for restore state test (expected in test environment)');
@@ -644,12 +640,8 @@ describe('Git Tools Tests', () => {
         // Missing both restore_point_id and commit_hash
       });
       
-      assert.ok(missingParamsResult.content, 'Should return content for missing params');
-      assert.strictEqual(
-        missingParamsResult.content[0].text,
-        'Error: Either restore_point_id or commit_hash is required',
-        'Should error on missing target'
-      );
+      expect(missingParamsResult.content).toBeTruthy(); // Should return content for missing params
+      expect(missingParamsResult.content[0].text).toBe('Error: Either restore_point_id or commit_hash is required'); // Should error on missing target
       
       // Test with invalid commit hash
       const invalidHashResult = await gitToolHandlers.handleRestoreProjectState({
@@ -657,7 +649,7 @@ describe('Git Tools Tests', () => {
         commit_hash: 'invalid-hash'
       });
       
-      assert.ok(invalidHashResult.content[0].text.includes('Invalid commit hash format'), 'Should validate commit hash');
+      expect(invalidHashResult.content[0].text.includes('Invalid commit hash format')).toBe(true); // Should validate commit hash
       console.log('✅ Commit hash validation working');
       
     } finally {
@@ -709,7 +701,7 @@ describe('Git Tools Tests', () => {
     const points = getStmt.all(repoRow.id);
     
     // We should have at least 1 restore point (might have added more in previous tests)
-    assert.ok(points.length >= 1, 'Should have at least 1 restore point');
+    expect(points.length).toBeGreaterThanOrEqual(1); // Should have at least 1 restore point
     
     // Test filtering by auto-generated
     const manualStmt = db.prepare(`
@@ -720,8 +712,8 @@ describe('Git Tools Tests', () => {
     const manualPoints = manualStmt.all(repoRow.id);
     
     // Should have at least 1 manual restore point
-    assert.ok(manualPoints.length >= 1, 'Should have at least 1 manual restore point');
-    assert.strictEqual(manualPoints[0].label, 'Test restore point', 'Should be the manual point');
+    expect(manualPoints.length).toBeGreaterThanOrEqual(1); // Should have at least 1 manual restore point
+    expect(manualPoints[0].label).toBe('Test restore point'); // Should be the manual point
     
     console.log('✅ Restore point operations working');
   });
