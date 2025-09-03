@@ -19,6 +19,14 @@ class AutoCommitService {
         this.db = new DatabaseManager();
         this.db.initialize(); // Ensure database is initialized
         
+        // Initialize error handler with notification callback
+        this.errorHandler = new ErrorHandler({
+            maxRetries: options.maxRetries || 3,
+            baseDelay: options.baseDelay || 1000,
+            maxDelay: options.maxDelay || 30000,
+            notificationCallback: this.sendErrorNotification.bind(this)
+        });
+        
         // Initialize sub-modules
         this.shadowManager = new ShadowBranchManager(options.shadow);
         this.fileMonitor = new FileMonitor(options.monitor);
