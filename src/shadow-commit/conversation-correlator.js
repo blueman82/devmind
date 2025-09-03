@@ -13,6 +13,7 @@ class ConversationCorrelator {
     constructor(options = {}) {
         this.logger = createLogger('ConversationCorrelator');
         this.db = new DatabaseManager();
+        this.db.initialize(); // Ensure database is initialized
         
         // Configuration
         this.config = {
