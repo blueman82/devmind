@@ -38,9 +38,9 @@ class AutoCommitService {
         
         // Initialize operation queues with concurrency limits
         this.gitOperationQueue = new PQueue({ 
-            concurrency: options.gitConcurrency || 2,
+            concurrency: options.gitConcurrency || 1, // Reduced from 2 to 1 to prevent SPAWN errors
             interval: 1000,
-            intervalCap: options.gitOperationsPerSecond || 10
+            intervalCap: options.gitOperationsPerSecond || 5 // Reduced from 10 to 5
         });
         
         this.fileOperationQueue = new PQueue({
