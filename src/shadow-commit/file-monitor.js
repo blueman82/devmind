@@ -383,9 +383,6 @@ class FileMonitor {
             ].join('\n');
         } else {
             // Basic diff-based message
-            const { exec } = await import('child_process');
-            const { promisify } = await import('util');
-            const execAsync = promisify(exec);
             
             try {
                 const { stdout } = await execAsync(
