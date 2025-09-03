@@ -30,6 +30,9 @@ struct SettingsWindow: View {
                 Label("Notifications", systemImage: "bell")
                     .tag("Notifications")
                 
+                Label("Repository Management", systemImage: "folder.badge.gearshape")
+                    .tag("Repository")
+                
                 Label("Advanced", systemImage: "wrench.and.screwdriver")
                     .tag("Advanced")
             }
