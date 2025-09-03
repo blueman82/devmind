@@ -191,10 +191,7 @@ class AutoCommitAPIService: ObservableObject {
                     
                     continuation.resume(returning: result)
                 } catch {
-                    self.logger.error("Failed to execute command", [
-                        "error": error.localizedDescription,
-                        "arguments": arguments.joined(separator: " ")
-                    ])
+                    self.logger.error("Failed to execute command: \(arguments.joined(separator: " ")) - Error: \(error.localizedDescription)")
                     
                     let result = ProcessResult(
                         success: false,
