@@ -192,6 +192,56 @@ sessionid_complete_fix_2025_09_02:
         
       competitive_advantage_maintained: "Concurrent access ensures conversation indexing (our core strength) never gets blocked by git operations"
     
+    phase_2_implementation_plan_2025_09_03:
+      plan_date: "2025-09-03 12:00"
+      status: "✅ Complete implementation plan created"
+      core_feature: "Auto-commit functionality with shadow branches"
+      
+      architectural_decisions_finalized:
+        trigger_mechanism: "Every file save (like ShadowGit)"
+        branch_strategy: "Shadow branches (shadow/feature-branch pattern)"
+        commit_messages: "Rich context from Claude Code conversations"
+        integration_location: "Swift macOS app (CommitChat)"
+        notifications: "UNUserNotificationCenter with user preferences"
+        repository_detection: "Claude projects + filesystem scanning hybrid"
+        
+      shadow_branch_advantages:
+        - "User's branches stay clean - no auto-commit clutter"
+        - "Complete granular history preserved separately"
+        - "Never interferes with user's manual git workflow"
+        - "Can cherry-pick specific saves when needed"
+        
+      notification_system_research:
+        framework: "UNUserNotificationCenter (modern macOS API)"
+        features: "Banner alerts, sound customization, batch notifications"
+        user_control: "Settings toggle for notification preferences"
+        
+      repository_auto_detection_methods:
+        primary: "Parse ~/.claude/projects for active repositories"
+        secondary: "Filesystem scanning with user-defined roots"
+        tertiary: "FSEvents monitoring for new .git folders"
+        ui: "Repository list with enable/disable toggles + manual folder selection"
+        
+      conversation_git_correlation:
+        data_captured: "sessionId, topic, files discussed, timestamps"
+        commit_enrichment: "Problem description, solution approach, code changes from conversation"
+        example: "Fix SQLite boolean binding - Converted to integer per session 7744aef1"
+        
+      database_concurrency_solution:
+        approach: "SQLite WAL mode + connection pooling"
+        benefit: "Auto-commits won't block conversation indexing"
+        new_tables: "shadow_commits, conversation_git_correlations, repository_settings"
+        
+      implementation_timeline:
+        phase_2a_foundation: "Weeks 1-2: WAL mode, shadow branches, basic auto-commit"
+        phase_2b_enrichment: "Weeks 3-4: Notifications, correlation, rich messages"
+        phase_2c_polish: "Weeks 5-6: UI refinement, testing, ship"
+        
+      competitive_positioning:
+        vs_shadowgit: "Shadow branches + conversation context + native notifications"
+        unique_value: "Complete development memory - discussions AND code evolution"
+        advantage: "Semantic search across conversations and commits together"
+    
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
       location: "/docs/project-management/AI-Memory-App-PRD.md"
