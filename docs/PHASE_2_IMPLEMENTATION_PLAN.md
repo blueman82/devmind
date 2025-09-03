@@ -219,12 +219,36 @@ Changes: +145/-23 lines
 - SPAWN EBADF errors completely resolved with hasUncommittedChanges() fix
 - Core auto-commit functionality working end-to-end
 
-**Phase 2c Week 5**: Foundation Complete → Feature Enhancement
-- ✅ Statistics dashboard (basic version complete, needs real data connection)
-- UNUserNotificationCenter integration for commit notifications
-- Advanced file filtering and exclusion patterns
-- Performance throttling optimization
-- Enhanced error handling and recovery
+**Phase 2c Week 5**: Strategic Value Multiplication (NEXT PHASE) 🎯
+**Strategic Approach**: Hybrid user value + production reliability approach
+
+**Priority 1 (2-3 hours)**: UNUserNotificationCenter Integration 🔔
+- Notification permissions and rich notification content with commit details
+- Configurable frequency (every commit, batched, hourly) and per-repository settings
+- Notification action buttons (view commit, open repository)
+- Transform invisible background process into tangible development tool
+
+**Priority 2 (3-4 hours)**: Enhanced Error Handling & Recovery 🛡️
+- Comprehensive error classification (repository, service, resource errors)
+- Retry logic with exponential backoff and graceful degradation
+- Automatic service restart capabilities and recovery workflows
+- Production reliability for real-world failure scenarios
+
+**Priority 3 (2-3 hours)**: Multi-Repository Performance Validation 📊
+- Scalability testing with 10+ concurrent repositories under mixed workloads
+- Performance optimization (file watching debouncing, git operation batching)
+- Resource monitoring (< 100ms commit latency, < 50MB per repo memory usage)
+- Concurrent processing limits and queue management
+
+**Priority 4 (1-2 hours)**: Production Monitoring & Metrics 📈
+- Comprehensive metrics dashboard (operational, engagement, performance indicators)
+- Performance timing measurements throughout auto-commit pipeline
+- Structured logging for analysis, debugging, and automated alerts
+- Data-driven optimization framework for intelligent feature prioritization
+
+**Success Criteria**: Users receive notifications < 2sec, 10+ repos without degradation, zero unhandled exceptions
+**Timeline**: 8-12 hours across 1-2 development sessions
+**Outcome**: Production-ready, user-validated system ready for broader adoption
 
 **Week 6**: Production Readiness
 - Sensitive file detection and security warnings
