@@ -61,6 +61,13 @@ Phase 2 introduces auto-commit functionality with shadow branches, creating comp
 - Edit/Write tool_use event within last 10 seconds
 - Extract sessionId and conversation context
 
+**Conversation Data Extraction**:
+- Parse conversation for problem description
+- Extract solution approach discussed
+- Identify files mentioned in conversation
+- Capture conversation topic/summary
+- Reference specific code changes discussed
+
 **Implementation Flow**:
 1. FSEvents detects file save
 2. Search for recent tool_use event
