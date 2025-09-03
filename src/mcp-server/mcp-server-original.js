@@ -380,7 +380,7 @@ class AIMemoryMCPServer {
     switch (summaryMode) {
       case 'condensed':
         return text.substring(0, 100) + (text.length > 100 ? '...' : '');
-      case 'key_points_only':
+      case 'key_points_only': {
         // Extract key points (lines starting with -, *, numbers, or containing keywords)
         const lines = text.split('\n');
         const keyLines = lines.filter(line => {
@@ -392,6 +392,7 @@ class AIMemoryMCPServer {
                  trimmed.toLowerCase().includes('result');
         });
         return keyLines.length > 0 ? keyLines.join('\n') : text.substring(0, 50) + '...';
+      }
       default:
         return text;
     }
@@ -400,7 +401,7 @@ class AIMemoryMCPServer {
   // Smart pagination with token limiting
   paginateMessages(messages, page = 1, pageSize = 50, maxTokens = 20000) {
     const startIndex = (page - 1) * pageSize;
-    let endIndex = Math.min(startIndex + pageSize, messages.length);
+    const endIndex = Math.min(startIndex + pageSize, messages.length);
     
     // Adjust end index based on token limit
     let currentTokens = 0;
