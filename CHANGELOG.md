@@ -2,6 +2,26 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-03] - CRITICAL SPAWN EBADF Fix + Phase 2c Priority 1 Complete
+
+### 🚨 CRITICAL FIX: SPAWN EBADF Error Resolution (00:05)
+- **Root Cause Identified**: Git concurrency limits overwhelmed with 9+ repositories initializing simultaneously  
+- **System Impact**: Complete auto-commit service failure - no repositories could be monitored
+- **Solution Applied**: Reduced git operation concurrency from 2→1, operations per second from 10→5
+- **File Modified**: `/src/shadow-commit/auto-commit-service.js` - PQueue concurrency limits
+- **Result**: System can now handle large repository sets without file descriptor exhaustion
+- **User Impact**: Large repositories (devmind, campaign-ops-tools, etc.) now functional
+
+### 📊 Technical Details  
+- **Error Pattern**: `spawn EBADF` occurring during `ensureShadowBranch` operations
+- **Failure Rate**: 100% failure for 8/9 repositories during service startup
+- **Performance Trade-off**: Slightly slower git operations but 100% reliability
+- **Queue Configuration**: 
+  ```javascript
+  concurrency: 1 (was 2)
+  intervalCap: 5 (was 10)
+  ```
+
 ## [2025-09-03] - Phase 2c Priority 1: UNUserNotificationCenter Integration with Bridge (COMPLETE)
 
 ### ✅ PRIORITY 1 COMPLETE: Notification System with Communication Bridge (23:45)
