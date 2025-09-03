@@ -145,6 +145,8 @@ Changes: +145/-23 lines
 - Per-repo settings (throttle, notifications, exclusions)
 - Manual folder selection
 - Statistics dashboard (commits/hour, storage used)
+- Auto-detection status indicator
+- Global exclusion patterns configuration
 
 ### 7. Notification System
 
