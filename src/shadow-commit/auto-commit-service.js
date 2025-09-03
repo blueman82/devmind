@@ -60,6 +60,9 @@ class AutoCommitService {
             this.isRunning = true;
             this.statistics.startTime = Date.now();
             
+            // Initialize database connection
+            await this.db.initialize();
+            
             // Auto-detect repositories if enabled
             if (this.config.autoDetectRepos) {
                 await this.detectAndAddRepositories();
