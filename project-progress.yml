@@ -263,6 +263,30 @@ sessionid_complete_fix_2025_09_02:
           without_context: "Update auth flow - added rate limiting, enhanced validation"
           
         standalone_value: "App remains valuable even without active Claude Code sessions"
+        
+      claude_code_detection_mechanism:
+        problem: "How to detect if file changes came from Claude Code vs other editors"
+        importance: "Determines whether to use conversation context or diff analysis"
+        
+        solution_discovered:
+          primary_method: "Parse JSONL conversation files for tool_use events"
+          data_source: "~/.claude/projects/*/conversations/*.jsonl"
+          tool_events_tracked: "Edit and Write tool usage with file paths"
+          correlation: "Match FSEvents file changes with recent tool_use timestamps"
+          
+        implementation_approach:
+          step_1: "Monitor JSONL files in real-time for tool_use events"
+          step_2: "Cache recent Claude edits with file path, timestamp, sessionId"
+          step_3: "When FSEvents detects change, check cache for correlation"
+          step_4: "If match within 3 seconds, use conversation context"
+          step_5: "If no match, use git diff analysis for commit message"
+          
+        example_flows:
+          claude_edit: "Tool_use Edit at 12:00:00 → FSEvents at 12:00:01 → Use context"
+          vscode_edit: "No tool_use event → FSEvents at 12:05:00 → Use diff analysis"
+          
+        elegance: "Leverages existing JSONL monitoring for conversation indexing"
+        accuracy: "Direct correlation with Claude's actual file operations"
     
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
