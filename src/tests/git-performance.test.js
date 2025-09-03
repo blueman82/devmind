@@ -55,7 +55,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     dbManager = new DatabaseManager(tempDbPath);
     await dbManager.initialize();
     gitSchema = new GitSchema(dbManager.db);
-    await gitSchema.initializeSchema();
+    await gitSchema.initialize();
     
     gitToolHandlers = new GitToolHandlers(dbManager, gitSchema);
     
