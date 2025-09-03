@@ -12,6 +12,8 @@ import ShadowBranchManager from './shadow-branch-manager.js';
 import FileMonitor from './file-monitor.js';
 import ConversationCorrelator from './conversation-correlator.js';
 import ErrorHandler from './error-handler.js';
+import PQueue from 'p-queue';
+import PerformanceMonitor from './performance-monitor.js';
 
 class AutoCommitService {
     constructor(options = {}) {
