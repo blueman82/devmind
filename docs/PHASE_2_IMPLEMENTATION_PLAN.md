@@ -58,6 +58,10 @@ Phase 2 introduces auto-commit functionality with shadow branches, creating comp
 - **Already Implemented**: Project Path field in MCP Server Settings
 - **UI Location**: `MCPServerSettingsView.swift` - configurable text field with browse button
 - **Flexibility**: Users can point to custom Claude project locations
+- **Current Implementation**: claudeProjectsPath is currently hardcoded in `ConversationIndexer.swift`
+- **Impact**: Search location for Claude projects is user-configurable
+- **Benefit**: More flexible than hardcoded ~/.claude/projects path
+- **Implementation Note**: Use `appState.projectPath` instead of hardcoded path in Phase 2
 
 **Match Criteria**:
 - File path exact match
