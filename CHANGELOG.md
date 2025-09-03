@@ -2,6 +2,28 @@
 
 All notable changes to the AI Memory App project will be documented in this file.
 
+## [2025-09-03] - Phase 2b Week 4: AppState ↔ AutoCommitAPIService Integration Complete (20:20)
+
+### 🔗 AppState Auto-Commit Service Integration
+- **AutoCommitAPIService Integration**: Connected AutoCommitAPIService.shared to AppState for centralized state management
+- **Service Status Monitoring**: Real-time monitoring of Node.js service connection status via Combine publishers
+- **Commit Statistics Sync**: Automatic synchronization of totalAutoCommits from service's SQLite database
+- **Error Handling Pipeline**: Service errors propagated through AppState for unified error management
+- **Reactive UI Updates**: @Published properties ensure immediate UI updates when service status changes
+
+### 🎯 Auto-Commit Service Management Methods
+- **checkAutoCommitServiceStatus()**: Asynchronous service status verification with UI state updates
+- **startAutoCommitService()**: Starts Node.js service with automatic status monitoring refresh
+- **stopAutoCommitService()**: Graceful service shutdown with immediate UI state reflection  
+- **syncRepositoriesWithService()**: Synchronizes monitored repositories with Node.js backend service
+- **setupAutoCommitMonitoring()**: Combine-based reactive monitoring of service state changes
+
+### ✅ Build Verification & Quality Assurance
+- **xcodebuild Status**: BUILD SUCCEEDED - All AppState integrations compile without errors
+- **Combine Subscriptions**: Proper memory management with cancellables storage
+- **MainActor Integration**: UI updates properly dispatched to main thread for thread safety
+- **Phase 2b Week 4 Progress**: Backend integration 60% complete - service monitoring operational
+
 ## [2025-09-03] - Phase 2b Week 3: Repository Management UI Implementation Started
 
 ### 🎨 SwiftUI Repository Management Architecture (17:30)
