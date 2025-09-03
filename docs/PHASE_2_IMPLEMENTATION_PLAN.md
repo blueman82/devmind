@@ -203,19 +203,38 @@ Changes: +145/-23 lines
 - ❌ Advanced file filtering and exclusions (basic version complete)
 - ❌ Performance throttling optimization (basic version complete)
 
-### Phase 2c: Polish (Weeks 5-6)
-**Week 5**:
-- Statistics dashboard
-- Advanced settings UI
-- Documentation and help system
-- Optional local LLM integration
-- Comprehensive testing
+### Phase 2c: Polish (Weeks 5-6) - STRATEGIC ROADMAP
 
-**Week 6**:
-- Performance optimization
-- Beta testing with real projects
-- Documentation
-- Ship Phase 2
+**IMMEDIATE NEXT SESSION** (Complete Phase 2b Week 4 - 20% remaining):
+**Priority 1**: Complete Commit Statistics Synchronization (2-3 hours)
+- Connect UI totalAutoCommits to actual SQLite database from Node.js service
+- Parse commit statistics from CLI output and update AppState
+- Display repository-specific commit counts in statistics dashboard
+
+**Priority 2**: End-to-End Auto-Commit Flow Testing (3-4 hours) 
+- Test actual file monitoring with real git repositories
+- Verify shadow branch creation (main → shadow/main)
+- Confirm auto-commit message generation and storage
+- Validate UI statistics update after real commits
+
+**Phase 2c Week 5**: Foundation Complete → Feature Enhancement
+- ✅ Statistics dashboard (basic version complete, needs real data connection)
+- UNUserNotificationCenter integration for commit notifications
+- Advanced file filtering and exclusion patterns
+- Performance throttling optimization
+- Enhanced error handling and recovery
+
+**Week 6**: Production Readiness
+- Sensitive file detection and security warnings
+- Comprehensive testing with multiple repositories
+- Documentation and user help system
+- Beta testing preparation
+- Performance optimization and monitoring
+
+**STRATEGIC APPROACH SELECTED**: Complete Foundation Approach (Option A)
+- Rationale: Infrastructure 80% complete - prioritize core functionality validation
+- Risk Mitigation: Ensure solid foundation before adding polish features
+- Success Criteria: Working auto-commits with real repositories before notifications
 
 ## Success Metrics
 
