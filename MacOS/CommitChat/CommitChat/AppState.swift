@@ -240,7 +240,7 @@ class AppState: ObservableObject {
         // Monitor AutoCommit service errors
         autoCommitAPI.$lastError
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] errorMessage in
+            .sink { errorMessage in
                 if let error = errorMessage {
                     // Log the error or handle it as needed
                     print("Auto-commit service error: \(error)")
