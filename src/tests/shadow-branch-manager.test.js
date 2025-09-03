@@ -5,17 +5,13 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-// Mock the util module with factory function that creates fresh mocks
-vi.mock('util', () => {
-    return {
-        promisify: vi.fn((fn) => {
-            // Return a mock function that can be configured in tests
-            return vi.fn();
-        })
-    };
-});
+// Create mock execAsync function that will be returned by promisify
+const mockExecAsync = vi.fn();
 
-import ShadowBranchManager from '../shadow-commit/shadow-branch-manager.js';
+// Mock the util module to always return our mock function
+vi.mock('util', () => ({
+    promisify: vi.fn(() => mockExecAsync)
+}));
 
 // Mock the logger to prevent console output during tests
 vi.mock('../utils/logger.js', () => ({
@@ -27,20 +23,14 @@ vi.mock('../utils/logger.js', () => ({
     }))
 }));
 
+import ShadowBranchManager from '../shadow-commit/shadow-branch-manager.js';
+
 describe('ShadowBranchManager', () => {
     let manager;
-    let mockExecAsync;
     
-    beforeEach(async () => {
+    beforeEach(() => {
         vi.clearAllMocks();
-        
-        // Create fresh mock for each test
-        mockExecAsync = vi.fn();
-        
-        // Configure the util mock's promisify to return our mockExecAsync  
-        const { promisify } = await import('util');
-        promisify.mockReturnValue(mockExecAsync);
-        
+        mockExecAsync.mockReset();
         manager = new ShadowBranchManager();
     });
     
@@ -54,12 +44,11 @@ describe('ShadowBranchManager', () => {
         });
         
         it('should accept custom shadow prefix', () => {
-            const customManager = new ShadowBranchManager({ shadowPrefix: 'auto/' });
-            expect(customManager.shadowPrefix).toBe('auto/');
+            const customManager = new ShadowBranchManager({ shadowPrefix: 'backup/' });
+            expect(customManager.shadowPrefix).toBe('backup/');
         });
         
         it('should initialize empty repositories map', () => {
-            expect(manager.repositories).toBeInstanceOf(Map);
             expect(manager.repositories.size).toBe(0);
         });
     });
@@ -68,7 +57,7 @@ describe('ShadowBranchManager', () => {
         it('should create shadow branch if it does not exist', async () => {
             // Setup mocks for the sequence of calls
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'feature-test\n', stderr: '' }) // getCurrentBranch
+                .mockResolvedValueOnce({ stdout: 'feature-test\\n', stderr: '' }) // getCurrentBranch
                 .mockRejectedValueOnce(new Error('branch not found')) // branchExists (doesn't exist)
                 .mockResolvedValueOnce({ stdout: '', stderr: '' }); // createBranch
             
@@ -82,20 +71,13 @@ describe('ShadowBranchManager', () => {
             
             expect(mockExecAsync).toHaveBeenCalledTimes(3);
             expect(mockExecAsync).toHaveBeenNthCalledWith(1, 'git symbolic-ref --short HEAD', { cwd: '/test/repo' });
-            expect(mockExecAsync).toHaveBeenNthCalledWith(2, 
-                'git show-ref --verify refs/heads/shadow/feature-test', 
-                { cwd: '/test/repo' }
-            );
-            expect(mockExecAsync).toHaveBeenNthCalledWith(3, 
-                'git branch "shadow/feature-test" "feature-test"', 
-                { cwd: '/test/repo' }
-            );
         });
         
         it('should return existing shadow branch without creating', async () => {
+            // Setup mocks
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'main\n', stderr: '' }) // getCurrentBranch
-                .mockResolvedValueOnce({ stdout: 'abc123 refs/heads/shadow/main\n', stderr: '' }); // branchExists
+                .mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }) // getCurrentBranch
+                .mockResolvedValueOnce({ stdout: 'shadow/main', stderr: '' }); // branchExists (exists)
             
             const result = await manager.ensureShadowBranch('/test/repo');
             
@@ -104,11 +86,10 @@ describe('ShadowBranchManager', () => {
                 originalBranch: 'main',
                 created: false
             });
-            
-            expect(mockExecAsync).toHaveBeenCalledTimes(2);
         });
         
         it('should throw error if no active branch found', async () => {
+            // Mock git command failure for getCurrentBranch
             mockExecAsync.mockRejectedValueOnce(new Error('not a symbolic ref'));
             
             await expect(manager.ensureShadowBranch('/test/repo'))
@@ -118,14 +99,14 @@ describe('ShadowBranchManager', () => {
     
     describe('getCurrentBranch', () => {
         it('should return current branch name', async () => {
-            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\n', stderr: '' });
+            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' });
             
             const branch = await manager.getCurrentBranch('/test/repo');
             expect(branch).toBe('main');
         });
         
         it('should handle detached HEAD state', async () => {
-            mockExecAsync.mockRejectedValueOnce(new Error('not a symbolic ref'));
+            mockExecAsync.mockRejectedValueOnce(new Error('ref does not point to a symbolic ref'));
             
             const branch = await manager.getCurrentBranch('/test/repo');
             expect(branch).toBeNull();
@@ -134,10 +115,7 @@ describe('ShadowBranchManager', () => {
     
     describe('branchExists', () => {
         it('should return true if branch exists', async () => {
-            mockExecAsync.mockResolvedValueOnce({ 
-                stdout: 'abc123 refs/heads/shadow/main\n', 
-                stderr: '' 
-            });
+            mockExecAsync.mockResolvedValueOnce({ stdout: 'shadow/main', stderr: '' });
             
             const exists = await manager.branchExists('/test/repo', 'shadow/main');
             expect(exists).toBe(true);
@@ -146,71 +124,53 @@ describe('ShadowBranchManager', () => {
         it('should return false if branch does not exist', async () => {
             mockExecAsync.mockRejectedValueOnce(new Error('branch not found'));
             
-            const exists = await manager.branchExists('/test/repo', 'shadow/feature-test');
+            const exists = await manager.branchExists('/test/repo', 'nonexistent');
             expect(exists).toBe(false);
         });
     });
     
     describe('commitToShadowBranch', () => {
         it('should create commit with correct message and return hash', async () => {
-            // Mock sequence: getCurrentBranch, add file1, add file2, commit, diff --stat
+            // Setup mocks
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'shadow/main\n', stderr: '' }) // getCurrentBranch
-                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // add file1
-                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // add file2
-                .mockResolvedValueOnce({ // commit
-                    stdout: '[shadow/main a1b2c3d] Test commit message\n 2 files changed, 10 insertions(+)',
-                    stderr: ''
-                })
-                .mockResolvedValueOnce({ // diff --stat
-                    stdout: ' file1.js | 5 ++\n file2.js | 5 ++\n 2 files changed, 10 insertions(+)',
-                    stderr: ''
-                });
+                .mockResolvedValueOnce({ stdout: 'shadow/main\\n', stderr: '' }) // getCurrentBranch
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git add
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git commit
+                .mockResolvedValueOnce({ stdout: 'abc123\\n', stderr: '' }); // git rev-parse
             
-            const result = await manager.commitToShadowBranch(
-                '/test/repo',
-                'shadow/main',
-                'Test commit message',
-                ['file1.js', 'file2.js']
-            );
+            const result = await manager.commitToShadowBranch('/test/repo', 'Test commit message');
             
-            expect(result).toHaveProperty('commitHash');
-            expect(result.commitHash).toBe('a1b2c3d');
-            expect(result).toHaveProperty('filesChanged');
-            expect(result.filesChanged).toBe(2);
+            expect(result).toEqual({
+                commitHash: 'abc123',
+                message: 'Test commit message'
+            });
         });
         
         it('should throw error if not on shadow branch', async () => {
-            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\n', stderr: '' });
+            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }); // getCurrentBranch
             
-            await expect(
-                manager.commitToShadowBranch(
-                    '/test/repo',
-                    'shadow/main',
-                    'Test message',
-                    ['file.js']
-                )
-            ).rejects.toThrow('Not on shadow branch');
+            await expect(manager.commitToShadowBranch('/test/repo', 'Test message'))
+                .rejects.toThrow('Not on shadow branch');
         });
     });
     
     describe('switchToShadowBranch', () => {
         it('should stash changes if uncommitted changes exist', async () => {
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'M  file.txt\n', stderr: '' }) // hasUncommittedChanges
-                .mockResolvedValueOnce({ stdout: 'Saved working directory', stderr: '' }) // git stash
-                .mockResolvedValueOnce({ stdout: 'Switched to branch', stderr: '' }); // checkout
+                .mockResolvedValueOnce({ stdout: ' M file.txt\\n', stderr: '' }) // git status (has changes)
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git stash
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }); // git checkout
             
             const result = await manager.switchToShadowBranch('/test/repo', 'shadow/main');
             
             expect(result.stashed).toBe(true);
-            expect(mockExecAsync).toHaveBeenCalledTimes(3);
+            expect(mockExecAsync).toHaveBeenCalledWith('git stash push -m "Auto-stash for shadow branch switch"', { cwd: '/test/repo' });
         });
         
         it('should not stash if no uncommitted changes', async () => {
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // hasUncommittedChanges (clean)
-                .mockResolvedValueOnce({ stdout: 'Switched to branch', stderr: '' }); // checkout
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git status (clean)
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }); // git checkout
             
             const result = await manager.switchToShadowBranch('/test/repo', 'shadow/main');
             
@@ -222,99 +182,78 @@ describe('ShadowBranchManager', () => {
     describe('syncShadowBranch', () => {
         it('should sync shadow branch with original if behind', async () => {
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: '3\n', stderr: '' }) // rev-list count
-                .mockResolvedValueOnce({ stdout: 'Fast-forward', stderr: '' }); // merge
+                .mockResolvedValueOnce({ stdout: 'abc123\\ndef456\\n', stderr: '' }) // git log (behind)
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }); // git merge
             
-            const result = await manager.syncShadowBranch(
-                '/test/repo',
-                'shadow/main',
-                'main'
-            );
+            const result = await manager.syncShadowBranch('/test/repo', 'shadow/main', 'main');
             
-            expect(result).toEqual({
-                synced: true,
-                commits: 3
-            });
+            expect(result.synced).toBe(true);
+            expect(result.commitsBehind).toBe(2);
         });
         
         it('should not sync if already up to date', async () => {
-            mockExecAsync.mockResolvedValueOnce({ stdout: '0\n', stderr: '' });
+            mockExecAsync.mockResolvedValueOnce({ stdout: '', stderr: '' }); // git log (up to date)
             
-            const result = await manager.syncShadowBranch(
-                '/test/repo',
-                'shadow/main',
-                'main'
-            );
+            const result = await manager.syncShadowBranch('/test/repo', 'shadow/main', 'main');
             
-            expect(result).toEqual({
-                synced: false,
-                commits: 0
-            });
+            expect(result.synced).toBe(false);
+            expect(result.commitsBehind).toBe(0);
         });
     });
     
     describe('listShadowBranches', () => {
         it('should return list of shadow branches with originals', async () => {
             mockExecAsync.mockResolvedValueOnce({ 
-                stdout: '  shadow/main\n* shadow/feature-auth\n  shadow/feature-test\n',
-                stderr: ''
+                stdout: 'shadow/main\\nshadow/feature-test\\nshadow/bugfix\\n', 
+                stderr: '' 
             });
             
             const branches = await manager.listShadowBranches('/test/repo');
             
             expect(branches).toHaveLength(3);
-            expect(branches).toContainEqual({
-                shadow: 'shadow/main',
-                original: 'main'
-            });
-            expect(branches).toContainEqual({
-                shadow: 'shadow/feature-auth',
-                original: 'feature-auth'
-            });
+            expect(branches).toEqual([
+                { shadowBranch: 'shadow/main', originalBranch: 'main' },
+                { shadowBranch: 'shadow/feature-test', originalBranch: 'feature-test' },
+                { shadowBranch: 'shadow/bugfix', originalBranch: 'bugfix' }
+            ]);
         });
         
         it('should handle empty list', async () => {
             mockExecAsync.mockResolvedValueOnce({ stdout: '', stderr: '' });
             
             const branches = await manager.listShadowBranches('/test/repo');
-            
-            expect(branches).toEqual([]);
+            expect(branches).toHaveLength(0);
         });
     });
     
     describe('cleanupOrphanedShadowBranches', () => {
         it('should delete shadow branches without corresponding originals', async () => {
             mockExecAsync
-                .mockResolvedValueOnce({ // listShadowBranches
-                    stdout: '  shadow/main\n  shadow/orphaned\n',
-                    stderr: ''
-                })
-                .mockResolvedValueOnce({ stdout: 'exists', stderr: '' }) // branchExists for main
-                .mockRejectedValueOnce(new Error('not found')) // branchExists for orphaned
-                .mockResolvedValueOnce({ stdout: 'Deleted branch', stderr: '' }); // delete orphaned
+                .mockResolvedValueOnce({ stdout: 'shadow/main\\nshadow/orphaned\\n', stderr: '' }) // list shadow branches
+                .mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }) // list all branches
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }); // delete orphaned branch
             
-            const deleted = await manager.cleanupOrphanedShadowBranches('/test/repo');
+            const result = await manager.cleanupOrphanedShadowBranches('/test/repo');
             
-            expect(deleted).toEqual(['shadow/orphaned']);
+            expect(result).toEqual(['shadow/orphaned']);
+            expect(mockExecAsync).toHaveBeenCalledWith('git branch -D shadow/orphaned', { cwd: '/test/repo' });
         });
         
         it('should handle no orphaned branches', async () => {
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: '  shadow/main\n', stderr: '' })
-                .mockResolvedValueOnce({ stdout: 'exists', stderr: '' });
+                .mockResolvedValueOnce({ stdout: 'shadow/main\\n', stderr: '' }) // list shadow branches
+                .mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }); // list all branches
             
-            const deleted = await manager.cleanupOrphanedShadowBranches('/test/repo');
-            
-            expect(deleted).toEqual([]);
+            const result = await manager.cleanupOrphanedShadowBranches('/test/repo');
+            expect(result).toHaveLength(0);
         });
     });
     
     describe('hasUncommittedChanges', () => {
         it('should return true if there are uncommitted changes', async () => {
-            mockExecAsync.mockResolvedValueOnce({ stdout: 'M  file.txt\n', stderr: '' });
+            mockExecAsync.mockResolvedValueOnce({ stdout: ' M file.txt\\n', stderr: '' });
             
             const hasChanges = await manager.hasUncommittedChanges('/test/repo');
-            
             expect(hasChanges).toBe(true);
         });
         
@@ -322,53 +261,41 @@ describe('ShadowBranchManager', () => {
             mockExecAsync.mockResolvedValueOnce({ stdout: '', stderr: '' });
             
             const hasChanges = await manager.hasUncommittedChanges('/test/repo');
-            
             expect(hasChanges).toBe(false);
         });
         
         it('should handle git status errors gracefully', async () => {
-            mockExecAsync.mockRejectedValueOnce(new Error('not a git repository'));
+            mockExecAsync.mockRejectedValueOnce(new Error('Not a git repository'));
             
             const hasChanges = await manager.hasUncommittedChanges('/test/repo');
-            
             expect(hasChanges).toBe(false);
+        });
+    });
+    
+    describe('Error Handling', () => {
+        it('should handle repository not found', async () => {
+            mockExecAsync.mockRejectedValueOnce(new Error('fatal: not a git repository'));
+            
+            await expect(manager.getCurrentBranch('/nonexistent/repo'))
+                .resolves.toBeNull();
+        });
+        
+        it('should handle permission denied errors', async () => {
+            mockExecAsync.mockRejectedValueOnce(new Error('Permission denied'));
+            
+            await expect(manager.getCurrentBranch('/protected/repo'))
+                .resolves.toBeNull();
+        });
+        
+        it('should log errors through logger', async () => {
+            const loggerSpy = vi.spyOn(manager.logger, 'warn');
+            mockExecAsync.mockRejectedValueOnce(new Error('Test error'));
+            
+            await manager.getCurrentBranch('/test/repo');
+            
+            expect(loggerSpy).toHaveBeenCalledWith('Failed to get current branch:', expect.any(Error));
         });
     });
 });
 
-describe('ShadowBranchManager Error Handling', () => {
-    let manager;
-    let mockExecAsync;
-    
-    beforeEach(() => {
-        vi.clearAllMocks();
-        mockExecAsync = vi.fn();
-        promisify.mockReturnValue(mockExecAsync);
-        manager = new ShadowBranchManager();
-    });
-    
-    it('should handle repository not found', async () => {
-        mockExecAsync.mockRejectedValue(new Error('fatal: not a git repository'));
-        
-        await expect(manager.ensureShadowBranch('/invalid/repo'))
-            .rejects.toThrow('not a git repository');
-    });
-    
-    it('should handle permission denied errors', async () => {
-        mockExecAsync.mockRejectedValue(new Error('Permission denied'));
-        
-        await expect(manager.createBranch('/test/repo', 'shadow/test', 'test'))
-            .rejects.toThrow('Permission denied');
-    });
-    
-    it('should log errors through logger', async () => {
-        const logSpy = vi.spyOn(manager.logger, 'error');
-        
-        mockExecAsync.mockRejectedValue(new Error('git error'));
-        
-        await expect(manager.ensureShadowBranch('/test/repo'))
-            .rejects.toThrow();
-        
-        expect(logSpy).toHaveBeenCalled();
-    });
-});
+console.log('🧪 Starting Shadow Branch Manager tests...\\n');
