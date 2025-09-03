@@ -22,9 +22,9 @@ describe('ConfigValidator Tests', () => {
 
   test('ConfigValidator initializes correctly', () => {
     validator = new ConfigValidator();
-    assert.ok(validator, 'ConfigValidator should be created');
-    assert.ok(Array.isArray(validator.requiredPaths), 'Should have required paths array');
-    assert.ok(Array.isArray(validator.optionalPaths), 'Should have optional paths array');
+    expect(validator).toBeTruthy();
+    expect(Array.isArray(validator.requiredPaths)).toBe(true);
+    expect(Array.isArray(validator.optionalPaths)).toBe(true);
     console.log('✅ ConfigValidator initialized');
   });
 
@@ -35,9 +35,9 @@ describe('ConfigValidator Tests', () => {
     
     const result = await validator.validate();
     
-    assert.strictEqual(result.valid, true, 'Validation should pass');
-    assert.strictEqual(result.errors.length, 0, 'Should have no errors');
-    assert.ok(result.info.length > 0, 'Should have info messages');
+    expect(result.valid).toBe(true);
+    expect(result.errors.length).toBe(0);
+    expect(result.info.length).toBeGreaterThan(0);
     
     console.log('✅ Configuration validation passed');
     console.log(`   Info messages: ${result.info.length}`);
@@ -48,7 +48,7 @@ describe('ConfigValidator Tests', () => {
     const result = await validator.validate();
     
     // Should still pass validation even with missing optional paths
-    assert.strictEqual(result.valid, true, 'Should still be valid');
+    expect(result.valid).toBe(true);
     
     // Check for warnings or info about optional paths
     const hasOptionalPathMessages = result.warnings.some(w => 
@@ -69,7 +69,7 @@ describe('ConfigValidator Tests', () => {
     const hasDatabaseInfo = result.info.some(info => 
       info.includes('Database library') && info.includes('available')
     );
-    assert.ok(hasDatabaseInfo, 'Should detect database library availability');
+    expect(hasDatabaseInfo).toBe(true);
     
     console.log('✅ Database library detection verified');
   });
@@ -81,7 +81,7 @@ describe('ConfigValidator Tests', () => {
     const hasWriteInfo = result.info.some(info => 
       info.includes('Database directory writable')
     );
-    assert.ok(hasWriteInfo, 'Should verify database directory is writable');
+    expect(hasWriteInfo).toBe(true);
     
     console.log('✅ Write permissions check verified');
   });
@@ -106,7 +106,7 @@ describe('ConfigValidator Tests', () => {
       await failingValidator.validateOrExit();
       
       // Should have called process.exit(1)
-      assert.strictEqual(exitCode, 1, 'Should exit with code 1 on validation failure');
+      expect(exitCode).toBe(1);
       console.log('✅ Validation failure handling verified');
       
     } finally {
