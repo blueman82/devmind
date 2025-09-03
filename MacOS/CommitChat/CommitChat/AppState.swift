@@ -273,6 +273,9 @@ class AppState: ObservableObject {
         Task {
             await checkAutoCommitServiceStatus()
         }
+        
+        // Start monitoring for auto-commit notifications
+        autoCommitAPI.startNotificationMonitoring()
     }
     
     /// Updates connection status based on ProcessManager state
