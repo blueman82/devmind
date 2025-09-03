@@ -6,6 +6,7 @@
 
 import path from 'path';
 import fs from 'fs/promises';
+import fsSync from 'fs';
 import { createLogger } from '../utils/logger.js';
 import DatabaseManager from '../database/database-manager.js';
 import ShadowBranchManager from './shadow-branch-manager.js';
