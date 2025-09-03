@@ -107,6 +107,7 @@ Changes: +145/-23 lines
 - Enable SQLite WAL mode on all connections
 - Connection pooling in MCP server
 - Read-optimized queries
+- Write queue for auto-commit indexing
 - Swift app indexing never blocked
 
 #### New Tables:
