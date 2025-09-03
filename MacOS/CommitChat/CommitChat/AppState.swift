@@ -135,6 +135,8 @@ class AppState: ObservableObject {
     init() {
         // Load settings from UserDefaults
         loadSettings()
+        // Load repository settings
+        loadRepositorySettings()
         // Initialize state
         setupInitialState()
         // Setup MCP server monitoring
