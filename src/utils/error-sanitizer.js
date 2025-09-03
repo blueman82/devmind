@@ -5,11 +5,11 @@ export class ErrorSanitizer {
     this.logger = createLogger('ErrorSanitizer');
     
     this.sensitivePatterns = [
-      /\/Users\/[^\/\s]+/g,                    // macOS user paths
-      /\/home\/[^\/\s]+/g,                     // Linux user paths  
-      /[A-Z]:\\Users\\[^\\\/\s]+/g,            // Windows user paths
+      /\/Users\/[^/\s]+/g,                    // macOS user paths
+      /\/home\/[^/\s]+/g,                     // Linux user paths  
+      /[A-Z]:\\Users\\[^\\/\s]+/g,            // Windows user paths
       /\/[a-zA-Z0-9_-]+@[a-zA-Z0-9.-]+/g,     // Email-like patterns in paths
-      /([a-zA-Z]:[\\\/])/g,                   // Drive letters
+      /([a-zA-Z]:[\\/])/g,                   // Drive letters
       /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, // IP addresses
       /[a-f0-9]{32,}/gi,                      // Long hex strings (hashes, keys)
       /password[=:\s]+[^\s]*/gi,              // Password values
@@ -30,7 +30,7 @@ export class ErrorSanitizer {
     try {
       if (!error) return 'Unknown error occurred';
       
-      let errorMessage = typeof error === 'string' ? error : error.message || error.toString();
+      const errorMessage = typeof error === 'string' ? error : error.message || error.toString();
       let sanitizedMessage = errorMessage;
       
       sanitizedMessage = sanitizedMessage.replace(this.sensitivePatterns[0], this.replacementPatterns.userPaths);
