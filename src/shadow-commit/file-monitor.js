@@ -86,17 +86,29 @@ class FileMonitor {
                 ]
             };
             
-            // Create FSEvents watcher
-            const watcher = FSEvents(repoPath);
-            
-            // Set up event handlers
-            watcher.on('change', this.handleFileChange.bind(this, repoPath, config));
-            watcher.on('error', error => {
-                this.logger.error('FSEvents error', { error: error.message, repoPath });
+            // Create chokidar watcher
+            const watcher = chokidar.watch(repoPath, {
+                persistent: true,
+                ignoreInitial: true,
+                followSymlinks: false,
+                depth: config.maxDepth || 5,
+                awaitWriteFinish: {
+                    stabilityThreshold: 500,
+                    pollInterval: 100
+                },
+                ignored: [
+                    /(^|[\/\\])\../, // Ignore dotfiles
+                    '**/node_modules/**',
+                    '**/.git/**'
+                ]
             });
             
-            // Start watching
-            await watcher.start();
+            // Set up event handlers
+            watcher.on('change', filePath => this.handleFileChange(repoPath, config, filePath, { isDirectory: false }));
+            watcher.on('add', filePath => this.handleFileChange(repoPath, config, filePath, { isDirectory: false, isCreated: true }));
+            watcher.on('error', error => {
+                this.logger.error('Chokidar error', { error: error.message, repoPath });
+            });
             
             // Store references
             this.monitors.set(repoPath, watcher);
