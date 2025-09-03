@@ -540,12 +540,11 @@ class AutoCommitService {
             this.db.db.prepare(query).run(
                 repoPath,
                 settings.enabled ? 1 : 0,
-                settings.notifications ? 1 : 0,
-                settings.notificationFrequency || 'batched',
+                settings.notifications ? 'every_commit' : 'batched',
                 JSON.stringify(settings.exclusions || []),
                 (settings.throttleMs || 2000) / 1000,
-                settings.maxFileSize || 10485760,
-                settings.autoDetected ? 1 : 0
+                Math.round((settings.maxFileSize || 10485760) / (1024 * 1024)),
+                settings.shadowPrefix || 'shadow/'
             );
         } catch (error) {
             this.logger.error('Failed to save repository settings', {
