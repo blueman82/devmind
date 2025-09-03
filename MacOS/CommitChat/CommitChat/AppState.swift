@@ -315,6 +315,66 @@ class AppState: ObservableObject {
         showRestorePoints = false
         showSettings = false
     }
+    
+    // MARK: - Repository Management
+    
+    /// Discovers git repositories on the local file system and populates monitoredRepositories
+    func discoverRepositories() async {
+        let discoveredRepos = await RepositoryDiscoveryService.shared.discoverRepositories()
+        
+        await MainActor.run {
+            // Merge discovered repositories with existing ones, avoiding duplicates
+            var uniqueRepos = monitoredRepositories
+            
+            for discoveredRepo in discoveredRepos {
+                if !uniqueRepos.contains(where: { $0.path == discoveredRepo.path }) {
+                    uniqueRepos.append(discoveredRepo)
+                }
+            }
+            
+            monitoredRepositories = uniqueRepos
+            saveRepositorySettings()
+        }
+    }
+    
+    /// Manually adds a repository to the monitored list
+    func addRepository(_ repositoryConfig: RepositoryConfig) {
+        if !monitoredRepositories.contains(where: { $0.path == repositoryConfig.path }) {
+            monitoredRepositories.append(repositoryConfig)
+            saveRepositorySettings()
+        }
+    }
+    
+    /// Removes a repository from the monitored list
+    func removeRepository(_ repositoryConfig: RepositoryConfig) {
+        monitoredRepositories.removeAll { $0.id == repositoryConfig.id }
+        saveRepositorySettings()
+    }
+    
+    /// Loads repository settings from UserDefaults
+    private func loadRepositorySettings() {
+        if let data = UserDefaults.standard.data(forKey: "monitoredRepositories"),
+           let repositories = try? JSONDecoder().decode([RepositoryConfig].self, from: data) {
+            monitoredRepositories = repositories
+        }
+        
+        // Load repository-specific settings
+        autoCommitEnabled = UserDefaults.standard.bool(forKey: "autoCommitEnabled")
+        autoDetectRepositories = UserDefaults.standard.bool(forKey: "autoDetectRepositories")
+        
+        // Set defaults for first run
+        if UserDefaults.standard.object(forKey: "autoDetectRepositories") == nil {
+            UserDefaults.standard.set(true, forKey: "autoDetectRepositories")
+            autoDetectRepositories = true
+        }
+    }
+    
+    /// Saves repository settings to UserDefaults
+    private func saveRepositorySettings() {
+        if let data = try? JSONEncoder().encode(monitoredRepositories) {
+            UserDefaults.standard.set(data, forKey: "monitoredRepositories")
+        }
+    }
 }
 
 // Note: Mock data has been moved to Models/MockData.swift for better organization
