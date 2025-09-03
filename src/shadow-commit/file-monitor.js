@@ -40,13 +40,17 @@ class FileMonitor {
                 '.DS_Store'
             ],
             sensitivePatterns: [
-                /api[_-]?key/i,
-                /secret[_-]?key/i,
-                /password/i,
-                /token/i,
+                // Keep regex for complex token validation
                 /bearer\s+[a-z0-9\-._~+/]+=*/i,
-                /aws[_-]?access[_-]?key/i,
-                /aws[_-]?secret/i
+            ],
+            // Simpler string-based sensitive content detection
+            sensitiveStrings: [
+                'api_key', 'api-key', 'apikey',
+                'secret_key', 'secret-key', 'secretkey',
+                'password', 'passwd', 'pwd',
+                'token', 'auth_token', 'auth-token',
+                'aws_access_key', 'aws-access-key',
+                'aws_secret', 'aws-secret'
             ],
             ...options
         };
