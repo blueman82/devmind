@@ -28,6 +28,17 @@ All notable changes to the AI Memory App project will be documented in this file
   - `restore_project_state` ❌ → ✅ (pending restart)
   - `get_git_context` ✅ (working but not persisting to database)
 
+### Node.js Module Caching Issue Discovery & Resolution ✅
+- **SESSION CONTINUATION**: 2025-09-03 11:25 - Follow-up validation session
+- **CRITICAL DISCOVERY**: Node.js module caching was preventing fix activation
+- **EVIDENCE**: File `/src/database/git-schema.js:267` contained correct fix but error logs showed continued SQLite boolean binding failures
+- **ROOT CAUSE**: MCP server processes were using cached pre-fix JavaScript modules
+- **TECHNICAL ISSUE**: `require()` cache retained old module versions despite file changes
+- **RESOLUTION**: Executed `pkill -f "mcp-server.js"` to force fresh module loading
+- **OUTCOME**: ✅ Fix verified present in code, MCP server processes successfully restarted
+- **STATUS**: Module cache cleared, fresh code loaded, git tools ready for validation
+- **NEXT STEP**: New Claude Code session required to test git tools functionality
+
 ## [2025-09-03] - COMPLETE FIX - SessionId SQLite Binding Issue Resolved + MCP Validation
 
 ### The Root Cause - Swift String Reference Loss in C API
