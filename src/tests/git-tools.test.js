@@ -152,19 +152,19 @@ describe('Git Tools Tests', () => {
       'passing'
     );
     
-    assert.ok(result.lastInsertRowid, 'Should create restore point');
+    expect(result.lastInsertRowid).toBeTruthy(); // Should create restore point
     
     // Now list restore points
     const listResult = await gitToolHandlers.handleListRestorePoints({
       project_path: testRepoPath
     });
     
-    assert.ok(listResult.content, 'Should return content');
+    expect(listResult.content).toBeTruthy(); // Should return content
     const response = JSON.parse(listResult.content[0].text);
     
-    assert.ok(response.restore_points, 'Should have restore points array');
-    assert.strictEqual(response.restore_points.length, 1, 'Should have 1 restore point');
-    assert.strictEqual(response.restore_points[0].label, 'Test restore point', 'Should have correct label');
+    expect(response.restore_points).toBeTruthy(); // Should have restore points array
+    expect(response.restore_points.length).toBe(1); // Should have 1 restore point
+    expect(response.restore_points[0].label).toBe('Test restore point'); // Should have correct label
     
     console.log('✅ handleListRestorePoints working correctly');
     
@@ -178,9 +178,9 @@ describe('Git Tools Tests', () => {
       
       // Check if repository was discovered (might be null in test environment)
       if (repoInfo && repoInfo.isGitRepository) {
-        assert.ok(repoInfo.isGitRepository, 'Should detect git repository');
-        assert.ok(repoInfo.gitDirectory.endsWith('.git'), 'Should find .git directory');
-        assert.strictEqual(repoInfo.workingDirectory, testRepoPath, 'Should have correct working directory');
+        expect(repoInfo.isGitRepository).toBe(true); // Should detect git repository
+        expect(repoInfo.gitDirectory.endsWith('.git')).toBe(true); // Should find .git directory
+        expect(repoInfo.workingDirectory).toBe(testRepoPath); // Should have correct working directory
         console.log('✅ Repository discovery working');
       } else {
         // Discovery might return false for test repos, that's ok
@@ -198,10 +198,10 @@ describe('Git Tools Tests', () => {
       const history = await gitManager.getCommitHistory(testRepoPath, { limit: 10 });
       
       // The test might fail if git log format is different, so let's be more lenient
-      assert.ok(Array.isArray(history), 'Should return an array');
+      expect(Array.isArray(history)).toBe(true); // Should return an array
       if (history.length > 0) {
-        assert.ok(history[0].hash, 'Should have commit hash');
-        assert.ok(history[0].message, 'Should have commit message');
+        expect(history[0].hash).toBeTruthy(); // Should have commit hash
+        expect(history[0].message).toBeTruthy(); // Should have commit message
         console.log(`✅ Found ${history.length} commits`);
       } else {
         console.log('⚠️ No commits found (might be due to git configuration)');
@@ -246,9 +246,9 @@ describe('Git Tools Tests', () => {
       if (response.success) {
         expect(response.success).toBe(true); // Should create successfully
         expect(response.restore_point).toBeTruthy(); // Should have restore point object
-        assert.strictEqual(response.restore_point.label, 'Test create restore point', 'Should have correct label');
-        assert.strictEqual(response.restore_point.description, 'Created by test suite', 'Should have correct description');
-        assert.strictEqual(response.restore_point.test_status, 'passing', 'Should have correct test status');
+        expect(response.restore_point.label).toBe('Test create restore point'); // Should have correct label
+        expect(response.restore_point.description).toBe('Created by test suite'); // Should have correct description
+        expect(response.restore_point.test_status).toBe('passing'); // Should have correct test status
         console.log('✅ handleCreateRestorePoint working correctly');
       } else if (response.error === 'No commits found') {
         console.log('⚠️ No commits in test repository (expected in test environment)');
@@ -267,7 +267,7 @@ describe('Git Tools Tests', () => {
       
       const duplicateResponse = JSON.parse(duplicateResult.content[0].text);
       if (duplicateResponse.error === 'Duplicate label') {
-        assert.ok(duplicateResponse.existing_restore_point, 'Should show existing restore point');
+        expect(duplicateResponse.existing_restore_point).toBeTruthy(); // Should show existing restore point
         console.log('✅ Duplicate label detection working');
       }
       
@@ -289,23 +289,15 @@ describe('Git Tools Tests', () => {
       label: 'Test label'
     });
     
-    assert.ok(missingPathResult.content, 'Should return content for missing path');
-    assert.strictEqual(
-      missingPathResult.content[0].text,
-      'Error: project_path and label are required',
-      'Should error on missing project_path'
-    );
+    expect(missingPathResult.content).toBeTruthy(); // Should return content for missing path
+    expect(missingPathResult.content[0].text).toBe('Error: project_path and label are required'); // Should error on missing project_path
     
     const missingLabelResult = await gitToolHandlers.handleCreateRestorePoint({
       project_path: testRepoPath
     });
     
-    assert.ok(missingLabelResult.content, 'Should return content for missing label');
-    assert.strictEqual(
-      missingLabelResult.content[0].text,
-      'Error: project_path and label are required',
-      'Should error on missing label'
-    );
+    expect(missingLabelResult.content).toBeTruthy(); // Should return content for missing label
+    expect(missingLabelResult.content[0].text).toBe('Error: project_path and label are required'); // Should error on missing label
     
     // Test invalid path validation
     const originalValidate = pathValidator.validateProjectPath;
