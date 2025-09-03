@@ -378,3 +378,13 @@ struct CommitStatistics {
         self.repositoryCount = repositoryCount
     }
 }
+
+struct NotificationData: Codable {
+    let timestamp: String
+    let type: String
+    let repository: String
+    let file: String
+    let branch: String
+    let commitHash: String
+    let sessionId: String?
+}
