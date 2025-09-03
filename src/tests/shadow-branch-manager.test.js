@@ -4,16 +4,16 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { promisify } from 'util';
 import ShadowBranchManager from '../shadow-commit/shadow-branch-manager.js';
 
-// Mock child_process and util modules
-vi.mock('child_process', () => ({
-    exec: vi.fn()
-}));
-
-vi.mock('util', () => ({
-    promisify: vi.fn(() => vi.fn())
-}));
+// Mock the entire util module
+vi.mock('util', () => {
+    const mockPromisify = vi.fn();
+    return {
+        promisify: mockPromisify
+    };
+});
 
 // Mock the logger to prevent console output during tests
 vi.mock('../utils/logger.js', () => ({
@@ -36,7 +36,7 @@ describe('ShadowBranchManager', () => {
         mockExecAsync = vi.fn();
         
         // Setup promisify to return our mock
-        vi.mocked(require('util').promisify).mockReturnValue(mockExecAsync);
+        promisify.mockReturnValue(mockExecAsync);
         
         manager = new ShadowBranchManager();
     });
@@ -340,7 +340,7 @@ describe('ShadowBranchManager Error Handling', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockExecAsync = vi.fn();
-        vi.mocked(require('util').promisify).mockReturnValue(mockExecAsync);
+        promisify.mockReturnValue(mockExecAsync);
         manager = new ShadowBranchManager();
     });
     
