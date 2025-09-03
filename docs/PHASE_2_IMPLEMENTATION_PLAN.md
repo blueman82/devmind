@@ -40,8 +40,17 @@ Phase 2 introduces auto-commit functionality with shadow branches, creating comp
   - `dist/**`
   - `*.lock` files
   - `.env` files (even if not in gitignore)
+  - Global user-configurable patterns (`*.log`, `*.tmp`, etc.)
 - Size limit: 10MB default (configurable)
 - Throttling: Minimum 2 seconds between commits
+- Depth limits: Maximum 5 levels deep for repository scanning
+
+**Sensitive File Detection**:
+- Scan file contents for API keys, passwords, tokens
+- Pattern matching for common secrets (AWS keys, JWT tokens, etc.)
+- Warning system before auto-committing suspected sensitive files
+- Never auto-commit files with detected sensitive content
+- User override option with explicit confirmation
 
 ### 3. Conversation Detection
 
