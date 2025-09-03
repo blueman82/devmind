@@ -126,7 +126,7 @@ class ConversationCorrelator {
                             mostRecentEvent = event;
                         }
                     }
-                } catch (error) {
+                } catch {
                     // Skip inaccessible directories
                     continue;
                 }
