@@ -28,6 +28,19 @@ All notable changes to the AI Memory App project will be documented in this file
 
 ### Completed Tasks
 - ✅ SQLite WAL mode verification
+- ✅ Shadow Branch Manager Module (355 lines)
+  - Full git operations wrapper for shadow branches
+  - Automatic stashing/unstashing of changes
+  - Branch synchronization and cleanup
+- ✅ File Monitor Module (421 lines)
+  - Chokidar-based file watching (replaced FSEvents due to Node 24 compatibility)
+  - Configurable exclusion patterns and throttling
+  - Sensitive content detection
+- ✅ Conversation Correlator Module (378 lines)
+  - JSONL parsing for tool_use events
+  - 10-second time window matching
+  - Confidence scoring and database storage
+- ✅ Dependencies added: chokidar@4.0.3, minimatch@10.0.3
 - ✅ Database schema for Phase 2 tables
 - ✅ Project documentation updates
 
