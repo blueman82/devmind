@@ -128,8 +128,14 @@ class FileMonitor {
             this.monitors.set(repoPath, watcher);
             this.activeRepositories.set(repoPath, config);
             
-            // Ensure shadow branch exists
-            await this.shadowManager.ensureShadowBranch(repoPath);
+            // Ensure shadow branch exists with retry logic
+            await this.errorHandler.executeWithRetry(
+                async () => await this.shadowManager.ensureShadowBranch(repoPath),
+                { 
+                    context: { operation: 'git', action: 'ensureShadowBranch', repoPath },
+                    operationId: `ensure-shadow-${repoPath}-${Date.now()}`
+                }
+            );
             
             this.logger.info('Started monitoring repository', { repoPath });
         } catch (error) {
@@ -184,8 +190,15 @@ class FileMonitor {
                 return;
             }
             
-            // Check file size
-            const fileStats = await fs.stat(filePath);
+            // Check file size with retry logic
+            const fileStats = await this.errorHandler.executeWithRetry(
+                async () => await fs.stat(filePath),
+                {
+                    context: { operation: 'filesystem', action: 'stat', filePath },
+                    operationId: `stat-${filePath}-${Date.now()}`,
+                    maxRetries: 2  // Fewer retries for file operations
+                }
+            );
             if (fileStats.size > config.maxFileSize) {
                 this.logger.warn('File exceeds size limit', {
                     filePath: relativePath,
@@ -195,8 +208,17 @@ class FileMonitor {
                 return;
             }
             
-            // Check for sensitive content
-            if (await this.containsSensitiveContent(filePath, config)) {
+            // Check for sensitive content with retry logic
+            const hasSensitiveContent = await this.errorHandler.executeWithRetry(
+                async () => await this.containsSensitiveContent(filePath, config),
+                {
+                    context: { operation: 'filesystem', action: 'readFile', filePath },
+                    operationId: `check-sensitive-${filePath}-${Date.now()}`,
+                    maxRetries: 2
+                }
+            );
+            
+            if (hasSensitiveContent) {
                 this.logger.warn('Sensitive content detected', { filePath: relativePath });
                 return;
             }
@@ -301,8 +323,14 @@ class FileMonitor {
      */
     async createShadowCommit(repoPath, filePath) {
         try {
-            // Get current branch info
-            const { shadowBranch, originalBranch } = await this.shadowManager.ensureShadowBranch(repoPath);
+            // Get current branch info with retry logic
+            const { shadowBranch, originalBranch } = await this.errorHandler.executeWithRetry(
+                async () => await this.shadowManager.ensureShadowBranch(repoPath),
+                {
+                    context: { operation: 'git', action: 'ensureShadowBranch', repoPath },
+                    operationId: `shadow-commit-${repoPath}-${Date.now()}`
+                }
+            );
             
             // Check for conversation context
             const correlation = await this.correlator.findConversationContext(repoPath, filePath);
@@ -325,12 +353,19 @@ class FileMonitor {
             }
             
             try {
-                // Commit the file
-                const commitResult = await this.shadowManager.commitToShadowBranch(
-                    repoPath,
-                    shadowBranch,
-                    message,
-                    [filePath]
+                // Commit the file with retry logic
+                const commitResult = await this.errorHandler.executeWithRetry(
+                    async () => await this.shadowManager.commitToShadowBranch(
+                        repoPath,
+                        shadowBranch,
+                        message,
+                        [filePath]
+                    ),
+                    {
+                        context: { operation: 'git', action: 'commit', repoPath, filePath },
+                        operationId: `commit-${filePath}-${Date.now()}`,
+                        maxRetries: 5  // More retries for commits
+                    }
                 );
                 
                 this.logger.info('Shadow commit created', {
