@@ -190,7 +190,7 @@ class FileMonitor {
             }
             
             // Check for sensitive content
-            if (await this.containsSensitiveContent(filePath, config.sensitivePatterns)) {
+            if (await this.containsSensitiveContent(filePath, config)) {
                 this.logger.warn('Sensitive content detected', { filePath: relativePath });
                 return;
             }
