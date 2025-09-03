@@ -221,7 +221,7 @@ struct RepositoryRow: View {
             VStack {
                 Toggle("", isOn: .constant(repository.isEnabled))
                     .labelsHidden()
-                    .onChange(of: repository.isEnabled) { _ in
+                    .onChange(of: repository.isEnabled) {
                         onToggleEnabled()
                     }
                 
