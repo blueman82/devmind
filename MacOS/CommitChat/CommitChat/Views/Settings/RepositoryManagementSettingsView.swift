@@ -111,6 +111,56 @@ struct RepositoryManagementSettingsView: View {
                     Label("Statistics", systemImage: "chart.bar")
                 }
                 
+                // Notification settings
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Notifications")
+                                    .font(.headline)
+                                Text("Get notified when auto-commits are created")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            // Authorization status
+                            HStack {
+                                Circle()
+                                    .fill(appState.notificationsAuthorized ? .green : .orange)
+                                    .frame(width: 8, height: 8)
+                                Text(appState.notificationsAuthorized ? "Authorized" : "Not Authorized")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        
+                        HStack {
+                            Picker("Notification Frequency", selection: $appState.notificationFrequency) {
+                                ForEach(NotificationFrequency.allCases, id: \.self) { frequency in
+                                    Text(frequency.displayName).tag(frequency)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            
+                            Spacer()
+                            
+                            if !appState.notificationsAuthorized {
+                                Button("Enable Notifications") {
+                                    Task {
+                                        _ = await appState.requestNotificationPermissions()
+                                    }
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                } label: {
+                    Label("Notifications", systemImage: "bell")
+                }
+                
                 // Repository list
                 GroupBox {
                     VStack(alignment: .leading, spacing: 8) {
