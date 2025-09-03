@@ -287,6 +287,37 @@ sessionid_complete_fix_2025_09_02:
           
         elegance: "Leverages existing JSONL monitoring for conversation indexing"
         accuracy: "Direct correlation with Claude's actual file operations"
+        
+      detection_mechanism_weaknesses:
+        critical_analysis_date: "2025-09-03 12:15"
+        
+        identified_weaknesses:
+          timing_mismatches: "File writes may lag behind tool_use events"
+          jsonl_delays: "JSONL might buffer or be lost on crash"
+          multiple_sessions: "Concurrent Claude windows cause ambiguity"
+          indirect_changes: "Claude-triggered builds/installs incorrectly attributed"
+          partial_edits: "Mixed Claude + manual edits in same file"
+          race_conditions: "FSEvents before JSONL write causes misclassification"
+          false_positives: "Coincidental timing matches wrong files"
+          resource_overhead: "Constant JSONL parsing impacts performance"
+          
+        severity_assessment:
+          high_severity: "JSONL reliability - core mechanism can fail completely"
+          medium_severity: "Timing windows and indirect file changes"
+          manageable: "Resource usage and false positives"
+          
+        mitigation_strategies:
+          fallback_always_ready: "Diff-based generation for when detection fails"
+          adaptive_windows: "Adjust correlation timing based on file size/type"
+          blacklist_patterns: "Exclude generated files (dist/*, node_modules/*, *.lock)"
+          probabilistic_scoring: "Weight multiple factors instead of binary decision"
+          
+        alternative_considered:
+          hybrid_always: "Include both conversation context AND diff analysis"
+          benefit: "Never lose information, always accurate"
+          tradeoff: "Longer commit messages, potential redundancy"
+          
+        recommendation: "Accept imperfect detection with robust fallbacks"
     
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
