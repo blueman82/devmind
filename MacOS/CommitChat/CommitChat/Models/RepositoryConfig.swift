@@ -11,7 +11,7 @@ import Foundation
 /// Represents a single repository's auto-commit settings and status
 struct RepositoryConfig: Codable, Identifiable, Equatable {
     /// Unique identifier for the repository
-    let id = UUID()
+    var id = UUID()
     
     /// Absolute path to the repository directory
     let path: String
