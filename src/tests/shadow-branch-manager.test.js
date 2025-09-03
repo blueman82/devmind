@@ -36,8 +36,7 @@ describe('ShadowBranchManager', () => {
         mockExecAsync = vi.fn();
         
         // Setup promisify to return our mock
-        const { promisify } = require('util');
-        promisify.mockReturnValue(mockExecAsync);
+        vi.mocked(require('util').promisify).mockReturnValue(mockExecAsync);
         
         manager = new ShadowBranchManager();
     });
