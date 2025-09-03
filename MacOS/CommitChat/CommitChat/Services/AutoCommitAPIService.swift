@@ -31,24 +31,16 @@ class AutoCommitAPIService: ObservableObject {
     
     /// Checks if the Node.js auto-commit service is running
     func checkServiceStatus() async -> Bool {
-        do {
-            let result = await executeCommand(["status"])
-            
-            await MainActor.run {
-                isConnected = result.success
-                if !result.success {
-                    lastError = result.error
-                }
+        let result = await executeCommand(["status"])
+        
+        await MainActor.run {
+            isConnected = result.success
+            if !result.success {
+                lastError = result.error
             }
-            
-            return result.success
-        } catch {
-            await MainActor.run {
-                isConnected = false
-                lastError = error.localizedDescription
-            }
-            return false
         }
+        
+        return result.success
     }
     
     /// Starts the auto-commit service
