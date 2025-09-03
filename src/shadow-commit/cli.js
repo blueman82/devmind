@@ -17,7 +17,8 @@ import ora from 'ora';
 
 const execAsync = promisify(exec);
 
-const logger = createLogger('AutoCommitCLI');
+// Logger available for future CLI enhancements
+// const logger = createLogger('AutoCommitCLI');
 const program = new Command();
 
 // Service instance
