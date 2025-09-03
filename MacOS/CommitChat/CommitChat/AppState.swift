@@ -478,4 +478,27 @@ class AppState: ObservableObject {
     }
 }
 
+// MARK: - Supporting Types
+
+/// Notification frequency options for auto-commit notifications
+enum NotificationFrequency: String, CaseIterable {
+    case disabled = "disabled"
+    case everyCommit = "everyCommit"
+    case batched = "batched"
+    case hourly = "hourly"
+    
+    var displayName: String {
+        switch self {
+        case .disabled:
+            return "Disabled"
+        case .everyCommit:
+            return "Every Commit"
+        case .batched:
+            return "Batched (10 commits)"
+        case .hourly:
+            return "Hourly Summary"
+        }
+    }
+}
+
 // Note: Mock data has been moved to Models/MockData.swift for better organization
