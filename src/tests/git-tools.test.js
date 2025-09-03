@@ -313,11 +313,8 @@ describe('Git Tools Tests', () => {
       label: 'Test'
     });
     
-    assert.ok(invalidPathResult.content, 'Should return content for invalid path');
-    assert.ok(
-      invalidPathResult.content[0].text.includes('Invalid project path'),
-      'Should error on invalid path'
-    );
+    expect(invalidPathResult.content).toBeTruthy(); // Should return content for invalid path
+    expect(invalidPathResult.content[0].text.includes('Invalid project path')).toBe(true); // Should error on invalid path
     
     // Restore original validation
     pathValidator.validateProjectPath = originalValidate;
@@ -358,11 +355,7 @@ describe('Git Tools Tests', () => {
         const response = JSON.parse(result.content[0].text);
         
         if (response.success) {
-          assert.strictEqual(
-            response.restore_point.test_status,
-            status,
-            `Should have ${status} test status`
-          );
+          expect(response.restore_point.test_status).toBe(status); // Should have test status
           console.log(`✅ Test status '${status}' handled correctly`);
         }
       }
@@ -377,11 +370,7 @@ describe('Git Tools Tests', () => {
       
       const defaultResponse = JSON.parse(defaultResult.content[0].text);
       if (defaultResponse.success) {
-        assert.strictEqual(
-          defaultResponse.restore_point.test_status,
-          'unknown',
-          'Should default to unknown test status'
-        );
+        expect(defaultResponse.restore_point.test_status).toBe('unknown'); // Should default to unknown test status
         console.log('✅ Default test_status handled correctly');
       }
       
@@ -419,11 +408,7 @@ describe('Git Tools Tests', () => {
       
       const autoResponse = JSON.parse(autoResult.content[0].text);
       if (autoResponse.success) {
-        assert.strictEqual(
-          autoResponse.restore_point.auto_generated,
-          true,
-          'Should be marked as auto-generated'
-        );
+        expect(autoResponse.restore_point.auto_generated).toBe(true); // Should be marked as auto-generated
         console.log('✅ auto_generated=true handled correctly');
       }
       
@@ -437,11 +422,7 @@ describe('Git Tools Tests', () => {
       
       const manualResponse = JSON.parse(manualResult.content[0].text);
       if (manualResponse.success) {
-        assert.strictEqual(
-          manualResponse.restore_point.auto_generated,
-          false,
-          'Should be marked as manual'
-        );
+        expect(manualResponse.restore_point.auto_generated).toBe(false); // Should be marked as manual
         console.log('✅ auto_generated=false handled correctly');
       }
       
@@ -455,11 +436,7 @@ describe('Git Tools Tests', () => {
       
       const defaultResponse = JSON.parse(defaultResult.content[0].text);
       if (defaultResponse.success) {
-        assert.strictEqual(
-          defaultResponse.restore_point.auto_generated,
-          false,
-          'Should default to false for auto_generated'
-        );
+        expect(defaultResponse.restore_point.auto_generated).toBe(false); // Should default to false for auto_generated
         console.log('✅ Default auto_generated handled correctly');
       }
       
@@ -496,11 +473,7 @@ describe('Git Tools Tests', () => {
       
       const emptyDescResponse = JSON.parse(emptyDescResult.content[0].text);
       if (emptyDescResponse.success) {
-        assert.strictEqual(
-          emptyDescResponse.restore_point.description,
-          '',
-          'Should accept empty description'
-        );
+        expect(emptyDescResponse.restore_point.description).toBe(''); // Should accept empty description
         console.log('✅ Empty description handled correctly');
       }
       
@@ -513,11 +486,7 @@ describe('Git Tools Tests', () => {
       
       const noDescResponse = JSON.parse(noDescResult.content[0].text);
       if (noDescResponse.success) {
-        assert.strictEqual(
-          noDescResponse.restore_point.description,
-          '',
-          'Should default to empty string when description omitted'
-        );
+        expect(noDescResponse.restore_point.description).toBe(''); // Should default to empty string when description omitted
         console.log('✅ Omitted description handled correctly');
       }
       
@@ -561,12 +530,12 @@ describe('Git Tools Tests', () => {
           restore_point_id: createResponse.restore_point.id
         });
         
-        assert.ok(previewResult.content, 'Should return content');
+        expect(previewResult.content).toBeTruthy(); // Should return content
         const previewResponse = JSON.parse(previewResult.content[0].text);
         
         if (previewResponse.preview?.status === 'no_changes') {
           console.log('✅ Preview correctly detected no changes (at same commit)');
-          assert.strictEqual(previewResponse.preview.status, 'no_changes', 'Should detect no changes');
+          expect(previewResponse.preview.status).toBe('no_changes'); // Should detect no changes
         } else if (previewResponse.project_path) {
           console.log('✅ Preview generated successfully');
           assert.ok(previewResponse.current_state, 'Should have current state');
