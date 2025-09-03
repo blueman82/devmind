@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'vitest';
 import { spawn } from 'child_process';
 import { join } from 'path';
 import { promises as fs } from 'fs';
@@ -101,12 +100,12 @@ describe('MCP Server Integration Tests', () => {
               
               // Verify expected tools are present
               const tools = response.result.tools;
-              assert.ok(Array.isArray(tools), 'Tools should be an array');
-              assert.ok(tools.length > 0, 'Should have at least one tool');
+              expect(Array.isArray(tools)).toBe(true); // Tools should be an array
+              expect(tools.length).toBeGreaterThan(0); // Should have at least one tool
               
               const toolNames = tools.map(t => t.name);
-              assert.ok(toolNames.includes('search_conversations'), 'Should include search_conversations tool');
-              assert.ok(toolNames.includes('get_conversation_context'), 'Should include get_conversation_context tool');
+              expect(toolNames.includes('search_conversations')).toBe(true); // Should include search_conversations tool
+              expect(toolNames.includes('get_conversation_context')).toBe(true); // Should include get_conversation_context tool
               
               console.log('✅ MCP Server tools verified:', toolNames.join(', '));
               resolve();
