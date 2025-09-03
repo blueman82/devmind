@@ -12,6 +12,7 @@ export class GitToolHandlers {
   constructor(dbManager) {
     this.dbManager = dbManager;
     this.gitManager = new GitManager();
+    this.secureGitExecutor = new SecureGitExecutor();
     this.logger = createLogger('GitToolHandlers');
     this.initialized = false;
   }
