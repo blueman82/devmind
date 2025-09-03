@@ -3,9 +3,9 @@
 ## Context
 You are continuing work on the **AI Memory App** project. The previous session successfully identified and fixed a critical SQLite boolean binding issue that was preventing git repository indexing, causing 4 of 5 git MCP tools to fail completely.
 
-## Current Status: ✅ FIXED - Awaiting MCP Server Restart
+## Current Status: ✅ FIXED - MCP Server Restart Required
 
-### What Was Accomplished
+### What Was Accomplished  
 1. **Root Cause Identified**: `TypeError: SQLite3 can only bind numbers, strings, bigints, buffers, and null`
 2. **Location**: `/src/database/git-schema.js:266-267` in `upsertRepository` method
 3. **Problem**: `isMonorepoSubdirectory` boolean value passed directly to SQLite
@@ -13,6 +13,7 @@ You are continuing work on the **AI Memory App** project. The previous session s
 5. **Defensive Programming**: Added gitSchema initialization safeguards to all handlers
 6. **Quality Verification**: Systematic search confirmed no other boolean SQLite bindings need fixes
 7. **Documentation**: Comprehensive updates to CHANGELOG.md and project-progress.yml
+8. **⚠️ Node.js Module Caching Issue Discovered**: Old MCP server processes were using cached pre-fix code
 
 ### Branch Structure Created
 - `main` branch: Production stable
