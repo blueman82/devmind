@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import UserNotifications
 
 /// Central state management for the CommitChat application.
 /// Manages window visibility, MCP server connection status, and application settings.
