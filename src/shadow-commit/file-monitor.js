@@ -293,7 +293,7 @@ class FileMonitor {
      * @param {Object} config - Repository configuration
      * @returns {Promise<void>}
      */
-    async createShadowCommit(repoPath, filePath) {
+    async createShadowCommit(repoPath, filePath, config) {
         try {
             // Get current branch info
             const { shadowBranch, originalBranch } = await this.shadowManager.ensureShadowBranch(repoPath);
