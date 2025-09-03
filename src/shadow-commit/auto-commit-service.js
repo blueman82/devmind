@@ -501,7 +501,7 @@ class AutoCommitService {
             if (row) {
                 return {
                     enabled: row.auto_commit_enabled === 1,
-                    notifications: row.notification_enabled === 1,
+                    notifications: row.notification_preference === 'every_commit',
                     throttleMs: row.commit_throttle_seconds * 1000,
                     exclusions: JSON.parse(row.excluded_patterns || '[]'),
                     maxFileSize: row.max_file_size
@@ -529,13 +529,12 @@ class AutoCommitService {
                 INSERT OR REPLACE INTO repository_settings (
                     repository_path,
                     auto_commit_enabled,
-                    notification_enabled,
-                    notification_frequency,
+                    notification_preference,
                     excluded_patterns,
                     commit_throttle_seconds,
-                    max_file_size,
-                    auto_detected
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    max_file_size_mb,
+                    shadow_branch_prefix
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
             `;
             
             this.db.db.prepare(query).run(
