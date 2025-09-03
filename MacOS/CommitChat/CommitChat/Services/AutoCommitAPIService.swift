@@ -140,16 +140,18 @@ class AutoCommitAPIService: ObservableObject {
     
     /// Updates commit statistics from the service
     func updateCommitStatistics() async {
-        let result = await executeCommand(["stats"])
+        let result = await executeCommand(["status"])
         
         if result.success {
             let stats = parseCommitStatistics(result.output)
             await MainActor.run {
                 commitStats = stats
+                isConnected = true // Service responded successfully
             }
         } else {
             await MainActor.run {
                 lastError = result.error
+                isConnected = false
             }
         }
     }
@@ -230,17 +232,17 @@ class AutoCommitAPIService: ObservableObject {
     }
     
     private func parseCommitStatistics(_ output: String) -> CommitStatistics {
-        // Parse statistics output from CLI
+        // Parse statistics output from CLI status command
         var totalCommits = 0
         var repositoryCount = 0
         
         let lines = output.components(separatedBy: .newlines)
         for line in lines {
-            if line.contains("Total commits:") {
-                totalCommits = extractNumber(from: line) ?? 0
-            }
-            if line.contains("Repositories:") {
-                repositoryCount = extractNumber(from: line) ?? 0
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.contains("Total Commits:") {
+                totalCommits = extractNumber(from: trimmed) ?? 0
+            } else if trimmed.contains("Active Repositories:") {
+                repositoryCount = extractNumber(from: trimmed) ?? 0
             }
         }
         
