@@ -241,6 +241,28 @@ sessionid_complete_fix_2025_09_02:
         vs_shadowgit: "Shadow branches + conversation context + native notifications"
         unique_value: "Complete development memory - discussions AND code evolution"
         advantage: "Semantic search across conversations and commits together"
+        
+      critical_gap_identified:
+        discovery: "Auto-commit messages for non-Claude Code development scenarios"
+        importance: "Users work in VSCode, Xcode, terminal - need standalone value"
+        
+      non_claude_context_message_generation:
+        strategies_identified:
+          git_diff_analysis: "Parse changes for semantic description"
+          ast_parsing: "Language-specific code understanding"
+          local_llm_option: "Optional local LLM for intelligent messages (privacy-preserved)"
+          hybrid_approach: "Claude context when available, smart fallback otherwise"
+          
+        recommended_implementation:
+          with_claude: "Rich conversation context + diff analysis"
+          without_claude: "Git diff semantic analysis with optional local LLM enhancement"
+          always_include: "Files changed, statistics, timestamp, change type"
+          
+        examples:
+          with_context: "Fix SQLite issue - per Claude session 7744aef1 discussion"
+          without_context: "Update auth flow - added rate limiting, enhanced validation"
+          
+        standalone_value: "App remains valuable even without active Claude Code sessions"
     
     documentation_enhancement_2025_09_03:
       update: "Enhanced PRD with comprehensive ShadowGit competitive analysis"
