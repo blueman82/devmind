@@ -187,11 +187,7 @@ class AutoCommitAPIService: ObservableObject {
                         error: error.isEmpty ? nil : error
                     )
                     
-                    self.logger.debug("Command executed", [
-                        "arguments": arguments.joined(separator: " "),
-                        "success": result.success,
-                        "output": output
-                    ])
+                    self.logger.debug("Command executed: \(arguments.joined(separator: " ")) - Success: \(result.success)")
                     
                     continuation.resume(returning: result)
                 } catch {
