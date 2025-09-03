@@ -29,12 +29,17 @@ vi.mock('../utils/logger.js', () => ({
 
 describe('ShadowBranchManager', () => {
     let manager;
+    let mockExecAsync;
     
     beforeEach(() => {
         vi.clearAllMocks();
         
-        // Reset the mock function
-        mockExecAsync.mockReset();
+        // Create fresh mock for each test
+        mockExecAsync = vi.fn();
+        
+        // Configure the util mock's promisify to return our mockExecAsync
+        const { promisify } = await import('util');
+        promisify.mockReturnValue(mockExecAsync);
         
         manager = new ShadowBranchManager();
     });
