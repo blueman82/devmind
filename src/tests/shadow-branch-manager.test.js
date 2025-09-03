@@ -22,22 +22,8 @@ vi.mock('child_process', () => ({
     })
 }));
 
-// Mock promisify
-vi.mock('util', () => ({
-    promisify: vi.fn((fn) => {
-        return vi.fn((cmd, options = {}) => {
-            return new Promise((resolve, reject) => {
-                // Mock responses based on command
-                const mockResponses = getMockResponse(cmd, options);
-                if (mockResponses.error) {
-                    reject(new Error(mockResponses.error));
-                } else {
-                    resolve({ stdout: mockResponses.stdout || '', stderr: mockResponses.stderr || '' });
-                }
-            });
-        });
-    })
-}));
+// Store mock implementation for dynamic control
+let mockExecAsync = vi.fn();
 
 // Helper to provide mock responses based on git commands
 function getMockResponse(cmd, options) {
