@@ -80,6 +80,27 @@ sessionid_complete_fix_2025_09_02:
       mcp_server: "Query service provider (read-only)"
     performance: "Excellent - 103,500% improvement over pre-fix state"
     
+  git_tools_status_2025_09_03:
+    status: "⚠️ Partially working - architecture gap identified"
+    tools_tested: 5
+    working: 1
+    failed: 4
+    test_results:
+      - "get_git_context: ✅ Working - reads git data from filesystem"
+      - "list_restore_points: ❌ Failed - no git repository in database"
+      - "create_restore_point: ❌ Failed - can't write to database"
+      - "preview_restore: ❌ Failed - requires indexed repository"
+      - "restore_project_state: ❌ Failed - requires indexed repository"
+    root_cause: "Git repositories table empty - no component handles git indexing"
+    architecture_gap:
+      issue: "MCP server is read-only, Swift app lacks git indexing logic"
+      impact: "Git restore functionality unavailable"
+      conversation_indexing: "✅ Unaffected - working perfectly"
+    potential_solutions:
+      - "Option 1: Add git repository indexing to Swift app"
+      - "Option 2: Grant MCP write permissions for git tables"
+      - "Option 3: Create separate git indexing service"
+    
 ## PREVIOUS UPDATE - 2025-09-02 - ROOT CAUSE FIXED - Empty SessionId Bug
 
 empty_sessionid_bug_fix_2025_09_02:
