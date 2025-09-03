@@ -498,7 +498,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         break;
       }
         
-      case 'parse':
+      case 'parse': {
         const filePath = process.argv[3];
         if (!filePath) {
           console.log('Usage: node conversation-parser.js parse <file-path>');
@@ -508,6 +508,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         const conversation = parser.parseConversation(filePath);
         console.log(JSON.stringify(conversation, null, 2));
         break;
+      }
         
       default:
         console.log('Usage:');
