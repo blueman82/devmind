@@ -53,6 +53,8 @@ struct SettingsWindow: View {
                         SearchSettingsView()
                     case "Notifications":
                         NotificationSettingsView()
+                    case "Repository":
+                        RepositoryManagementSettingsView()
                     case "Advanced":
                         AdvancedSettingsView()
                     default:
