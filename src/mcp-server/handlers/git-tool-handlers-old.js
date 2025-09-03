@@ -1120,7 +1120,7 @@ export class GitToolHandlers {
         });
 
         // Use secure git executor for diff summary
-        const diffSummary = secureGitExecutor.executeGitCommand(
+        const diffSummary = this.secureGitExecutor.executeGitCommand(
           'diff',
           ['--name-status', `${fromCommit}..${toCommit}`],
           { cwd: projectPath, timeout: 10000 }
