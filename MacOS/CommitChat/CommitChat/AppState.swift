@@ -424,6 +424,47 @@ class AppState: ObservableObject {
             UserDefaults.standard.set(data, forKey: "monitoredRepositories")
         }
     }
+    
+    // MARK: - Auto-Commit Service Management
+    
+    /// Checks the auto-commit service status
+    func checkAutoCommitServiceStatus() async {
+        let isRunning = await autoCommitAPI.checkServiceStatus()
+        await MainActor.run {
+            autoCommitServiceConnected = isRunning
+        }
+    }
+    
+    /// Starts the auto-commit service
+    func startAutoCommitService() async -> Bool {
+        let success = await autoCommitAPI.startService()
+        if success {
+            await checkAutoCommitServiceStatus()
+        }
+        return success
+    }
+    
+    /// Stops the auto-commit service
+    func stopAutoCommitService() async -> Bool {
+        let success = await autoCommitAPI.stopService()
+        if success {
+            await MainActor.run {
+                autoCommitServiceConnected = false
+            }
+        }
+        return success
+    }
+    
+    /// Syncs repository configurations with the auto-commit service
+    func syncRepositoriesWithService() async {
+        // Add all enabled repositories to the service
+        for repo in monitoredRepositories where repo.isEnabled {
+            _ = await autoCommitAPI.addRepository(repo)
+        }
+        
+        // Update commit statistics
+        await autoCommitAPI.updateCommitStatistics()
+    }
 }
 
 // Note: Mock data has been moved to Models/MockData.swift for better organization
