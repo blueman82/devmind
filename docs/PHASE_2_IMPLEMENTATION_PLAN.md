@@ -260,6 +260,29 @@ The final architecture is elegantly simple while covering all user scenarios.
 4. **File size limits**: 10MB default, configurable per-repo
 5. **Commit throttling**: 2 seconds minimum, configurable
 
+## Code Example
+
+```swift
+// Notification Implementation Example
+import UserNotifications
+
+func sendAutoCommitNotification(for file: String, branch: String) {
+    let center = UNUserNotificationCenter.current()
+    let content = UNMutableNotificationContent()
+    content.title = "Auto-commit saved"
+    content.body = "Updated \(file) - shadow/\(branch)"
+    content.sound = .default
+    
+    let request = UNNotificationRequest(
+        identifier: UUID().uuidString,
+        content: content,
+        trigger: nil
+    )
+    
+    center.add(request)
+}
+```
+
 ## Next Steps
 
 1. Begin Phase 2a implementation with SQLite WAL mode
