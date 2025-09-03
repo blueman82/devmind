@@ -343,7 +343,7 @@ export class DatabaseManager {
         } = options;
 
         // Build FTS5 query based on search mode
-        let ftsQuery = this.buildFTSQuery(query, searchMode);
+        const ftsQuery = this.buildFTSQuery(query, searchMode);
         
         let sql = `
             SELECT DISTINCT

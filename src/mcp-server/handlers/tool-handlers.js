@@ -132,7 +132,7 @@ export class ToolHandlers {
           searchMethod: results.length > 0 && results[0].relevance_score ? 'SQLite FTS5' : 'JSONL Fallback'
         };
         
-        let finalResult = baseResult;
+        const finalResult = baseResult;
         const resultTokens = MessageUtils.estimateTokens(JSON.stringify(baseResult));
         
         // Check if we can include snippet
