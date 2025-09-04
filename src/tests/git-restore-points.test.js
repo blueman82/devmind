@@ -56,6 +56,7 @@ describe('Git Restore Points Management', () => {
     await gitSchema.initialize();
     
     gitToolHandlers = new GitToolHandlers(dbManager, gitSchema);
+    await gitToolHandlers.initialize();
     
     // Mock path validator to allow test paths
     originalValidate = pathValidator.validateProjectPath;
