@@ -75,7 +75,7 @@ try {
         const stats = await fs.promises.stat(dbPath);
         const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
         console.log(`\n💿 Database File: ${sizeMB} MB at ${dbPath}`);
-    } catch (error) {
+    } catch {
         console.log(`\n💿 Database File: Not found at ${dbPath}`);
     }
     
