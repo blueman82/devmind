@@ -728,7 +728,7 @@ describe('Git Tools Tests', () => {
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
       await fs.unlink(tempDbPath);
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
     
