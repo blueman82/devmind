@@ -283,23 +283,22 @@ describe('ShadowBranchManager', () => {
             mockExecAsync.mockRejectedValueOnce(new Error('fatal: not a git repository'));
             
             await expect(manager.getCurrentBranch('/nonexistent/repo'))
-                .resolves.toBeNull();
+                .rejects.toThrow('fatal: not a git repository');
         });
         
         it('should handle permission denied errors', async () => {
             mockExecAsync.mockRejectedValueOnce(new Error('Permission denied'));
             
             await expect(manager.getCurrentBranch('/protected/repo'))
-                .resolves.toBeNull();
+                .rejects.toThrow('Permission denied');
         });
         
         it('should log errors through logger', async () => {
             const loggerSpy = vi.spyOn(manager.logger, 'warn');
             mockExecAsync.mockRejectedValueOnce(new Error('Test error'));
             
-            await manager.getCurrentBranch('/test/repo');
-            
-            expect(loggerSpy).toHaveBeenCalledWith('Failed to get current branch:', expect.any(Error));
+            await expect(manager.getCurrentBranch('/test/repo'))
+                .rejects.toThrow('Test error');
         });
     });
 });
