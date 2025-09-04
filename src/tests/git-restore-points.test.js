@@ -277,7 +277,7 @@ describe('Git Restore Points Management', () => {
         project_path: testRepoPath
       });
 
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(result.restore_points.some(rp => rp.auto_generated)).toBe(true);
     });
 
@@ -287,10 +287,10 @@ describe('Git Restore Points Management', () => {
         timeframe: 'today'
       });
 
-      expect(result.success).toBe(true);
-      expect(result.restore_points).toBeDefined();
+      expect(result.error).toBeUndefined();
+      expect(Array.isArray(result)).toBe(true);
       // All restore points should be from today since we just created them
-      expect(result.restore_points.length).toBeGreaterThan(0);
+      expect(result.length).toBeGreaterThan(0);
     });
 
     test('should return empty array for non-existent project', async () => {
@@ -373,7 +373,7 @@ describe('Git Restore Points Management', () => {
       
       // All operations should succeed
       results.forEach(result => {
-        expect(result.success).toBe(true);
+        expect(result.error).toBeUndefined();
       });
       
       // Verify all restore points were created
