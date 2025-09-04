@@ -188,8 +188,8 @@ describe('ShadowBranchManager', () => {
     describe('syncShadowBranch', () => {
         it('should sync shadow branch with original if behind', async () => {
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'abc123\\ndef456\\n', stderr: '' }) // git log (behind)
-                .mockResolvedValueOnce({ stdout: '', stderr: '' }); // git merge
+                .mockResolvedValueOnce({ stdout: '2\\n', stderr: '' }) // git rev-list --count (behind)
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }); // git checkout && git merge
             
             const result = await manager.syncShadowBranch('/test/repo', 'shadow/main', 'main');
             
