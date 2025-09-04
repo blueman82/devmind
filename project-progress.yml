@@ -74,7 +74,11 @@ test_suite_recovery_2025_09_04_10_10:
     mcp_response_parsing:
       problem: "Tests expect direct objects, handlers return MCP format {content: [{text: JSON}]}"
       solution: "parseMCPResponse helper function to extract JSON from MCP wrapper"
-      status: "Pattern identified, needs systematic application"
+      status: "✅ IMPLEMENTED - Applied to all handler calls in git-integration tests"
+      result: "Tests still failing - root cause appears to be repository initialization/detection issues"
+      files_updated:
+        - "src/tests/git-integration.test.js - All handler calls now use parseMCPResponse()"
+        - "Helper function added to parse MCP response format"
       
   remaining_work:
     priority_1:
