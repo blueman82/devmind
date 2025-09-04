@@ -61,6 +61,13 @@ All notable changes to the AI Memory App project will be documented in this file
 - **Result**: Tests still failing - issue appears to be deeper than response format
 - **Next Step**: Debug actual handler responses to understand failure root cause
 
+### 🔧 **Path Validator API Fix (10:45)**
+- **Issue**: git-integration test mock returning wrong property name
+- **Fix**: Changed `{sanitizedPath}` to `{normalizedPath}` to match PathValidator API
+- **File**: src/tests/git-integration.test.js:59
+- **Impact**: Should resolve repository initialization failures in 12 git-integration tests
+- **Root Cause**: Mock property mismatch preventing proper path validation
+
 ### 🎯 **Test Categorization Complete**
 - **Legitimate Failures**: 40 tests need fixing
   - Git Integration: 12 failures (deeper issues beyond MCP response parsing)
