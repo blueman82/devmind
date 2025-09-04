@@ -409,9 +409,10 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       
       // Verify all projects were processed successfully
       contextResults.forEach((result, index) => {
-        expect(result.success).toBe(true);
-        expect(result.git_context).toBeDefined();
-        console.log(`📊 ${projects[index].name}: ${result.git_context.commits?.length || 0} commits`);
+        expect(result.project_path).toBeDefined();
+        expect(result.repository).toBeDefined();
+        expect(result.summary).toBeDefined();
+        console.log(`📊 ${projects[index].name}: ${result.commit_history?.length || 0} commits`);
       });
       
       // Create restore points for all projects
