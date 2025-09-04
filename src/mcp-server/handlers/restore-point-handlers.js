@@ -16,7 +16,7 @@ export class RestorePointHandlers extends GitBaseHandler {
    * @returns {Promise<{content: Array<{type: string, text: string}>}>} MCP response
    */
   async handleListRestorePoints(args) {
-    const { project_path, timeframe, include_auto_generated = false, limit = 50 } = args;
+    const { project_path, timeframe, include_auto_generated = true, limit = 50 } = args;
 
     try {
       const pathValidation = this.validateProjectPath(project_path);
