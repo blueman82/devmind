@@ -108,12 +108,11 @@ describe('Git Restore Points Management', () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.success).toBe(true);
-      expect(result.restore_point).toBeDefined();
-      expect(result.restore_point.label).toBe('stable-v1');
-      expect(result.restore_point.description).toBe('Stable version 1.0');
-      expect(result.restore_point.test_status).toBe('unknown');
-      expect(result.restore_point.auto_generated).toBe(false);
+      expect(result.error).toBeUndefined();
+      expect(result.label).toBe('stable-v1');
+      expect(result.description).toBe('Stable version 1.0');
+      expect(result.test_status).toBe('unknown');
+      expect(result.auto_generated).toBe(false);
     });
 
     test('should create restore point with all optional parameters', async () => {
@@ -125,10 +124,10 @@ describe('Git Restore Points Management', () => {
         auto_generated: true
       });
 
-      expect(result.success).toBe(true);
-      expect(result.restore_point.label).toBe('before-refactor');
-      expect(result.restore_point.test_status).toBe('passing');
-      expect(result.restore_point.auto_generated).toBe(true);
+      expect(result.error).toBeUndefined();
+      expect(result.label).toBe('before-refactor');
+      expect(result.test_status).toBe('passing');
+      expect(result.auto_generated).toBe(true);
     });
 
     test('should create restore point with minimal parameters', async () => {
@@ -137,11 +136,11 @@ describe('Git Restore Points Management', () => {
         label: 'minimal-test'
       });
 
-      expect(result.success).toBe(true);
-      expect(result.restore_point.label).toBe('minimal-test');
-      expect(result.restore_point.description).toBeNull();
-      expect(result.restore_point.test_status).toBe('unknown');
-      expect(result.restore_point.auto_generated).toBe(false);
+      expect(result.error).toBeUndefined();
+      expect(result.label).toBe('minimal-test');
+      expect(result.description).toBeNull();
+      expect(result.test_status).toBe('unknown');
+      expect(result.auto_generated).toBe(false);
     });
 
     test('should validate test_status enumeration', async () => {
@@ -155,8 +154,8 @@ describe('Git Restore Points Management', () => {
           test_status: status
         });
         
-        expect(result.success).toBe(true);
-        expect(result.restore_point.test_status).toBe(status);
+        expect(result.error).toBeUndefined();
+        expect(result.test_status).toBe(status);
       }
     });
 
@@ -166,7 +165,7 @@ describe('Git Restore Points Management', () => {
         label: 'invalid-path'
       });
 
-      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
       expect(result.error).toBeDefined();
       expect(result.error).toContain('Invalid project path');
     });
@@ -296,7 +295,7 @@ describe('Git Restore Points Management', () => {
         project_path: '/nonexistent/project'
       });
 
-      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
       expect(result.error).toContain('Invalid project path');
     });
 
@@ -395,7 +394,7 @@ describe('Git Restore Points Management', () => {
         label: 'connection-error-test'
       });
       
-      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
       expect(result.error).toContain('Database connection');
       
       // Restore database connection
@@ -416,7 +415,7 @@ describe('Git Restore Points Management', () => {
           label: label
         });
         
-        expect(result.success).toBe(false);
+        expect(result.error).toBeDefined();
         expect(result.error).toContain('Invalid label');
       }
     });
@@ -431,7 +430,7 @@ describe('Git Restore Points Management', () => {
         label: 'non-git-test'
       });
       
-      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
       expect(result.error).toContain('repository');
     });
   });
