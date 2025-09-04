@@ -85,7 +85,10 @@ describe('MCP Server Integration Tests', () => {
 
     return new Promise((resolve, reject) => {
       let responseData = '';
-      let requestTimeoutHandle;
+      let requestTimeoutHandle = setTimeout(() => {
+        mcpProcess.stdout.removeListener('data', dataHandler);
+        reject(new Error('MCP Server list_tools request timeout'));
+      }, 4000);
 
       const dataHandler = (data) => {
         responseData += data.toString();
