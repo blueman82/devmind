@@ -350,7 +350,7 @@ describe('Git Restore Points Management', () => {
       const result1 = parseMCPResponse(response1);
       
       expect(result1?.error).toBeUndefined();
-      expect(result1?.length).toBeLessThanOrEqual(100);
+      expect(result1.restore_points?.length).toBeLessThanOrEqual(100);
       
       // Test minimum limit
       const response2 = await gitToolHandlers.handleListRestorePoints({
@@ -360,7 +360,7 @@ describe('Git Restore Points Management', () => {
       const result2 = parseMCPResponse(response2);
       
       expect(result2?.error).toBeUndefined();
-      expect(result2).toHaveLength(0);
+      expect(result2.restore_points).toHaveLength(0);
     });
   });
 
@@ -387,8 +387,8 @@ describe('Git Restore Points Management', () => {
       const listResult = parseMCPResponse(listResponse);
       
       expect(listResult?.error).toBeUndefined();
-      expect(listResult).toHaveLength(3);
-      expect(listResult?.map(rp => rp.label)).toEqual(
+      expect(listResult.restore_points).toHaveLength(3);
+      expect(listResult.restore_points?.map(rp => rp.label)).toEqual(
         expect.arrayContaining(labels)
       );
     });
@@ -427,7 +427,7 @@ describe('Git Restore Points Management', () => {
       const listResult = parseMCPResponse(listResponse);
       
       expect(listResult?.error).toBeUndefined();
-      expect(listResult).toHaveLength(3);
+      expect(listResult.restore_points).toHaveLength(3);
     });
   });
 
