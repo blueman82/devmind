@@ -101,7 +101,7 @@ export class ConfigValidator {
                 logger.debug('Required path validated', { path });
             } catch {
                 results.valid = false;
-                results.errors.push(`Cannot access required path: ${path} - ${error.message}`);
+                results.errors.push(`Cannot access required path: ${path}`);
                 logger.error('Required path validation failed', { path, error: error.message });
             }
         }
