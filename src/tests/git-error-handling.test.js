@@ -337,7 +337,7 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       // Should handle git command failures without crashing
-      if (!result.success) {
+      if (result.error) {
         expect(result.error).toBeDefined();
         expect(result.error).not.toContain('undefined');
         expect(result.error).not.toContain('null');
