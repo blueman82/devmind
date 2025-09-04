@@ -112,7 +112,7 @@ describe('MCP Server Integration Tests', () => {
               return;
             }
           }
-        } catch (parseError) {
+        } catch {
           // Continue waiting for more data
         }
       };
@@ -147,7 +147,7 @@ describe('MCP Server Integration Tests', () => {
     try {
       await fs.unlink(tempDbPath);
       console.log('✅ Test database cleaned up');
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   });
