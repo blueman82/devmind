@@ -101,6 +101,26 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     clearStmt.run();
   });
 
+  // Helper function to parse MCP response format
+  const parseMCPResponse = (response) => {
+    if (!response || !response.content || !response.content[0]) {
+      console.log('🔍 DEBUG: Invalid response structure:', response);
+      return null;
+    }
+    try {
+      // MCP responses have format: {content: [{type: 'text', text: JSON}]}
+      const text = response.content[0].text;
+      // Handle error responses that start with "Error: "
+      if (text.startsWith('Error: ')) {
+        return { error: text.substring(7), success: false };
+      }
+      return JSON.parse(text);
+    } catch (err) {
+      console.log('🔍 DEBUG: Failed to parse MCP response:', response, err);
+      return { error: 'Failed to parse response', success: false };
+    }
+  };
+
   // Helper function to create repository with specified number of commits
   async function createRepository(repoPath, commitCount, prefix) {
     execSync('git init', { cwd: repoPath });
@@ -165,13 +185,14 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     test('should discover small repository quickly', async () => {
       const timer = measureTime();
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: smallRepoPath
       });
+      const result = parseMCPResponse(response);
       
       const elapsed = timer.end();
       
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(elapsed).toBeLessThan(1000); // Should complete in under 1 second
       console.log(`📊 Small repository discovery: ${elapsed.toFixed(2)}ms`);
     });
@@ -179,13 +200,14 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     test('should discover medium repository efficiently', async () => {
       const timer = measureTime();
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: mediumRepoPath
       });
+      const result = parseMCPResponse(response);
       
       const elapsed = timer.end();
       
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(elapsed).toBeLessThan(3000); // Should complete in under 3 seconds
       console.log(`📊 Medium repository discovery: ${elapsed.toFixed(2)}ms`);
     });
@@ -193,18 +215,19 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     test('should handle large repository within reasonable time', async () => {
       const timer = measureTime();
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: largeRepoPath,
         limit: 50 // Limit commits for performance
       });
+      const result = parseMCPResponse(response);
       
       const elapsed = timer.end();
       
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(elapsed).toBeLessThan(10000); // Should complete in under 10 seconds
       console.log(`📊 Large repository discovery: ${elapsed.toFixed(2)}ms`);
       
-      if (result.commit_history) {
+      if (result?.commit_history) {
         expect(result.commit_history.length).toBeLessThanOrEqual(50);
       }
     });
@@ -215,14 +238,15 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       for (const subdir of subdirs) {
         const timer = measureTime();
         
-        const result = await gitToolHandlers.handleGetGitContext({
+        const response = await gitToolHandlers.handleGetGitContext({
           project_path: join(monorepoPath, subdir),
           subdirectory: subdir
         });
+        const result = parseMCPResponse(response);
         
         const elapsed = timer.end();
         
-        expect(result.error).toBeUndefined();
+        expect(result?.error).toBeUndefined();
         expect(elapsed).toBeLessThan(2000); // Should complete in under 2 seconds
         console.log(`📊 Monorepo ${subdir} discovery: ${elapsed.toFixed(2)}ms`);
       }
@@ -233,14 +257,15 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     test('should retrieve small commit history quickly', async () => {
       const timer = measureTime();
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: smallRepoPath,
         limit: 10
       });
+      const result = parseMCPResponse(response);
       
       const elapsed = timer.end();
       
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(elapsed).toBeLessThan(500); // Should complete in under 0.5 seconds
       console.log(`📊 Small commit history (10): ${elapsed.toFixed(2)}ms`);
     });
@@ -248,14 +273,15 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     test('should handle medium commit history retrieval', async () => {
       const timer = measureTime();
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: mediumRepoPath,
         limit: 25
       });
+      const result = parseMCPResponse(response);
       
       const elapsed = timer.end();
       
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(elapsed).toBeLessThan(2000); // Should complete in under 2 seconds
       console.log(`📊 Medium commit history (25): ${elapsed.toFixed(2)}ms`);
     });
@@ -266,18 +292,19 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       for (const limit of limits) {
         const timer = measureTime();
         
-        const result = await gitToolHandlers.handleGetGitContext({
+        const response = await gitToolHandlers.handleGetGitContext({
           project_path: largeRepoPath,
           limit: limit
         });
+        const result = parseMCPResponse(response);
         
         const elapsed = timer.end();
         
-        expect(result.error).toBeUndefined();
+        expect(result?.error).toBeUndefined();
         expect(elapsed).toBeLessThan(limit * 100); // Linear scaling expectation
         console.log(`📊 Large commit history (${limit}): ${elapsed.toFixed(2)}ms`);
         
-        if (result.commit_history) {
+        if (result?.commit_history) {
           expect(result.commit_history.length).toBeLessThanOrEqual(limit);
         }
       }
@@ -287,15 +314,16 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       // Test subdirectory filtering performance
       const timer = measureTime();
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: monorepoPath,
         subdirectory: 'frontend',
         limit: 20
       });
+      const result = parseMCPResponse(response);
       
       const elapsed = timer.end();
       
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(elapsed).toBeLessThan(3000); // Filtered queries should still be fast
       console.log(`📊 Filtered commit history (frontend): ${elapsed.toFixed(2)}ms`);
     });
@@ -309,10 +337,11 @@ describe('Git Performance Testing and Load Benchmarks', () => {
         const timer = measureTime();
         
         // Ensure repository is indexed in database
-        await gitToolHandlers.handleGetGitContext({
+        const response = await gitToolHandlers.handleGetGitContext({
           project_path: repoPath,
           limit: 5
         });
+        const result = parseMCPResponse(response);
         
         const elapsed = timer.end();
         
