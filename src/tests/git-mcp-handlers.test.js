@@ -438,7 +438,7 @@ describe('Git MCP Tool Handlers', () => {
       });
       
       expect(missingPathResult.content[0].text).toBe(
-        'Error: project_path and label are required'
+        'Error: project_path is required'
       );
       
       // Missing label
@@ -447,7 +447,7 @@ describe('Git MCP Tool Handlers', () => {
       });
       
       expect(missingLabelResult.content[0].text).toBe(
-        'Error: project_path and label are required'
+        'Error: label is required'
       );
       
       console.log('✅ Missing required parameters handled correctly');
