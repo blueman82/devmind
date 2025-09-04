@@ -378,7 +378,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const allFeatureRestores = parseMCPResponse(allFeatureRestoresResponse);
       
       expect(allFeatureRestores).toBeTruthy();
-      expect(Array.isArray(allFeatureRestores)).toBe(true);
+      expect(Array.isArray(allFeatureRestores.restore_points)).toBe(true);
       expect(allFeatureRestores.length).toBe(features.length);
       
       console.log('✅ Feature branch development workflow successful');
@@ -617,9 +617,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const stableRestores = parseMCPResponse(stableRestoresResponse);
       
       expect(stableRestores).toBeTruthy();
-      expect(Array.isArray(stableRestores)).toBe(true);
+      expect(Array.isArray(stableRestores.restore_points)).toBe(true);
       
-      const stablePoint = stableRestores.find(rp => 
+      const stablePoint = stableRestores.restore_points.find(rp => 
         rp.label === 'stable-release' && rp.test_status === 'passing'
       );
       
@@ -705,8 +705,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const allRestores = parseMCPResponse(allRestoresResponse);
       
       expect(allRestores).toBeTruthy();
-      expect(Array.isArray(allRestores)).toBe(true);
-      const integrationPoint = allRestores.find(rp => rp.label === 'sprint-integration');
+      expect(Array.isArray(allRestores.restore_points)).toBe(true);
+      const integrationPoint = allRestores.restore_points.find(rp => rp.label === 'sprint-integration');
       expect(integrationPoint).toBeDefined();
       
       console.log('✅ Team collaboration workflow successful');
@@ -747,7 +747,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const ciRestores = parseMCPResponse(ciRestoresResponse);
       
       expect(ciRestores).toBeTruthy();
-      expect(Array.isArray(ciRestores)).toBe(true);
+      expect(Array.isArray(ciRestores.restore_points)).toBe(true);
       
       const autoCiPoints = ciRestores.restore_points.filter(rp => 
         rp.auto_generated && rp.label.startsWith('ci-')
@@ -820,9 +820,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const allRestores = parseMCPResponse(allRestoresResponse);
       
       expect(allRestores).toBeTruthy();
-      expect(Array.isArray(allRestores)).toBe(true);
-      const beforeIssue = allRestores.find(rp => rp.label === 'before-db-issue');
-      const afterIssue = allRestores.find(rp => rp.label === 'after-recovery');
+      expect(Array.isArray(allRestores.restore_points)).toBe(true);
+      const beforeIssue = allRestores.restore_points.find(rp => rp.label === 'before-db-issue');
+      const afterIssue = allRestores.restore_points.find(rp => rp.label === 'after-recovery');
       
       expect(beforeIssue).toBeDefined();
       expect(afterIssue).toBeDefined();
