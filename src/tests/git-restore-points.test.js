@@ -99,48 +99,67 @@ describe('Git Restore Points Management', () => {
     clearStmt.run();
   });
 
+  // Helper function to parse MCP response format
+  const parseMCPResponse = (response) => {
+    if (!response || !response.content || !response.content[0]) {
+      return null;
+    }
+    try {
+      const text = response.content[0].text;
+      if (text.startsWith('Error: ')) {
+        return { error: text.substring(7) };
+      }
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  };
+
   describe('Create Restore Point', () => {
     test('should create basic restore point with required parameters', async () => {
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'stable-v1',
         description: 'Stable version 1.0'
       });
+      const result = parseMCPResponse(response);
 
       expect(result).toBeDefined();
-      expect(result.error).toBeUndefined();
-      expect(result.label).toBe('stable-v1');
-      expect(result.description).toBe('Stable version 1.0');
-      expect(result.test_status).toBe('unknown');
-      expect(result.auto_generated).toBe(false);
+      expect(result?.error).toBeUndefined();
+      expect(result?.label).toBe('stable-v1');
+      expect(result?.description).toBe('Stable version 1.0');
+      expect(result?.test_status).toBe('unknown');
+      expect(result?.auto_generated).toBe(false);
     });
 
     test('should create restore point with all optional parameters', async () => {
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'before-refactor',
         description: 'Before major refactoring',
         test_status: 'passing',
         auto_generated: true
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeUndefined();
-      expect(result.label).toBe('before-refactor');
-      expect(result.test_status).toBe('passing');
-      expect(result.auto_generated).toBe(true);
+      expect(result?.error).toBeUndefined();
+      expect(result?.label).toBe('before-refactor');
+      expect(result?.test_status).toBe('passing');
+      expect(result?.auto_generated).toBe(true);
     });
 
     test('should create restore point with minimal parameters', async () => {
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'minimal-test'
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeUndefined();
-      expect(result.label).toBe('minimal-test');
-      expect(result.description).toBeNull();
-      expect(result.test_status).toBe('unknown');
-      expect(result.auto_generated).toBe(false);
+      expect(result?.error).toBeUndefined();
+      expect(result?.label).toBe('minimal-test');
+      expect(result?.description).toBeNull();
+      expect(result?.test_status).toBe('unknown');
+      expect(result?.auto_generated).toBe(false);
     });
 
     test('should validate test_status enumeration', async () => {
@@ -148,65 +167,71 @@ describe('Git Restore Points Management', () => {
       const validStatuses = ['passing', 'failing', 'unknown'];
       
       for (const status of validStatuses) {
-        const result = await gitToolHandlers.handleCreateRestorePoint({
+        const response = await gitToolHandlers.handleCreateRestorePoint({
           project_path: testRepoPath,
           label: `test-${status}`,
           test_status: status
         });
+        const result = parseMCPResponse(response);
         
-        expect(result.error).toBeUndefined();
-        expect(result.test_status).toBe(status);
+        expect(result?.error).toBeUndefined();
+        expect(result?.test_status).toBe(status);
       }
     });
 
     test('should handle invalid project path', async () => {
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: '/nonexistent/path',
         label: 'invalid-path'
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('Invalid project path');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('Invalid project path');
     });
 
     test('should prevent duplicate labels in same project', async () => {
       // Create first restore point
-      const result1 = await gitToolHandlers.handleCreateRestorePoint({
+      const response1 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'duplicate-test',
         description: 'First attempt'
       });
+      const result1 = parseMCPResponse(response1);
       
-      expect(result1.error).toBeUndefined();
+      expect(result1?.error).toBeUndefined();
       
       // Try to create second restore point with same label
-      const result2 = await gitToolHandlers.handleCreateRestorePoint({
+      const response2 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'duplicate-test',
         description: 'Second attempt'
       });
+      const result2 = parseMCPResponse(response2);
       
-      expect(result2.error).toBeDefined();
-      expect(result2.error).toContain('already exists');
+      expect(result2?.error).toBeDefined();
+      expect(result2?.error).toContain('already exists');
     });
 
     test('should handle missing required parameters', async () => {
       // Test missing project_path
-      const result1 = await gitToolHandlers.handleCreateRestorePoint({
+      const response1 = await gitToolHandlers.handleCreateRestorePoint({
         label: 'missing-path'
       });
+      const result1 = parseMCPResponse(response1);
       
-      expect(result1.error).toBeDefined();
-      expect(result1.error).toContain('project_path is required');
+      expect(result1?.error).toBeDefined();
+      expect(result1?.error).toContain('project_path is required');
       
       // Test missing label
-      const result2 = await gitToolHandlers.handleCreateRestorePoint({
+      const response2 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath
       });
+      const result2 = parseMCPResponse(response2);
       
-      expect(result2.error).toBeDefined();
-      expect(result2.error).toContain('label is required');
+      expect(result2?.error).toBeDefined();
+      expect(result2?.error).toContain('label is required');
     });
   });
 
@@ -237,88 +262,96 @@ describe('Git Restore Points Management', () => {
     });
 
     test('should list all restore points for project', async () => {
-      const result = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(Array.isArray(result)).toBe(true);
       expect(result).toHaveLength(3);
-      expect(result.map(rp => rp.label)).toEqual(
+      expect(result?.map(rp => rp.label)).toEqual(
         expect.arrayContaining(['v1.0.0', 'before-refactor', 'auto-backup'])
       );
     });
 
     test('should limit number of results', async () => {
-      const result = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath,
         limit: 2
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(Array.isArray(result)).toBe(true);
       expect(result).toHaveLength(2);
     });
 
     test('should exclude auto-generated restore points when requested', async () => {
-      const result = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath,
         include_auto_generated: false
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(Array.isArray(result)).toBe(true);
       expect(result).toHaveLength(2);
-      expect(result.every(rp => !rp.auto_generated)).toBe(true);
+      expect(result?.every(rp => !rp.auto_generated)).toBe(true);
     });
 
     test('should include auto-generated restore points by default', async () => {
-      const result = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeUndefined();
-      expect(result.some(rp => rp.auto_generated)).toBe(true);
+      expect(result?.error).toBeUndefined();
+      expect(result?.some(rp => rp.auto_generated)).toBe(true);
     });
 
     test('should handle timeframe filtering', async () => {
-      const result = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath,
         timeframe: 'today'
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(Array.isArray(result)).toBe(true);
       // All restore points should be from today since we just created them
-      expect(result.length).toBeGreaterThan(0);
+      expect(result?.length).toBeGreaterThan(0);
     });
 
     test('should return empty array for non-existent project', async () => {
-      const result = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: '/nonexistent/project'
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('Invalid project path');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('Invalid project path');
     });
 
     test('should validate limit parameter bounds', async () => {
       // Test maximum limit
-      const result1 = await gitToolHandlers.handleListRestorePoints({
+      const response1 = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath,
         limit: 150 // Over max of 100
       });
+      const result1 = parseMCPResponse(response1);
       
-      expect(result1.error).toBeUndefined();
-      expect(result1.length).toBeLessThanOrEqual(100);
+      expect(result1?.error).toBeUndefined();
+      expect(result1?.length).toBeLessThanOrEqual(100);
       
       // Test minimum limit
-      const result2 = await gitToolHandlers.handleListRestorePoints({
+      const response2 = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath,
         limit: 0
       });
+      const result2 = parseMCPResponse(response2);
       
-      expect(result2.error).toBeUndefined();
+      expect(result2?.error).toBeUndefined();
       expect(result2).toHaveLength(0);
     });
   });
@@ -329,23 +362,25 @@ describe('Git Restore Points Management', () => {
       
       // Create multiple restore points
       for (const label of labels) {
-        const createResult = await gitToolHandlers.handleCreateRestorePoint({
+        const createResponse = await gitToolHandlers.handleCreateRestorePoint({
           project_path: testRepoPath,
           label: label,
           description: `Description for ${label}`
         });
+        const createResult = parseMCPResponse(createResponse);
         
-        expect(createResult.error).toBeUndefined();
+        expect(createResult?.error).toBeUndefined();
       }
       
       // List all restore points
-      const listResult = await gitToolHandlers.handleListRestorePoints({
+      const listResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath
       });
+      const listResult = parseMCPResponse(listResponse);
       
-      expect(listResult.error).toBeUndefined();
+      expect(listResult?.error).toBeUndefined();
       expect(listResult).toHaveLength(3);
-      expect(listResult.map(rp => rp.label)).toEqual(
+      expect(listResult?.map(rp => rp.label)).toEqual(
         expect.arrayContaining(labels)
       );
     });
@@ -369,19 +404,21 @@ describe('Git Restore Points Management', () => {
         })
       ];
       
-      const results = await Promise.all(concurrentOperations);
+      const responses = await Promise.all(concurrentOperations);
+      const results = responses.map(response => parseMCPResponse(response));
       
       // All operations should succeed
       results.forEach(result => {
-        expect(result.error).toBeUndefined();
+        expect(result?.error).toBeUndefined();
       });
       
       // Verify all restore points were created
-      const listResult = await gitToolHandlers.handleListRestorePoints({
+      const listResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: testRepoPath
       });
+      const listResult = parseMCPResponse(listResponse);
       
-      expect(listResult.error).toBeUndefined();
+      expect(listResult?.error).toBeUndefined();
       expect(listResult).toHaveLength(3);
     });
   });
@@ -392,13 +429,14 @@ describe('Git Restore Points Management', () => {
       const originalDb = gitToolHandlers.dbManager;
       gitToolHandlers.dbManager = null;
       
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'connection-error-test'
       });
+      const result = parseMCPResponse(response);
       
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('Database connection');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('Database connection');
       
       // Restore database connection
       gitToolHandlers.dbManager = originalDb;
@@ -413,13 +451,14 @@ describe('Git Restore Points Management', () => {
       ];
       
       for (const label of invalidLabels) {
-        const result = await gitToolHandlers.handleCreateRestorePoint({
+        const response = await gitToolHandlers.handleCreateRestorePoint({
           project_path: testRepoPath,
           label: label
         });
+        const result = parseMCPResponse(response);
         
-        expect(result.error).toBeDefined();
-        expect(result.error).toContain('Invalid label');
+        expect(result?.error).toBeDefined();
+        expect(result?.error).toContain('Invalid label');
       }
     });
 
@@ -428,13 +467,14 @@ describe('Git Restore Points Management', () => {
       const nonGitPath = join(tempDir, 'non-git-dir');
       await fs.mkdir(nonGitPath, { recursive: true });
       
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: nonGitPath,
         label: 'non-git-test'
       });
+      const result = parseMCPResponse(response);
       
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('repository');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('repository');
     });
   });
 });
