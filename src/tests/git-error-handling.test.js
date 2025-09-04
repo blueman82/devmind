@@ -312,9 +312,23 @@ describe('Git Error Handling and Edge Cases', () => {
   });
 
   describe('Parameter Validation Error Handling', () => {
-    test('should handle edge case restore point parameters', async () => {
+    test('should reject invalid restore point parameters', async () => {
+      const invalidParams = [
+        { project_path: testRepoPath, label: '' }, // Empty label - correctly rejected
+        { project_path: testRepoPath, label: '   ' }, // Whitespace only - correctly rejected
+      ];
+
+      for (const params of invalidParams) {
+        const response = await gitToolHandlers.handleCreateRestorePoint(params);
+        const result = parseMCPResponse(response);
+        
+        // Handlers correctly reject truly invalid parameters
+        expect(result?.error).toBeDefined();
+      }
+    });
+
+    test('should accept edge case restore point parameters', async () => {
       const edgeCaseParams = [
-        { project_path: testRepoPath, label: '' }, // Empty label - currently accepted
         { project_path: testRepoPath, label: 'a'.repeat(256) }, // Long label - currently accepted
         { project_path: testRepoPath, label: 'valid-label-1', test_status: 'invalid' }, // Invalid enum - currently accepted as string
         { project_path: testRepoPath, label: 'valid-label-2', auto_generated: 'not-boolean' } // Invalid boolean - currently accepted
@@ -324,7 +338,7 @@ describe('Git Error Handling and Edge Cases', () => {
         const response = await gitToolHandlers.handleCreateRestorePoint(params);
         const result = parseMCPResponse(response);
         
-        // Handlers currently accept these parameters and create restore points successfully
+        // Handlers currently accept these edge case parameters and create restore points successfully
         expect(result?.error).toBeUndefined();
         expect(result?.restore_point?.label).toBeDefined();
       }
