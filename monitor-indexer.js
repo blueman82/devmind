@@ -139,7 +139,7 @@ async function displayStatus() {
                         console.log(`     • ${name.substring(0, 16)}${name.length > 16 ? '...' : ''}`);
                     });
                 }
-            } catch (error) {
+            } catch {
                 console.log(`   Directory Status: ${colorize('red', '❌ NOT FOUND')}`);
                 console.log(`   Note: ${colorize('yellow', 'Waiting for Claude projects to be created...')}`);
             }
