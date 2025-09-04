@@ -598,7 +598,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
           });
           
           expect(previewResult).toHaveProperty('content');
-          const previewResponse = JSON.parse(previewResult.content[0].text);
+          const _previewResponse = JSON.parse(previewResult.content[0].text);
           
           if (previewResponse.preview?.status === 'no_changes') {
             expect(previewResponse.preview.status).toBe('no_changes');
@@ -790,7 +790,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
         });
         
         expect(contextResult).toHaveProperty('content');
-        const contextResponse = JSON.parse(contextResult.content[0].text);
+        const _contextResponse = JSON.parse(contextResult.content[0].text);
         console.log('✅ Step 1: Repository discovered and indexed');
         
         // Step 2: Create restore point
@@ -812,7 +812,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
             restore_point_id: createResponse.restore_point.id
           });
           
-          const previewResponse = JSON.parse(previewResult.content[0].text);
+          const _previewResponse = JSON.parse(previewResult.content[0].text);
           console.log('✅ Step 3: Preview generated');
           
           // Step 4: Dry run restore
