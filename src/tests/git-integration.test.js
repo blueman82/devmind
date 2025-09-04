@@ -212,6 +212,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
   // Helper function to parse MCP response format
   const parseMCPResponse = (response) => {
     if (!response || !response.content || !response.content[0]) {
+      console.log('🔍 DEBUG: Invalid response structure:', response);
       return null;
     }
     try {
@@ -222,7 +223,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         return { error: text.substring(7), success: false };
       }
       return JSON.parse(text);
-    } catch {
+    } catch (error) {
+      console.log('🔍 DEBUG: JSON parse failed for:', response.content[0]?.text);
       return null;
     }
   };
