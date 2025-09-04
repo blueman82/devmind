@@ -253,7 +253,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const initialRestore = parseMCPResponse(initialRestoreResponse);
       
       expect(initialRestore).toBeTruthy();
-      expect(initialRestore.label).toBe('initial-state');
+      expect(initialRestore.restore_point.label).toBe('initial-state');
       
       // Step 3: Check branch context
       const branchContextResponse = await gitToolHandlers.handleGetGitContext({
@@ -273,7 +273,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       expect(restorePointsList).toBeTruthy();
       expect(Array.isArray(restorePointsList)).toBe(true);
       expect(restorePointsList).toHaveLength(1);
-      expect(restorePointsList[0].label).toBe('initial-state');
+      expect(restorePointsList.restore_points[0].label).toBe('initial-state');
       
       // Step 5: Create working state restore point
       const workingRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
@@ -285,7 +285,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const workingRestore = parseMCPResponse(workingRestoreResponse);
       
       expect(workingRestore).toBeTruthy();
-      expect(workingRestore.label).toBe('before-refactor');
+      expect(workingRestore.restore_point.label).toBe('before-refactor');
       
       // Step 6: Verify complete workflow
       const finalContextResponse = await gitToolHandlers.handleGetGitContext({
@@ -328,7 +328,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         const componentRestore = parseMCPResponse(componentRestoreResponse);
         
         expect(componentRestore).toBeTruthy();
-        expect(componentRestore.label).toBe(`${component}-stable`);
+        expect(componentRestore.restore_point.label).toBe(`${component}-stable`);
       }
       
       // Test monorepo root context
@@ -368,7 +368,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         const featureRestore = parseMCPResponse(featureRestoreResponse);
         
         expect(featureRestore).toBeTruthy();
-        expect(featureRestore.label).toBe(`feature-${feature}-ready`);
+        expect(featureRestore.restore_point.label).toBe(`feature-${feature}-ready`);
       }
       
       // List all feature restore points
@@ -431,7 +431,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       // Verify all restore points were created
       restoreResults.forEach(result => {
         expect(result).toBeTruthy();
-        expect(result.label).toBeDefined();
+        expect(result.restore_point.label).toBeDefined();
       });
       
       console.log('✅ Multiple projects simultaneous processing successful');
