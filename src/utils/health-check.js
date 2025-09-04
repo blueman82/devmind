@@ -115,7 +115,8 @@ export class HealthChecker {
             const startTime = Date.now();
             
             // Test basic query
-            const _result = this.dbManager.db.prepare('SELECT 1 as test').get();
+            // Test basic query
+            this.dbManager.db.prepare('SELECT 1 as test').get();
             const queryTime = Date.now() - startTime;
             
             // Get database statistics
