@@ -170,7 +170,7 @@ describe('ShadowBranchManager', () => {
             const result = await manager.switchToShadowBranch('/test/repo', 'shadow/main');
             
             expect(result.stashed).toBe(true);
-            expect(mockExecAsync).toHaveBeenCalledWith('git stash push -m "Auto-stash for shadow branch switch"', { cwd: '/test/repo' });
+            expect(mockExecAsync).toHaveBeenCalledWith('git stash push -m "Auto-commit: temporary stash"', { cwd: '/test/repo' });
         });
         
         it('should not stash if no uncommitted changes', async () => {
