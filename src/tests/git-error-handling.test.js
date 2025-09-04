@@ -96,15 +96,32 @@ describe('Git Error Handling and Edge Cases', () => {
     clearStmt.run();
   });
 
+  // Helper function to parse MCP response format
+  const parseMCPResponse = (response) => {
+    if (!response || !response.content || !response.content[0]) {
+      return null;
+    }
+    try {
+      const text = response.content[0].text;
+      if (text.startsWith('Error: ')) {
+        return { error: text.substring(7) };
+      }
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  };
+
   describe('Invalid Path Handling', () => {
     test('should handle non-existent paths gracefully', async () => {
       const nonExistentPath = '/absolutely/nonexistent/path/that/should/not/exist';
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: nonExistentPath
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
+      expect(result?.error).toBeDefined();
       expect(result.error).toContain('Invalid project path');
       expect(result.error).toContain('does not exist');
     });
@@ -117,9 +134,11 @@ describe('Git Error Handling and Edge Cases', () => {
         gitToolHandlers.handleGetGitContext({}) // Missing project_path entirely
       ]);
 
-      results.forEach(result => {
-        expect(result.error).toBeDefined();
-        expect(result.error).toContain('project_path');
+      const parsedResults = results.map(parseMCPResponse);
+      
+      parsedResults.forEach(result => {
+        expect(result?.error).toBeDefined();
+        expect(result?.error).toContain('project_path');
       });
     });
 
@@ -132,11 +151,12 @@ describe('Git Error Handling and Edge Cases', () => {
       ];
 
       for (const invalidPath of invalidPaths) {
-        const result = await gitToolHandlers.handleGetGitContext({
+        const response = await gitToolHandlers.handleGetGitContext({
           project_path: invalidPath
         });
+        const result = parseMCPResponse(response);
 
-        expect(result.error).toBeDefined();
+        expect(result?.error).toBeDefined();
       }
     });
 
