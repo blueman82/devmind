@@ -276,9 +276,9 @@ describe('Git Restore Points Management', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeUndefined();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result).toHaveLength(3);
-      expect(result?.map(rp => rp.label)).toEqual(
+      expect(Array.isArray(result.restore_points)).toBe(true);
+      expect(result.restore_points).toHaveLength(3);
+      expect(result.restore_points?.map(rp => rp.label)).toEqual(
         expect.arrayContaining(['v1.0.0', 'before-refactor', 'auto-backup'])
       );
     });
@@ -291,8 +291,8 @@ describe('Git Restore Points Management', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeUndefined();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result).toHaveLength(2);
+      expect(Array.isArray(result.restore_points)).toBe(true);
+      expect(result.restore_points).toHaveLength(2);
     });
 
     test('should exclude auto-generated restore points when requested', async () => {
@@ -303,9 +303,9 @@ describe('Git Restore Points Management', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeUndefined();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result).toHaveLength(2);
-      expect(result?.every(rp => !rp.auto_generated)).toBe(true);
+      expect(Array.isArray(result.restore_points)).toBe(true);
+      expect(result.restore_points).toHaveLength(2);
+      expect(result.restore_points?.every(rp => !rp.auto_generated)).toBe(true);
     });
 
     test('should include auto-generated restore points by default', async () => {
@@ -315,7 +315,7 @@ describe('Git Restore Points Management', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeUndefined();
-      expect(result?.some(rp => rp.auto_generated)).toBe(true);
+      expect(result.restore_points?.some(rp => rp.auto_generated)).toBe(true);
     });
 
     test('should handle timeframe filtering', async () => {
@@ -326,9 +326,9 @@ describe('Git Restore Points Management', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeUndefined();
-      expect(Array.isArray(result)).toBe(true);
+      expect(Array.isArray(result.restore_points)).toBe(true);
       // All restore points should be from today since we just created them
-      expect(result?.length).toBeGreaterThan(0);
+      expect(result.restore_points?.length).toBeGreaterThan(0);
     });
 
     test('should return empty array for non-existent project', async () => {
