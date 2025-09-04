@@ -592,7 +592,7 @@ describe('Git Error Handling and Edge Cases', () => {
         if (result?.error) {
           expect(result?.error).toBeDefined();
         } else {
-          expect(Array.isArray(result)).toBe(true);
+          expect(Array.isArray(result.restore_points)).toBe(true);
         }
       }
     });
