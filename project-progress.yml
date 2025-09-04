@@ -40,6 +40,14 @@ test_suite_recovery_2025_09_04_10_10:
         - "Misc: 2 failures (logger spy, branch filtering)"
       key_discovery: "35 'failures' are intentional error validation tests - should NOT be fixed"
       
+    path_validator_api_fix:
+      status: "✅ Bug Fix Applied"
+      date: "2025-09-04 10:45"
+      issue: "git-integration tests failing due to path validator mock returning wrong property"
+      fix: "Changed mock return from {sanitizedPath} to {normalizedPath} to match PathValidator API"
+      target: "src/tests/git-integration.test.js:59"
+      impact: "Should resolve repository initialization failures in integration tests"
+      
   metrics:
     baseline:
       total_tests: 205
