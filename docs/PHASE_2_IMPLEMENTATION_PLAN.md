@@ -18,6 +18,10 @@
 - ✅ **Test Categorization Complete**: 
   - 40 legitimate failures to fix
   - 35 intentional error validation tests (should remain "failing")
+- ✅ **MCP Response Parsing**: Implemented across all git-integration tests
+  - Added `parseMCPResponse()` helper function
+  - Applied to all `gitToolHandlers.handle*` calls
+  - Tests still failing - deeper issues identified
 
 ### Remaining Work
 - 🔧 Git Integration: 12 failures (MCP response parsing)
