@@ -289,14 +289,14 @@ describe('Git Tools Tests', () => {
     });
     
     expect(missingPathResult.content).toBeTruthy(); // Should return content for missing path
-    expect(missingPathResult.content[0].text).toBe('Error: project_path and label are required'); // Should error on missing project_path
+    expect(missingPathResult.content[0].text).toBe('Error: project_path is required'); // Should error on missing project_path
     
     const missingLabelResult = await gitToolHandlers.handleCreateRestorePoint({
       project_path: testRepoPath
     });
     
     expect(missingLabelResult.content).toBeTruthy(); // Should return content for missing label
-    expect(missingLabelResult.content[0].text).toBe('Error: project_path and label are required'); // Should error on missing label
+    expect(missingLabelResult.content[0].text).toBe('Error: label is required'); // Should error on missing label
     
     // Test invalid path validation
     const originalValidate = pathValidator.validateProjectPath;
