@@ -519,40 +519,45 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const workflowSteps = [];
       
       // Step 1: Start of day - check project status
-      const morningContext = await gitToolHandlers.handleGetGitContext({
+      const morningContextResponse = await gitToolHandlers.handleGetGitContext({
         project_path: projectRepoPath
       });
+      const morningContext = parseMCPResponse(morningContextResponse);
       workflowSteps.push({ step: 'morning_context', success: morningContext.success });
       
       // Step 2: Create restore point before starting work
-      const preWorkRestore = await gitToolHandlers.handleCreateRestorePoint({
+      const preWorkRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'start-of-day',
         description: 'Clean state before starting daily work'
       });
+      const preWorkRestore = parseMCPResponse(preWorkRestoreResponse);
       workflowSteps.push({ step: 'pre_work_restore', success: preWorkRestore.success });
       
       // Step 3: Work on feature branch
-      const featureBranchContext = await gitToolHandlers.handleGetGitContext({
+      const featureBranchContextResponse = await gitToolHandlers.handleGetGitContext({
         project_path: projectRepoPath,
         branch: 'development'
       });
+      const featureBranchContext = parseMCPResponse(featureBranchContextResponse);
       workflowSteps.push({ step: 'feature_branch_context', success: featureBranchContext.success });
       
       // Step 4: Create milestone restore point
-      const milestoneRestore = await gitToolHandlers.handleCreateRestorePoint({
+      const milestoneRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'feature-milestone',
         description: 'Feature development milestone reached',
         test_status: 'passing'
       });
+      const milestoneRestore = parseMCPResponse(milestoneRestoreResponse);
       workflowSteps.push({ step: 'milestone_restore', success: milestoneRestore.success });
       
       // Step 5: Review daily progress
-      const dailyRestores = await gitToolHandlers.handleListRestorePoints({
+      const dailyRestoresResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: projectRepoPath,
         timeframe: 'today'
       });
+      const dailyRestores = parseMCPResponse(dailyRestoresResponse);
       workflowSteps.push({ step: 'daily_review', success: dailyRestores.success });
       
       // Step 6: End of day - create final restore point
