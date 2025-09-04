@@ -169,11 +169,12 @@ describe('Git Error Handling and Edge Cases', () => {
         // Try to restrict permissions (may not work on all systems)
         await fs.chmod(restrictedPath, 0o000);
         
-        const result = await gitToolHandlers.handleGetGitContext({
+        const response = await gitToolHandlers.handleGetGitContext({
           project_path: restrictedPath
         });
+        const result = parseMCPResponse(response);
 
-        expect(result.error).toBeDefined();
+        expect(result?.error).toBeDefined();
         
         // Restore permissions for cleanup
         await fs.chmod(restrictedPath, 0o755);
@@ -186,48 +187,52 @@ describe('Git Error Handling and Edge Cases', () => {
 
   describe('Non-Git Directory Handling', () => {
     test('should handle directories that are not git repositories', async () => {
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: nonGitPath
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('repository');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('repository');
     });
 
     test('should handle empty directories', async () => {
       const emptyPath = join(tempDir, 'empty-directory');
       await fs.mkdir(emptyPath, { recursive: true });
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: emptyPath
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('repository');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('repository');
     });
 
     test('should detect when git command is not available', async () => {
       // This test would require mocking the git command or running in environment without git
       // For now, we'll test with an invalid git command path
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: nonGitPath
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
+      expect(result?.error).toBeDefined();
     });
   });
 
   describe('Corrupted Repository Handling', () => {
     test('should handle corrupted git repositories gracefully', async () => {
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: corruptedRepoPath
       });
+      const result = parseMCPResponse(response);
 
       // Should either succeed with empty results or fail gracefully
-      if (result.error) {
-        expect(result.error).toBeDefined();
-        expect(result.error).not.toContain('undefined');
+      if (result?.error) {
+        expect(result?.error).toBeDefined();
+        expect(result?.error).not.toContain('undefined');
       } else {
         // If it succeeds, should have project_path and repository info
         expect(result.project_path).toBeDefined();
@@ -243,12 +248,13 @@ describe('Git Error Handling and Edge Cases', () => {
       execSync('git init', { cwd: tempRepoPath });
       await fs.rm(join(tempRepoPath, '.git'), { recursive: true, force: true });
       
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: tempRepoPath
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('repository');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('repository');
     });
   });
 
@@ -258,13 +264,14 @@ describe('Git Error Handling and Edge Cases', () => {
       const originalDb = gitToolHandlers.dbManager;
       gitToolHandlers.dbManager = null;
       
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'db-error-test'
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('Database');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('Database');
       
       // Restore database connection
       gitToolHandlers.dbManager = originalDb;
@@ -279,25 +286,27 @@ describe('Git Error Handling and Edge Cases', () => {
       });
       
       // Try to create another with the same label (should violate unique constraint)
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'constraint-test',
         description: 'Duplicate label test'
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('already exists');
+      expect(result?.error).toBeDefined();
+      expect(result?.error).toContain('already exists');
     });
 
     test('should handle database transaction failures', async () => {
       // Test with invalid data that should cause transaction rollback
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: null, // Invalid label should cause failure
         description: 'Transaction failure test'
       });
+      const result = parseMCPResponse(response);
 
-      expect(result.error).toBeDefined();
+      expect(result?.error).toBeDefined();
     });
   });
 
@@ -311,9 +320,10 @@ describe('Git Error Handling and Edge Cases', () => {
       ];
 
       for (const params of invalidParams) {
-        const result = await gitToolHandlers.handleCreateRestorePoint(params);
+        const response = await gitToolHandlers.handleCreateRestorePoint(params);
+        const result = parseMCPResponse(response);
         
-        expect(result.error).toBeDefined();
+        expect(result?.error).toBeDefined();
       }
     });
 
