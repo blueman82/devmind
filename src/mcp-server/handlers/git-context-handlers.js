@@ -115,7 +115,11 @@ export class GitContextHandlers extends GitBaseHandler {
         const effectiveSubdirectory = subdirectory || 
           (repository.isMonorepoSubdirectory ? repository.subdirectoryPath : null);
         
-        if (effectiveSubdirectory && effectiveSubdirectory !== '.') {
+        // Only pass subdirectory if it's valid and not the root
+        if (effectiveSubdirectory && 
+            effectiveSubdirectory !== '.' && 
+            !effectiveSubdirectory.includes('..') &&
+            /^[a-zA-Z0-9_\-/.]+$/.test(effectiveSubdirectory)) {
           options.subdirectory = effectiveSubdirectory;
         }
 
