@@ -434,8 +434,8 @@ describe('Git Restore Points Management', () => {
   describe('Error Handling and Edge Cases', () => {
     test('should handle database connection errors gracefully', async () => {
       // Close the database to simulate connection error
-      const originalDb = gitToolHandlers.dbManager;
-      gitToolHandlers.dbManager = null;
+      const originalDb = gitToolHandlers.restorePointHandlers.dbManager;
+      gitToolHandlers.restorePointHandlers.dbManager = null;
       
       const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
