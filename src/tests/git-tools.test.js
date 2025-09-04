@@ -6,7 +6,6 @@ import GitManager from '../git/git-manager.js';
 import GitSchema from '../database/git-schema.js';
 import { GitToolHandlers } from '../mcp-server/handlers/git-tool-handlers.js';
 import DatabaseManager from '../database/database-manager.js';
-import Database from 'better-sqlite3';
 import { execSync } from 'child_process';
 import pathValidator from '../utils/path-validator.js';
 
