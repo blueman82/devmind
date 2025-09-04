@@ -11,7 +11,7 @@ export class RestorePointHandlers extends GitBaseHandler {
    * @param {Object} args - Tool arguments
    * @param {string} args.project_path - Path to the project directory
    * @param {string} [args.timeframe] - Filter by timeframe (e.g., "last week")
-   * @param {boolean} [args.include_auto_generated=false] - Include auto-generated restore points
+   * @param {boolean} [args.include_auto_generated=true] - Include auto-generated restore points
    * @param {number} [args.limit=50] - Maximum number of restore points to return
    * @returns {Promise<{content: Array<{type: string, text: string}>}>} MCP response
    */
