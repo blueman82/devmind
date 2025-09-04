@@ -102,16 +102,20 @@ describe('Git Restore Points Management', () => {
   // Helper function to parse MCP response format
   const parseMCPResponse = (response) => {
     if (!response || !response.content || !response.content[0]) {
+      console.log('🔍 DEBUG: Invalid response structure:', response);
       return null;
     }
     try {
+      // MCP responses have format: {content: [{type: 'text', text: JSON}]}
       const text = response.content[0].text;
+      // Handle error responses that start with "Error: "
       if (text.startsWith('Error: ')) {
-        return { error: text.substring(7) };
+        return { error: text.substring(7), success: false };
       }
       return JSON.parse(text);
-    } catch {
-      return null;
+    } catch (err) {
+      console.log('🔍 DEBUG: Failed to parse MCP response:', response, err);
+      return { error: 'Failed to parse response', success: false };
     }
   };
 
