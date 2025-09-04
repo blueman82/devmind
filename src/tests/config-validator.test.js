@@ -123,7 +123,7 @@ describe('ConfigValidator Tests', () => {
     try {
       await fs.rm(tempTestDir, { recursive: true, force: true });
       console.log('✅ Test environment cleaned up');
-    } catch (error) {
+    } catch {
       console.log('⚠️  Cleanup completed with warnings');
     }
   });
