@@ -64,7 +64,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     originalValidate = pathValidator.validateProjectPath;
     pathValidator.validateProjectPath = (path) => {
       if (path && path.includes('performance-test')) {
-        return { isValid: true, sanitizedPath: path };
+        return { isValid: true, normalizedPath: path };
       }
       return originalValidate(path);
     };
