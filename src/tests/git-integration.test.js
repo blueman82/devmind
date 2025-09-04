@@ -793,18 +793,20 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       gitToolHandlers.dbManager = originalDb;
       
       // Verify system recovery
-      const afterRecovery = await gitToolHandlers.handleCreateRestorePoint({
+      const afterRecoveryResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'after-recovery',
         description: 'State after database recovery'
       });
+      const afterRecovery = parseMCPResponse(afterRecoveryResponse);
       
       expect(afterRecovery.success).toBe(true);
       
       // Verify data integrity maintained
-      const allRestores = await gitToolHandlers.handleListRestorePoints({
+      const allRestoresResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: projectRepoPath
       });
+      const allRestores = parseMCPResponse(allRestoresResponse);
       
       expect(allRestores.success).toBe(true);
       const beforeIssue = allRestores.restore_points.find(rp => rp.label === 'before-db-issue');
@@ -843,7 +845,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         }
       }
       
-      const stressResults = await Promise.all(stressOps);
+      const stressResponses = await Promise.all(stressOps);
+      const stressResults = stressResponses.map(parseMCPResponse);
       
       // System should maintain reasonable success rate even under stress
       const successCount = stressResults.filter(result => result.success).length;
