@@ -223,7 +223,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         return { error: text.substring(7), success: false };
       }
       return JSON.parse(text);
-    } catch (error) {
+    } catch {
       console.log('🔍 DEBUG: JSON parse failed for:', response.content[0]?.text);
       return null;
     }
