@@ -763,9 +763,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const developerView = parseMCPResponse(developerViewResponse);
       
       expect(developerView).toBeTruthy();
-      expect(Array.isArray(developerView)).toBe(true);
+      expect(Array.isArray(developerView.restore_points)).toBe(true);
       
-      const manualPoints = developerView.filter(rp => !rp.auto_generated);
+      const manualPoints = developerView.restore_points.filter(rp => !rp.auto_generated);
       expect(manualPoints.length).toBeGreaterThan(0);
       
       console.log('✅ Continuous integration workflow successful');
