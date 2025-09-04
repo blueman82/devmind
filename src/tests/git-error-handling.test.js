@@ -555,18 +555,19 @@ describe('Git Error Handling and Edge Cases', () => {
       ];
 
       for (const label of unicodeLabels) {
-        const result = await gitToolHandlers.handleCreateRestorePoint({
+        const response = await gitToolHandlers.handleCreateRestorePoint({
           project_path: testRepoPath,
           label: label,
           description: 'Unicode test'
         });
+        const result = parseMCPResponse(response);
 
         // Should handle unicode gracefully
-        if (result.error) {
-          expect(result.error).toBeDefined();
+        if (result?.error) {
+          expect(result?.error).toBeDefined();
         } else {
-          expect(result.label).toBeDefined();
-          expect(result.label).toBe(label);
+          expect(result?.label).toBeDefined();
+          expect(result?.label).toBe(label);
         }
       }
     });
@@ -580,14 +581,15 @@ describe('Git Error Handling and Edge Cases', () => {
       ];
 
       for (const params of boundaryTests) {
-        const result = await gitToolHandlers.handleListRestorePoints({
+        const response = await gitToolHandlers.handleListRestorePoints({
           project_path: testRepoPath,
           ...params
         });
+        const result = parseMCPResponse(response);
 
         // Should handle boundary values appropriately
-        if (result.error) {
-          expect(result.error).toBeDefined();
+        if (result?.error) {
+          expect(result?.error).toBeDefined();
         } else {
           expect(Array.isArray(result)).toBe(true);
         }
