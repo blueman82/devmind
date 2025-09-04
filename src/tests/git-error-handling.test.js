@@ -61,7 +61,7 @@ describe('Git Error Handling and Edge Cases', () => {
       if (path && path.includes('error-handling-test')) {
         return { isValid: true, normalizedPath: path };
       }
-      return originalValidate(path);
+      return originalValidate.call(pathValidator, path);
     };
     
     console.log('✅ Git Error Handling test environment ready');
