@@ -124,7 +124,7 @@ describe('Git Error Handling and Edge Cases', () => {
 
       expect(result?.error).toBeDefined();
       expect(result?.error).toContain('Invalid project path');
-      expect(result?.error).toContain('does not exist');
+      expect(result?.error).toContain('Path is outside allowed directory patterns');
     });
 
     test('should handle empty/null project path', async () => {
