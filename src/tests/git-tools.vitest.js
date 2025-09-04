@@ -598,8 +598,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
           });
           
           expect(previewResult).toHaveProperty('content');
-          // Parse and verify preview response
-          JSON.parse(previewResult.content[0].text);
+          const previewResponse = JSON.parse(previewResult.content[0].text);
           
           if (previewResponse.preview?.status === 'no_changes') {
             expect(previewResponse.preview.status).toBe('no_changes');
