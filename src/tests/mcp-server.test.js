@@ -62,13 +62,7 @@ describe('MCP Server Integration Tests', () => {
         }
       });
 
-      // Set timeout for server startup
-      timeoutHandle = setTimeout(() => {
-        if (!hasStarted) {
-          mcpProcess.kill();
-          reject(new Error('MCP Server startup timeout'));
-        }
-      }, 8000);
+      // Timeout is already set above
     });
   });
 
