@@ -787,8 +787,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       expect(initialRestore).toBeTruthy();
       
       // Simulate database connection issue and recovery
-      const originalDb = gitToolHandlers.dbManager;
-      gitToolHandlers.dbManager = null;
+      const originalDb = gitToolHandlers.restorePointHandlers.dbManager;
+      gitToolHandlers.restorePointHandlers.dbManager = null;
       
       // Attempt operation during "outage"
       const duringOutageResponse = await gitToolHandlers.handleCreateRestorePoint({
