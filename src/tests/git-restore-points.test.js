@@ -62,7 +62,7 @@ describe('Git Restore Points Management', () => {
     originalValidate = pathValidator.validateProjectPath;
     pathValidator.validateProjectPath = (path) => {
       if (path && path.includes('restore-points-test')) {
-        return { isValid: true, sanitizedPath: path };
+        return { isValid: true, normalizedPath: path };
       }
       return originalValidate(path);
     };
