@@ -178,7 +178,7 @@ describe('Git Restore Points Management', () => {
         description: 'First attempt'
       });
       
-      expect(result1.success).toBe(true);
+      expect(result1.error).toBeUndefined();
       
       // Try to create second restore point with same label
       const result2 = await gitToolHandlers.handleCreateRestorePoint({
@@ -187,7 +187,7 @@ describe('Git Restore Points Management', () => {
         description: 'Second attempt'
       });
       
-      expect(result2.success).toBe(false);
+      expect(result2.error).toBeDefined();
       expect(result2.error).toContain('already exists');
     });
 
@@ -197,7 +197,7 @@ describe('Git Restore Points Management', () => {
         label: 'missing-path'
       });
       
-      expect(result1.success).toBe(false);
+      expect(result1.error).toBeDefined();
       expect(result1.error).toContain('project_path is required');
       
       // Test missing label
@@ -205,7 +205,7 @@ describe('Git Restore Points Management', () => {
         project_path: testRepoPath
       });
       
-      expect(result2.success).toBe(false);
+      expect(result2.error).toBeDefined();
       expect(result2.error).toContain('label is required');
     });
   });
@@ -309,8 +309,8 @@ describe('Git Restore Points Management', () => {
         limit: 150 // Over max of 100
       });
       
-      expect(result1.success).toBe(true);
-      expect(result1.restore_points.length).toBeLessThanOrEqual(100);
+      expect(result1.error).toBeUndefined();
+      expect(result1.length).toBeLessThanOrEqual(100);
       
       // Test minimum limit
       const result2 = await gitToolHandlers.handleListRestorePoints({
@@ -318,8 +318,8 @@ describe('Git Restore Points Management', () => {
         limit: 0
       });
       
-      expect(result2.success).toBe(true);
-      expect(result2.restore_points).toHaveLength(0);
+      expect(result2.error).toBeUndefined();
+      expect(result2).toHaveLength(0);
     });
   });
 
@@ -335,7 +335,7 @@ describe('Git Restore Points Management', () => {
           description: `Description for ${label}`
         });
         
-        expect(createResult.success).toBe(true);
+        expect(createResult.error).toBeUndefined();
       }
       
       // List all restore points
@@ -343,9 +343,9 @@ describe('Git Restore Points Management', () => {
         project_path: testRepoPath
       });
       
-      expect(listResult.success).toBe(true);
-      expect(listResult.restore_points).toHaveLength(3);
-      expect(listResult.restore_points.map(rp => rp.label)).toEqual(
+      expect(listResult.error).toBeUndefined();
+      expect(listResult).toHaveLength(3);
+      expect(listResult.map(rp => rp.label)).toEqual(
         expect.arrayContaining(labels)
       );
     });
@@ -381,8 +381,8 @@ describe('Git Restore Points Management', () => {
         project_path: testRepoPath
       });
       
-      expect(listResult.success).toBe(true);
-      expect(listResult.restore_points).toHaveLength(3);
+      expect(listResult.error).toBeUndefined();
+      expect(listResult).toHaveLength(3);
     });
   });
 

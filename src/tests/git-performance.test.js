@@ -185,7 +185,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       const elapsed = timer.end();
       
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(elapsed).toBeLessThan(3000); // Should complete in under 3 seconds
       console.log(`📊 Medium repository discovery: ${elapsed.toFixed(2)}ms`);
     });
@@ -200,12 +200,12 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       const elapsed = timer.end();
       
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(elapsed).toBeLessThan(10000); // Should complete in under 10 seconds
       console.log(`📊 Large repository discovery: ${elapsed.toFixed(2)}ms`);
       
-      if (result.git_context && result.git_context.commits) {
-        expect(result.git_context.commits.length).toBeLessThanOrEqual(50);
+      if (result.commit_history) {
+        expect(result.commit_history.length).toBeLessThanOrEqual(50);
       }
     });
 
@@ -222,7 +222,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
         
         const elapsed = timer.end();
         
-        expect(result.success).toBe(true);
+        expect(result.error).toBeUndefined();
         expect(elapsed).toBeLessThan(2000); // Should complete in under 2 seconds
         console.log(`📊 Monorepo ${subdir} discovery: ${elapsed.toFixed(2)}ms`);
       }
@@ -240,7 +240,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       const elapsed = timer.end();
       
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(elapsed).toBeLessThan(500); // Should complete in under 0.5 seconds
       console.log(`📊 Small commit history (10): ${elapsed.toFixed(2)}ms`);
     });
@@ -255,7 +255,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       const elapsed = timer.end();
       
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(elapsed).toBeLessThan(2000); // Should complete in under 2 seconds
       console.log(`📊 Medium commit history (25): ${elapsed.toFixed(2)}ms`);
     });
@@ -273,12 +273,12 @@ describe('Git Performance Testing and Load Benchmarks', () => {
         
         const elapsed = timer.end();
         
-        expect(result.success).toBe(true);
+        expect(result.error).toBeUndefined();
         expect(elapsed).toBeLessThan(limit * 100); // Linear scaling expectation
         console.log(`📊 Large commit history (${limit}): ${elapsed.toFixed(2)}ms`);
         
-        if (result.git_context && result.git_context.commits) {
-          expect(result.git_context.commits.length).toBeLessThanOrEqual(limit);
+        if (result.commit_history) {
+          expect(result.commit_history.length).toBeLessThanOrEqual(limit);
         }
       }
     });
@@ -295,7 +295,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       const elapsed = timer.end();
       
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(elapsed).toBeLessThan(3000); // Filtered queries should still be fast
       console.log(`📊 Filtered commit history (frontend): ${elapsed.toFixed(2)}ms`);
     });
@@ -345,7 +345,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       const elapsed = timer.end();
       
       results.forEach(result => {
-        expect(result.success).toBe(true);
+        expect(result.error).toBeUndefined();
       });
       
       expect(elapsed).toBeLessThan(10000); // Concurrent ops should complete quickly
@@ -437,7 +437,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       const elapsed = timer.end();
       
       results.forEach(result => {
-        expect(result.success).toBe(true);
+        expect(result.error).toBeUndefined();
       });
       
       expect(elapsed).toBeLessThan(15000); // All operations should complete in under 15 seconds
@@ -526,12 +526,12 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       });
       const elapsed = timer.end();
       
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(elapsed).toBeLessThan(3000); // Should still be fast with large database
       console.log(`📊 Large database query: ${elapsed.toFixed(2)}ms`);
       
-      if (result.restore_points) {
-        expect(result.restore_points.length).toBeLessThanOrEqual(50);
+      if (Array.isArray(result)) {
+        expect(result.length).toBeLessThanOrEqual(50);
       }
     });
   });
@@ -552,7 +552,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
         const elapsed = timer.end();
         times.push(elapsed);
         
-        expect(result.success).toBe(true);
+        expect(result.error).toBeUndefined();
       }
       
       const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
