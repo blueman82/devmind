@@ -24,7 +24,7 @@
   - Tests still failing - deeper issues identified
 
 ### Remaining Work
-- 🔧 Git Integration: 12 failures (MCP response parsing)
+- 🔧 Git Integration: 12 failures (repository initialization/detection issues)
 - 🔧 Git Performance: 18 failures (benchmark environment)
 - 🔧 Git MCP Handlers: 8 failures (response format)
 
