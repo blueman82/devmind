@@ -171,7 +171,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       const elapsed = timer.end();
       
-      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
       expect(elapsed).toBeLessThan(1000); // Should complete in under 1 second
       console.log(`📊 Small repository discovery: ${elapsed.toFixed(2)}ms`);
     });
