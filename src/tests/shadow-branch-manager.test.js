@@ -218,9 +218,9 @@ describe('ShadowBranchManager', () => {
             
             expect(branches).toHaveLength(3);
             expect(branches).toEqual([
-                { shadowBranch: 'shadow/main', originalBranch: 'main' },
-                { shadowBranch: 'shadow/feature-test', originalBranch: 'feature-test' },
-                { shadowBranch: 'shadow/bugfix', originalBranch: 'bugfix' }
+                { shadow: 'shadow/main', original: 'main' },
+                { shadow: 'shadow/feature-test', original: 'feature-test' },
+                { shadow: 'shadow/bugfix', original: 'bugfix' }
             ]);
         });
         
@@ -234,24 +234,45 @@ describe('ShadowBranchManager', () => {
     
     describe('cleanupOrphanedShadowBranches', () => {
         it('should delete shadow branches without corresponding originals', async () => {
-            mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'shadow/main\\nshadow/orphaned\\n', stderr: '' }) // list shadow branches
-                .mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }) // list all branches
-                .mockResolvedValueOnce({ stdout: '', stderr: '' }); // delete orphaned branch
+            // Mock the direct method calls
+            const mockListShadowBranches = vi.spyOn(manager, 'listShadowBranches')
+                .mockResolvedValueOnce([
+                    { shadow: 'shadow/main', original: 'main' },
+                    { shadow: 'shadow/orphaned', original: 'orphaned' }
+                ]);
+            
+            // Mock branchExists for checking originals
+            const mockBranchExists = vi.spyOn(manager, 'branchExists')
+                .mockResolvedValueOnce(true)   // main branch exists
+                .mockResolvedValueOnce(false); // orphaned branch does not exist
+            
+            // Mock git branch -D command via execAsync
+            mockExecAsync.mockResolvedValueOnce({ stdout: '', stderr: '' });
             
             const result = await manager.cleanupOrphanedShadowBranches('/test/repo');
             
             expect(result).toEqual(['shadow/orphaned']);
-            expect(mockExecAsync).toHaveBeenCalledWith('git branch -D shadow/orphaned', { cwd: '/test/repo' });
+            expect(mockExecAsync).toHaveBeenCalledWith('git branch -D "shadow/orphaned"', { cwd: '/test/repo' });
+            
+            // Restore spies
+            mockListShadowBranches.mockRestore();
+            mockBranchExists.mockRestore();
         });
         
         it('should handle no orphaned branches', async () => {
-            mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'shadow/main\\n', stderr: '' }) // list shadow branches
-                .mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }); // list all branches
+            // Mock the direct method calls
+            const mockListShadowBranches = vi.spyOn(manager, 'listShadowBranches')
+                .mockResolvedValueOnce([{ shadow: 'shadow/main', original: 'main' }]);
+            
+            const mockBranchExists = vi.spyOn(manager, 'branchExists')
+                .mockResolvedValueOnce(true); // main branch exists
             
             const result = await manager.cleanupOrphanedShadowBranches('/test/repo');
             expect(result).toHaveLength(0);
+            
+            // Restore spies
+            mockListShadowBranches.mockRestore();
+            mockBranchExists.mockRestore();
         });
     });
     
