@@ -104,10 +104,10 @@ test_suite_recovery_2025_09_04_10_10:
       success_rate: "56.1%"
     current:
       total_tests: 205
-      passing: 132
-      failing: 73
-      success_rate: "64.4%"
-      status: "Active Progress - Path validator fix successful (+2 tests)"
+      passing: 134
+      failing: 71
+      success_rate: "65.4%"
+      status: "Active Progress - MCP parsing fixes: +2 more tests passing (+4 total)"
     improvement: "+8.3%" # 64.4% - 56.1% baseline
     target:
       expected_passing: 170
