@@ -97,7 +97,7 @@ describe('ConfigValidator Tests', () => {
       const failingValidator = new ConfigValidator();
       
       // Override validateDatabase to force failure
-      const originalValidateDatabase = failingValidator.validateDatabase;
+      const _originalValidateDatabase = failingValidator.validateDatabase;
       failingValidator.validateDatabase = async (results) => {
         results.valid = false;
         results.errors.push('Simulated database validation failure');
