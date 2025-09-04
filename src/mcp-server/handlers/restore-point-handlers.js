@@ -162,6 +162,9 @@ export class RestorePointHandlers extends GitBaseHandler {
       test_status = 'unknown'
     } = args;
 
+    console.log('DEBUG handleCreateRestorePoint - args:', JSON.stringify(args, null, 2));
+    console.log('DEBUG handleCreateRestorePoint - project_path:', project_path, typeof project_path);
+
     try {
       // Validate required parameters
       if (!project_path || !label) {
@@ -169,6 +172,7 @@ export class RestorePointHandlers extends GitBaseHandler {
       }
 
       const pathValidation = this.validateProjectPath(project_path);
+      console.log('DEBUG handleCreateRestorePoint - pathValidation:', JSON.stringify(pathValidation, null, 2));
       if (!pathValidation.isValid) {
         return this.createErrorResponse(`Invalid project path - ${pathValidation.error}`);
       }
