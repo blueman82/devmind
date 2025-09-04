@@ -82,7 +82,8 @@ test_suite_recovery_2025_09_04_10_10:
       
   remaining_work:
     priority_1:
-      task: "Complete MCP response parsing for git-integration tests"
+      task: "Debug git-integration repository initialization issues"
+      status: "MCP parsing complete but tests still fail - need deeper investigation"
       impact: "Would fix 12 test failures"
     priority_2:
       task: "Fix git-performance benchmark environment"
