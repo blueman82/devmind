@@ -122,8 +122,8 @@ describe('Git Error Handling and Edge Cases', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeDefined();
-      expect(result.error).toContain('Invalid project path');
-      expect(result.error).toContain('does not exist');
+      expect(result?.error).toContain('Invalid project path');
+      expect(result?.error).toContain('does not exist');
     });
 
     test('should handle empty/null project path', async () => {
@@ -235,8 +235,8 @@ describe('Git Error Handling and Edge Cases', () => {
         expect(result?.error).not.toContain('undefined');
       } else {
         // If it succeeds, should have project_path and repository info
-        expect(result.project_path).toBeDefined();
-        expect(result.repository).toBeDefined();
+        expect(result?.project_path).toBeDefined();
+        expect(result?.repository).toBeDefined();
       }
     });
 
@@ -395,8 +395,8 @@ describe('Git Error Handling and Edge Cases', () => {
       if (result?.error) {
         expect(result?.error).toBeDefined();
       } else {
-        expect(result.project_path).toBeDefined();
-        expect(result.repository).toBeDefined();
+        expect(result?.project_path).toBeDefined();
+        expect(result?.repository).toBeDefined();
       }
     });
 
@@ -492,10 +492,10 @@ describe('Git Error Handling and Edge Cases', () => {
         expect(result?.error).not.toContain('heap');
         expect(result?.error).not.toContain('memory');
       } else {
-        expect(result.project_path).toBeDefined();
-        expect(result.repository).toBeDefined();
-        if (result.commit_history) {
-          expect(Array.isArray(result.commit_history)).toBe(true);
+        expect(result?.project_path).toBeDefined();
+        expect(result?.repository).toBeDefined();
+        if (result?.commit_history) {
+          expect(Array.isArray(result?.commit_history)).toBe(true);
         }
       }
     });
