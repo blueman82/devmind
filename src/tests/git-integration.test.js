@@ -56,7 +56,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
     originalValidate = pathValidator.validateProjectPath;
     pathValidator.validateProjectPath = (path) => {
       if (path && path.includes('integration-test')) {
-        return { isValid: true, sanitizedPath: path };
+        return { isValid: true, normalizedPath: path, originalPath: path };
       }
       return originalValidate(path);
     };
