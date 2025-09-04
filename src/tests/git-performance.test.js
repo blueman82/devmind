@@ -66,7 +66,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       if (path && path.includes('performance-test')) {
         return { isValid: true, normalizedPath: path };
       }
-      return originalValidate(path);
+      return originalValidate.call(pathValidator, path);
     };
     
     console.log('✅ Git Performance test environment ready');
