@@ -51,7 +51,8 @@ describe('ConfigValidator Tests', () => {
     expect(result.valid).toBe(true);
     
     // Check for warnings or info about optional paths
-    const _hasOptionalPathMessages = result.warnings.some(w => 
+    // Check for warnings or info about optional paths
+    result.warnings.some(w => 
       w.includes('Optional path not found')
     ) || result.info.some(i => 
       i.includes('Optional path') 
@@ -97,7 +98,7 @@ describe('ConfigValidator Tests', () => {
       const failingValidator = new ConfigValidator();
       
       // Override validateDatabase to force failure
-      const _originalValidateDatabase = failingValidator.validateDatabase;
+      // Override validateDatabase to force failure
       failingValidator.validateDatabase = async (results) => {
         results.valid = false;
         results.errors.push('Simulated database validation failure');
