@@ -62,7 +62,7 @@ describe('ShadowBranchManager', () => {
         it('should create shadow branch if it does not exist', async () => {
             // Setup mocks for the sequence of calls
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'feature-test\\n', stderr: '' }) // getCurrentBranch
+                .mockResolvedValueOnce({ stdout: 'feature-test\n', stderr: '' }) // getCurrentBranch
                 .mockRejectedValueOnce(new Error('branch not found')) // branchExists (doesn't exist)
                 .mockResolvedValueOnce({ stdout: '', stderr: '' }); // createBranch
             
@@ -81,7 +81,7 @@ describe('ShadowBranchManager', () => {
         it('should return existing shadow branch without creating', async () => {
             // Setup mocks
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }) // getCurrentBranch
+                .mockResolvedValueOnce({ stdout: 'main\n', stderr: '' }) // getCurrentBranch
                 .mockResolvedValueOnce({ stdout: 'shadow/main', stderr: '' }); // branchExists (exists)
             
             const result = await manager.ensureShadowBranch('/test/repo');
@@ -104,14 +104,14 @@ describe('ShadowBranchManager', () => {
     
     describe('getCurrentBranch', () => {
         it('should return current branch name', async () => {
-            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' });
+            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\n', stderr: '' });
             
             const branch = await manager.getCurrentBranch('/test/repo');
             expect(branch).toBe('main');
         });
         
         it('should handle detached HEAD state', async () => {
-            mockExecAsync.mockRejectedValueOnce(new Error('ref does not point to a symbolic ref'));
+            mockExecAsync.mockRejectedValueOnce(new Error('not a symbolic ref'));
             
             const branch = await manager.getCurrentBranch('/test/repo');
             expect(branch).toBeNull();
@@ -138,23 +138,24 @@ describe('ShadowBranchManager', () => {
         it('should create commit with correct message and return hash', async () => {
             // Setup mocks
             mockExecAsync
-                .mockResolvedValueOnce({ stdout: 'shadow/main\\n', stderr: '' }) // getCurrentBranch
-                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git add
-                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git commit
-                .mockResolvedValueOnce({ stdout: 'abc123\\n', stderr: '' }); // git rev-parse
+                .mockResolvedValueOnce({ stdout: 'shadow/main\n', stderr: '' }) // getCurrentBranch
+                .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git add (files loop)
+                .mockResolvedValueOnce({ stdout: '[shadow/main abc123] Test commit message\n 1 file changed, 1 insertion(+)', stderr: '' }) // git commit
+                .mockResolvedValueOnce({ stdout: ' 1 file changed, 1 insertion(+)\n', stderr: '' }); // git diff --stat
             
-            const result = await manager.commitToShadowBranch('/test/repo', 'Test commit message');
+            const result = await manager.commitToShadowBranch('/test/repo', 'shadow/main', 'Test commit message', ['test-file.js']);
             
             expect(result).toEqual({
                 commitHash: 'abc123',
-                message: 'Test commit message'
+                filesChanged: 1,
+                message: '[shadow/main abc123] Test commit message\n 1 file changed, 1 insertion(+)'
             });
         });
         
         it('should throw error if not on shadow branch', async () => {
-            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\\n', stderr: '' }); // getCurrentBranch
+            mockExecAsync.mockResolvedValueOnce({ stdout: 'main\n', stderr: '' }); // getCurrentBranch
             
-            await expect(manager.commitToShadowBranch('/test/repo', 'Test message'))
+            await expect(manager.commitToShadowBranch('/test/repo', 'shadow/main', 'Test message', ['test-file.js']))
                 .rejects.toThrow('Not on shadow branch');
         });
     });
