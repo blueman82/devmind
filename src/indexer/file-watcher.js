@@ -40,7 +40,7 @@ export class FileWatcher {
             // Check if Claude projects directory exists
             try {
                 await fs.access(this.claudeProjectsPath);
-            } catch (error) {
+            } catch {
                 console.log(`Claude projects directory not found: ${this.claudeProjectsPath}`);
                 console.log('Waiting for Claude projects to be created...');
                 
@@ -104,7 +104,7 @@ export class FileWatcher {
         try {
             const files = await fs.readdir(directoryPath);
             return files.some(file => extname(file) === '.jsonl');
-        } catch (error) {
+        } catch {
             return false;
         }
     }
@@ -132,7 +132,7 @@ export class FileWatcher {
                                     }
                                 }, 2000);
                             }
-                        } catch (error) {
+                        } catch {
                             // Directory might have been deleted, ignore
                         }
                     }
@@ -182,7 +182,7 @@ export class FileWatcher {
                             await fs.access(filePath);
                             console.log(`New conversation file: ${filename} in ${projectName}`);
                             this.scheduleIndexing(filePath);
-                        } catch (error) {
+                        } catch {
                             // File was deleted
                             console.log(`Conversation file deleted: ${filename} in ${projectName}`);
                         }
@@ -227,7 +227,7 @@ export class FileWatcher {
                             console.log('Claude projects directory created, starting monitoring...');
                             watcher.close();
                             await this.start(); // Restart monitoring
-                        } catch (error) {
+                        } catch {
                             // Directory not ready yet
                         }
                     }
