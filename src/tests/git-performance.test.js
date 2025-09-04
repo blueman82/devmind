@@ -467,11 +467,12 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       );
       
       const timer = measureTime();
-      const results = await Promise.all(concurrentOps);
+      const responses = await Promise.all(concurrentOps);
       const elapsed = timer.end();
       
+      const results = responses.map(response => parseMCPResponse(response));
       results.forEach(result => {
-        expect(result.error).toBeUndefined();
+        expect(result?.error).toBeUndefined();
       });
       
       expect(elapsed).toBeLessThan(15000); // All operations should complete in under 15 seconds
@@ -494,10 +495,11 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       }
       
       const timer = measureTime();
-      const results = await Promise.all(operations);
+      const responses = await Promise.all(operations);
       const elapsed = timer.end();
       
-      const successCount = results.filter(r => r.success).length;
+      const results = responses.map(response => parseMCPResponse(response));
+      const successCount = results.filter(r => r && !r.error).length;
       expect(successCount).toBeGreaterThan(requestCount * 0.9); // 90% success rate
       
       const avgTime = elapsed / requestCount;
@@ -530,10 +532,11 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       }
       
       const timer = measureTime();
-      const results = await Promise.all(mixedOps);
+      const responses = await Promise.all(mixedOps);
       const elapsed = timer.end();
       
-      const successCount = results.filter(r => r.success).length;
+      const results = responses.map(response => parseMCPResponse(response));
+      const successCount = results.filter(r => r && !r.error).length;
       expect(successCount).toBeGreaterThan(mixedOps.length * 0.8); // 80% success rate under load
       
       console.log(`📊 Mixed load test (30 ops): ${elapsed.toFixed(2)}ms total, ${successCount}/${mixedOps.length} successful`);
@@ -554,13 +557,14 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       // Test performance with large database
       const timer = measureTime();
-      const result = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: smallRepoPath,
         limit: 50
       });
+      const result = parseMCPResponse(response);
       const elapsed = timer.end();
       
-      expect(result.error).toBeUndefined();
+      expect(result?.error).toBeUndefined();
       expect(elapsed).toBeLessThan(3000); // Should still be fast with large database
       console.log(`📊 Large database query: ${elapsed.toFixed(2)}ms`);
       
@@ -578,15 +582,16 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       for (let i = 0; i < runCount; i++) {
         const timer = measureTime();
         
-        const result = await gitToolHandlers.handleGetGitContext({
+        const response = await gitToolHandlers.handleGetGitContext({
           project_path: mediumRepoPath,
           limit: 20
         });
+        const result = parseMCPResponse(response);
         
         const elapsed = timer.end();
         times.push(elapsed);
         
-        expect(result.error).toBeUndefined();
+        expect(result?.error).toBeUndefined();
       }
       
       const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
@@ -608,24 +613,26 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       // Test small repository
       const timer1 = measureTime();
-      const result1 = await gitToolHandlers.handleGetGitContext({
+      const response1 = await gitToolHandlers.handleGetGitContext({
         project_path: smallRepoPath,
         limit: 10
       });
+      const result1 = parseMCPResponse(response1);
       const elapsed1 = timer1.end();
       
-      expect(result1.success).toBe(true);
+      expect(result1 && !result1.error).toBe(true);
       expect(elapsed1).toBeLessThan(baseline.smallRepo);
       
       // Test medium repository
       const timer2 = measureTime();
-      const result2 = await gitToolHandlers.handleGetGitContext({
+      const response2 = await gitToolHandlers.handleGetGitContext({
         project_path: mediumRepoPath,
         limit: 25
       });
+      const result2 = parseMCPResponse(response2);
       const elapsed2 = timer2.end();
       
-      expect(result2.success).toBe(true);
+      expect(result2 && !result2.error).toBe(true);
       expect(elapsed2).toBeLessThan(baseline.mediumRepo);
       
       console.log(`📊 Baseline comparison - Small: ${elapsed1.toFixed(2)}ms (< ${baseline.smallRepo}ms), Medium: ${elapsed2.toFixed(2)}ms (< ${baseline.mediumRepo}ms)`);
