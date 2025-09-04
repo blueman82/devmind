@@ -569,8 +569,8 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       expect(elapsed).toBeLessThan(3000); // Should still be fast with large database
       console.log(`📊 Large database query: ${elapsed.toFixed(2)}ms`);
       
-      if (Array.isArray(result)) {
-        expect(result.length).toBeLessThanOrEqual(50);
+      if (Array.isArray(result.restore_points)) {
+        expect(result.restore_points.length).toBeLessThanOrEqual(50);
       }
     });
   });
