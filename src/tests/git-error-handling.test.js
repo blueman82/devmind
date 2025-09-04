@@ -439,7 +439,7 @@ describe('Git Error Handling and Edge Cases', () => {
         if (result?.error) {
           expect(result?.error).toBeDefined();
         } else {
-          expect(result?.label).toBeDefined();
+          expect(result?.restore_point?.label).toBeDefined();
         }
       });
     });
@@ -471,7 +471,7 @@ describe('Git Error Handling and Edge Cases', () => {
         expect(gitResult?.project_path).toBeDefined();
       }
       if (!restoreResult?.error) {
-        expect(restoreResult?.label).toBeDefined();
+        expect(restoreResult?.restore_point?.label).toBeDefined();
       }
     });
   });
@@ -525,7 +525,7 @@ describe('Git Error Handling and Edge Cases', () => {
           expect(result?.error).toBeDefined();
           expect(result?.error).not.toContain('ENOSPC'); // Should handle disk space errors
         } else {
-          expect(result?.label).toBeDefined();
+          expect(result?.restore_point?.label).toBeDefined();
         }
       });
     });
@@ -547,7 +547,7 @@ describe('Git Error Handling and Edge Cases', () => {
         expect(result?.error).toBeDefined();
         expect(result?.error).toContain('too long');
       } else {
-        expect(result?.label).toBeDefined();
+        expect(result?.restore_point?.label).toBeDefined();
       }
     });
 
@@ -571,8 +571,8 @@ describe('Git Error Handling and Edge Cases', () => {
         if (result?.error) {
           expect(result?.error).toBeDefined();
         } else {
-          expect(result?.label).toBeDefined();
-          expect(result?.label).toBe(label);
+          expect(result?.restore_point?.label).toBeDefined();
+          expect(result?.restore_point?.label).toBe(label);
         }
       }
     });
