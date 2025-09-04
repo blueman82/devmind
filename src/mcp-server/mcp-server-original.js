@@ -352,7 +352,7 @@ class AIMemoryMCPServer {
       }
 
       // Merge priority messages with filtered results (remove duplicates)
-      const priorityIds = new Set(priorityMsgs.map((msg, i) => messages.indexOf(msg)));
+      const priorityIds = new Set(priorityMsgs.map((msg) => messages.indexOf(msg)));
       const filteredIds = new Set(filtered.map(msg => messages.indexOf(msg)));
       const combinedIds = new Set([...priorityIds, ...filteredIds]);
       
@@ -528,7 +528,7 @@ class AIMemoryMCPServer {
 
       // Show filtered messages
       contextText += `## Conversation Flow\n\n`;
-      pageMessages.forEach((msg, i) => {
+      pageMessages.forEach((msg) => {
         if (msg.role && this.getMessageText(msg).length > 0) {
           const textContent = this.formatMessage(msg, summary_mode);
           contextText += `**${msg.role}**: ${textContent}\n\n`;
