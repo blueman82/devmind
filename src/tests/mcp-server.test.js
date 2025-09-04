@@ -28,13 +28,13 @@ describe('MCP Server Integration Tests', () => {
         env: { ...process.env, LOG_LEVEL: 'error' }
       });
 
-      let _stdoutData = '';
+      let stdoutData = '';
       let stderrData = '';
       let hasStarted = false;
-      let timeout;
+      const timeout = 5000;
 
       mcpProcess.stdout.on('data', (data) => {
-        _stdoutData += data.toString();
+        stdoutData += data.toString();
       });
 
       mcpProcess.stderr.on('data', (data) => {
@@ -85,7 +85,7 @@ describe('MCP Server Integration Tests', () => {
 
     return new Promise((resolve, reject) => {
       let responseData = '';
-      let timeout;
+      const timeout = 5000;
 
       const dataHandler = (data) => {
         responseData += data.toString();
