@@ -102,7 +102,7 @@ export class GitContextHandlers extends GitBaseHandler {
       }
 
       if (include_commit_history) {
-        const options = { limit: commit_limit };
+        const options = { limit: effectiveLimit };
         if (time_range) {
           const timeRangeDate = this.parseTimeRange(time_range);
           if (timeRangeDate) {
