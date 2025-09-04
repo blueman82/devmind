@@ -261,9 +261,9 @@ describe('Git Error Handling and Edge Cases', () => {
 
   describe('Database Connection Error Handling', () => {
     test('should handle database connection failures', async () => {
-      // Temporarily break the database connection
-      const originalDb = gitToolHandlers.dbManager;
-      gitToolHandlers.dbManager = null;
+      // Temporarily break the database connection in the specific handler
+      const originalDb = gitToolHandlers.restorePointHandlers.dbManager;
+      gitToolHandlers.restorePointHandlers.dbManager = null;
       
       const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
@@ -275,7 +275,7 @@ describe('Git Error Handling and Edge Cases', () => {
       expect(result?.error).toContain('Database');
       
       // Restore database connection
-      gitToolHandlers.dbManager = originalDb;
+      gitToolHandlers.restorePointHandlers.dbManager = originalDb;
     });
 
     test('should handle database constraint violations', async () => {
