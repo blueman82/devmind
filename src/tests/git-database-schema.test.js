@@ -58,7 +58,7 @@ describe('Git Database Schema Operations', () => {
       const expectedColumns = [
         'id', 'project_path', 'working_directory', 'git_directory',
         'repository_root', 'subdirectory_path', 'is_monorepo_subdirectory',
-        'remote_primary', 'current_branch', 'last_scanned'
+        'remote_url', 'current_branch', 'last_scanned'
       ];
       
       expectedColumns.forEach(column => {
@@ -78,8 +78,8 @@ describe('Git Database Schema Operations', () => {
       const columnNames = columns.map(col => col.name);
       
       const expectedColumns = [
-        'id', 'repository_id', 'commit_hash', 'timestamp', 'author_name',
-        'author_email', 'message', 'branch_name', 'files_changed',
+        'id', 'repository_id', 'commit_hash', 'commit_date', 'author_name',
+        'author_email', 'message', 'branch_name', 'files_changed_count',
         'insertions', 'deletions', 'is_merge', 'parent_hashes'
       ];
       
@@ -136,12 +136,13 @@ describe('Git Database Schema Operations', () => {
         currentBranch: 'main'
       };
       
-      const repoId = await gitSchema.upsertRepository(repositoryData);
-      expect(repoId).toBeDefined();
-      expect(typeof repoId).toBe('number');
+      const result = await gitSchema.upsertRepository(repositoryData);
+      expect(result).toBeDefined();
+      expect(result.repositoryId).toBeDefined();
+      expect(typeof result.repositoryId).toBe('number');
       
       // Verify the data was stored correctly
-      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(repoId);
+      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(result.repositoryId);
       
       expect(stored.project_path).toBe('/test/simple-repo');
       expect(stored.working_directory).toBe('/test/simple-repo');
@@ -162,11 +163,12 @@ describe('Git Database Schema Operations', () => {
         currentBranch: 'main'
       };
       
-      const repoId = await gitSchema.upsertRepository(repositoryData);
-      expect(repoId).toBeDefined();
+      const result = await gitSchema.upsertRepository(repositoryData);
+      expect(result).toBeDefined();
+      expect(result.repositoryId).toBeDefined();
       
       // Verify monorepo fields
-      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(repoId);
+      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(result.repositoryId);
       
       expect(stored.project_path).toBe('/test/monorepo/ketchup');
       expect(stored.repository_root).toBe('/test/monorepo');
@@ -185,17 +187,17 @@ describe('Git Database Schema Operations', () => {
       };
       
       // First insert
-      const repoId1 = await gitSchema.upsertRepository(repositoryData);
+      const result1 = await gitSchema.upsertRepository(repositoryData);
       
       // Update with same project path but different branch
       repositoryData.currentBranch = 'feature/test';
-      const repoId2 = await gitSchema.upsertRepository(repositoryData);
+      const result2 = await gitSchema.upsertRepository(repositoryData);
       
       // Should return same ID (update, not insert)
-      expect(repoId1).toBe(repoId2);
+      expect(result1.repositoryId).toBe(result2.repositoryId);
       
       // Verify the update
-      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(repoId1);
+      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(result1.repositoryId);
       expect(stored.current_branch).toBe('feature/test');
       
       console.log('✅ Repository upsert (update) working correctly');
@@ -209,10 +211,11 @@ describe('Git Database Schema Operations', () => {
         // Missing optional fields
       };
       
-      const repoId = await gitSchema.upsertRepository(repositoryData);
-      expect(repoId).toBeDefined();
+      const result = await gitSchema.upsertRepository(repositoryData);
+      expect(result).toBeDefined();
+      expect(result.repositoryId).toBeDefined();
       
-      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(repoId);
+      const stored = db.prepare('SELECT * FROM git_repositories WHERE id = ?').get(result.repositoryId);
       expect(stored.project_path).toBe('/test/minimal-repo');
       // Optional fields should be null or have defaults
       
@@ -225,33 +228,34 @@ describe('Git Database Schema Operations', () => {
 
     beforeEach(async () => {
       // Create a test repository for commit tests
-      repositoryId = await gitSchema.upsertRepository({
+      const result = await gitSchema.upsertRepository({
         projectPath: '/test/commit-repo',
         workingDirectory: '/test/commit-repo',
         gitDirectory: '/test/commit-repo/.git',
         currentBranch: 'main'
       });
+      repositoryId = result.repositoryId;
     });
 
     test('should insert commit with all fields', async () => {
       const commitData = {
-        repositoryId: repositoryId,
         hash: 'abc123def456789',
-        timestamp: new Date('2025-01-01T12:00:00Z'),
+        date: new Date('2025-01-01T12:00:00Z'),
         authorName: 'Test Author',
         authorEmail: 'test@example.com',
         message: 'Test commit message',
         branchName: 'main',
-        filesChanged: ['file1.js', 'file2.js', 'file3.md'],
+        filesChanged: [{path: 'file1.js', status: 'M'}, {path: 'file2.js', status: 'A'}, {path: 'file3.md', status: 'M'}],
         insertions: 25,
         deletions: 10,
         isMerge: false,
-        parentHashes: ['parent123abc']
+        parents: ['parent123abc']
       };
       
-      const commitId = await gitSchema.insertCommit(commitData);
-      expect(commitId).toBeDefined();
-      expect(typeof commitId).toBe('number');
+      const result = await gitSchema.insertCommit(repositoryId, commitData);
+      expect(result).toBeDefined();
+      expect(result.lastInsertRowid).toBeDefined();
+      const commitId = result.lastInsertRowid;
       
       // Verify the commit was stored correctly
       const stored = db.prepare('SELECT * FROM git_commits WHERE id = ?').get(commitId);
@@ -266,8 +270,7 @@ describe('Git Database Schema Operations', () => {
       expect(stored.is_merge).toBe(0); // SQLite boolean as integer
       
       // Check JSON fields
-      const filesChanged = JSON.parse(stored.files_changed);
-      expect(filesChanged).toEqual(['file1.js', 'file2.js', 'file3.md']);
+      expect(stored.files_changed_count).toBe(3);
       
       const parentHashes = JSON.parse(stored.parent_hashes);
       expect(parentHashes).toEqual(['parent123abc']);
@@ -277,22 +280,22 @@ describe('Git Database Schema Operations', () => {
 
     test('should handle merge commits', async () => {
       const mergeCommitData = {
-        repositoryId: repositoryId,
         hash: 'merge123abc456',
-        timestamp: new Date(),
+        date: new Date(),
         authorName: 'Merge Author',
         authorEmail: 'merge@example.com',
         message: 'Merge branch feature into main',
         branchName: 'main',
-        filesChanged: ['merged-file.js'],
+        filesChanged: [{path: 'merged-file.js', status: 'M'}],
         insertions: 5,
         deletions: 2,
         isMerge: true,
-        parentHashes: ['parent1abc', 'parent2def']
+        parents: ['parent1abc', 'parent2def']
       };
       
-      const commitId = await gitSchema.insertCommit(mergeCommitData);
-      expect(commitId).toBeDefined();
+      const result = await gitSchema.insertCommit(repositoryId, mergeCommitData);
+      expect(result).toBeDefined();
+      const commitId = result.lastInsertRowid;
       
       const stored = db.prepare('SELECT * FROM git_commits WHERE id = ?').get(commitId);
       expect(stored.is_merge).toBe(1); // true as integer
@@ -306,9 +309,8 @@ describe('Git Database Schema Operations', () => {
 
     test('should enforce foreign key constraints', async () => {
       const commitData = {
-        repositoryId: 99999, // Non-existent repository ID
         hash: 'invalid123',
-        timestamp: new Date(),
+        date: new Date(),
         authorName: 'Test',
         authorEmail: 'test@example.com',
         message: 'Should fail',
@@ -316,7 +318,7 @@ describe('Git Database Schema Operations', () => {
       };
       
       // Should throw foreign key constraint error
-      await expect(gitSchema.insertCommit(commitData)).rejects.toThrow();
+      await expect(gitSchema.insertCommit(99999, commitData)).rejects.toThrow();
       
       console.log('✅ Foreign key constraints enforced for commits');
     });
@@ -324,9 +326,8 @@ describe('Git Database Schema Operations', () => {
     test('should handle commit with branch filtering context', async () => {
       // Insert commits on different branches
       const mainCommit = {
-        repositoryId: repositoryId,
         hash: 'main123abc',
-        timestamp: new Date(),
+        date: new Date(),
         authorName: 'Main Author',
         authorEmail: 'main@example.com',
         message: 'Main branch commit',
@@ -334,17 +335,18 @@ describe('Git Database Schema Operations', () => {
       };
       
       const featureCommit = {
-        repositoryId: repositoryId,
         hash: 'feature456def',
-        timestamp: new Date(),
+        date: new Date(),
         authorName: 'Feature Author',
         authorEmail: 'feature@example.com',
         message: 'Feature branch commit',
         branchName: 'feature/test'
       };
       
-      const mainId = await gitSchema.insertCommit(mainCommit);
-      const featureId = await gitSchema.insertCommit(featureCommit);
+      const mainResult = await gitSchema.insertCommit(repositoryId, mainCommit);
+      const featureResult = await gitSchema.insertCommit(repositoryId, featureCommit);
+      const mainId = mainResult.lastInsertRowid;
+      const featureId = featureResult.lastInsertRowid;
       
       expect(mainId).toBeDefined();
       expect(featureId).toBeDefined();
@@ -372,12 +374,13 @@ describe('Git Database Schema Operations', () => {
 
     beforeEach(async () => {
       // Create a test repository for restore point tests
-      repositoryId = await gitSchema.upsertRepository({
+      const result = await gitSchema.upsertRepository({
         projectPath: '/test/restore-repo',
         workingDirectory: '/test/restore-repo',
         gitDirectory: '/test/restore-repo/.git',
         currentBranch: 'main'
       });
+      repositoryId = result.repositoryId;
     });
 
     test('should insert restore point with all fields', async () => {
@@ -509,18 +512,18 @@ describe('Git Database Schema Operations', () => {
   describe('Database Performance and Indexing', () => {
     test('should have efficient queries with proper indexes', async () => {
       // Insert test data
-      const repoId = await gitSchema.upsertRepository({
+      const result = await gitSchema.upsertRepository({
         projectPath: '/test/perf-repo',
         workingDirectory: '/test/perf-repo',
         gitDirectory: '/test/perf-repo/.git'
       });
+      const repoId = result.repositoryId;
       
       // Insert multiple commits
       for (let i = 0; i < 10; i++) {
-        await gitSchema.insertCommit({
-          repositoryId: repoId,
+        await gitSchema.insertCommit(repoId, {
           hash: `commit${i}abc`,
-          timestamp: new Date(),
+          date: new Date(),
           authorName: 'Perf Author',
           authorEmail: 'perf@example.com',
           message: `Performance test commit ${i}`,
@@ -532,7 +535,7 @@ describe('Git Database Schema Operations', () => {
       
       // Query commits by repository
       const commits = db.prepare(
-        'SELECT * FROM git_commits WHERE repository_id = ? ORDER BY timestamp DESC'
+        'SELECT * FROM git_commits WHERE repository_id = ? ORDER BY commit_date DESC'
       ).all(repoId);
       
       const queryTime = Date.now() - startTime;
@@ -560,8 +563,9 @@ describe('Git Database Schema Operations', () => {
       const results = await Promise.all(promises);
       
       expect(results).toHaveLength(5);
-      results.forEach(repoId => {
-        expect(typeof repoId).toBe('number');
+      results.forEach(result => {
+        expect(result.repositoryId).toBeDefined();
+        expect(typeof result.repositoryId).toBe('number');
       });
       
       console.log('✅ Concurrent database operations completed successfully');
