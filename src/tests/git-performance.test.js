@@ -341,7 +341,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
           project_path: repoPath,
           limit: 5
         });
-        const result = parseMCPResponse(response);
+        parseMCPResponse(response); // Parse but result not used in performance test
         
         const elapsed = timer.end();
         
@@ -420,7 +420,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
           project_path: largeRepoPath,
           limit: 50
         });
-        const result = parseMCPResponse(response);
+        parseMCPResponse(response); // Parse but result not used in memory test
       }
       
       const finalMemory = process.memoryUsage();
