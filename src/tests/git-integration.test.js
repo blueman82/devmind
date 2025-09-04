@@ -379,7 +379,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       
       expect(allFeatureRestores).toBeTruthy();
       expect(Array.isArray(allFeatureRestores.restore_points)).toBe(true);
-      expect(allFeatureRestores.length).toBe(features.length);
+      expect(allFeatureRestores.restore_points.length).toBe(features.length);
       
       console.log('✅ Feature branch development workflow successful');
     });
@@ -644,8 +644,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const rollbackCommands = parseMCPResponse(rollbackCommandsResponse);
       
       expect(rollbackCommands).toBeTruthy();
-      expect(rollbackCommands.commands).toBeDefined();
-      expect(Array.isArray(rollbackCommands.commands)).toBe(true);
+      expect(rollbackCommands.restoration_commands).toBeDefined();
+      expect(Array.isArray(rollbackCommands.restoration_commands)).toBe(true);
       
       console.log('✅ Emergency rollback scenario handled successfully');
     });
