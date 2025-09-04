@@ -326,7 +326,7 @@ describe('Git Error Handling and Edge Cases', () => {
         
         // Handlers currently accept these parameters and create restore points successfully
         expect(result?.error).toBeUndefined();
-        expect(result?.label).toBeDefined();
+        expect(result?.restore_point?.label).toBeDefined();
       }
     });
 
