@@ -216,7 +216,7 @@ describe('Git Restore Points Management', () => {
       const result2 = parseMCPResponse(response2);
       
       expect(result2?.error).toBeDefined();
-      expect(result2?.error).toContain('already exists');
+      expect(result2?.error).toContain('Duplicate label');
     });
 
     test('should handle missing required parameters', async () => {
