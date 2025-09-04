@@ -497,7 +497,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
       });
       
       expect(missingPathResult.content[0].text).toBe(
-        'Error: project_path and label are required'
+        'Error: project_path is required'
       );
       
       const missingLabelResult = await gitToolHandlers.handleCreateRestorePoint({
@@ -505,7 +505,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
       });
       
       expect(missingLabelResult.content[0].text).toBe(
-        'Error: project_path and label are required'
+        'Error: label is required'
       );
     });
 
