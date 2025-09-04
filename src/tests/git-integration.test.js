@@ -271,8 +271,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const restorePointsList = parseMCPResponse(restorePointsListResponse);
       
       expect(restorePointsList).toBeTruthy();
-      expect(Array.isArray(restorePointsList)).toBe(true);
-      expect(restorePointsList).toHaveLength(1);
+      expect(Array.isArray(restorePointsList.restore_points)).toBe(true);
+      expect(restorePointsList.restore_points).toHaveLength(1);
       expect(restorePointsList.restore_points[0].label).toBe('initial-state');
       
       // Step 5: Create working state restore point
@@ -464,8 +464,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         const projectRestores = parseMCPResponse(response);
         
         expect(projectRestores).toBeTruthy();
-        expect(Array.isArray(projectRestores)).toBe(true);
-        expect(projectRestores.some(rp => rp.label === `integrity-test-${i + 1}`)).toBe(true);
+        expect(Array.isArray(projectRestores.restore_points)).toBe(true);
+        expect(projectRestores.restore_points.some(rp => rp.label === `integrity-test-${i + 1}`)).toBe(true);
       }
       
       // Verify no cross-contamination between projects
@@ -474,7 +474,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const project1Restores = parseMCPResponse(response);
       
-      const project1Labels = project1Restores.map(rp => rp.label);
+      const project1Labels = project1Restores.restore_points.map(rp => rp.label);
       expect(project1Labels.includes('integrity-test-2')).toBe(false);
       expect(project1Labels.includes('integrity-test-3')).toBe(false);
       
