@@ -241,9 +241,10 @@ describe('Git Restore Points Management', () => {
         project_path: testRepoPath
       });
 
-      expect(result.success).toBe(true);
-      expect(result.restore_points).toHaveLength(3);
-      expect(result.restore_points.map(rp => rp.label)).toEqual(
+      expect(result.error).toBeUndefined();
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(3);
+      expect(result.map(rp => rp.label)).toEqual(
         expect.arrayContaining(['v1.0.0', 'before-refactor', 'auto-backup'])
       );
     });
