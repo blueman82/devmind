@@ -252,7 +252,7 @@ export class ToolHandlers {
               };
               break;
             }
-          } catch (parseError) {
+          } catch {
             continue;
           }
         }
@@ -426,7 +426,7 @@ export class ToolHandlers {
           endTime: row.updated_at,
           messageCount: row.message_count
         }));
-      } catch (error) {
+      } catch {
         // Fallback to JSONL parsing
         dataSource = 'JSONL Fallback';
         const files = this.parser.findConversationFiles();
@@ -438,7 +438,7 @@ export class ToolHandlers {
             if (cutoff && new Date(conversation.endTime) < cutoff) continue;
             if (project_filter && !conversation.projectPath?.toLowerCase().includes(project_filter.toLowerCase())) continue;
             conversations.push(conversation);
-          } catch (parseError) {
+          } catch {
             continue;
           }
         }
