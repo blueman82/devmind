@@ -64,7 +64,7 @@ describe('Git Restore Points Management', () => {
       if (path && path.includes('restore-points-test')) {
         return { isValid: true, normalizedPath: path };
       }
-      return originalValidate(path);
+      return originalValidate.call(pathValidator, path);
     };
     
     console.log('✅ Git Restore Points test environment ready');
