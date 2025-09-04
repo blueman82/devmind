@@ -51,7 +51,7 @@ describe('ConfigValidator Tests', () => {
     expect(result.valid).toBe(true);
     
     // Check for warnings or info about optional paths
-    const hasOptionalPathMessages = result.warnings.some(w => 
+    const _hasOptionalPathMessages = result.warnings.some(w => 
       w.includes('Optional path not found')
     ) || result.info.some(i => 
       i.includes('Optional path') 
