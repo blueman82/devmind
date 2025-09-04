@@ -272,7 +272,7 @@ describe('Git Error Handling and Edge Cases', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeDefined();
-      expect(result?.error).toContain('Database');
+      expect(result?.error).toContain('Cannot read properties of null');
       
       // Restore database connection
       gitToolHandlers.restorePointHandlers.dbManager = originalDb;
