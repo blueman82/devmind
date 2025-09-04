@@ -141,7 +141,7 @@ describe('ShadowBranchManager', () => {
                 .mockResolvedValueOnce({ stdout: 'shadow/main\n', stderr: '' }) // getCurrentBranch
                 .mockResolvedValueOnce({ stdout: '', stderr: '' }) // git add (files loop)
                 .mockResolvedValueOnce({ stdout: '[shadow/main abc123] Test commit message\n 1 file changed, 1 insertion(+)', stderr: '' }) // git commit
-                .mockResolvedValueOnce({ stdout: ' 1 file changed, 1 insertion(+)\n', stderr: '' }); // git diff --stat
+                .mockResolvedValueOnce({ stdout: ' test-file.js | 1 +\n 1 file changed, 1 insertion(+)\n', stderr: '' }); // git diff --stat
             
             const result = await manager.commitToShadowBranch('/test/repo', 'shadow/main', 'Test commit message', ['test-file.js']);
             
