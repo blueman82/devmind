@@ -209,6 +209,24 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
     execSync('git checkout main', { cwd: repoPath });
   }
 
+  // Helper function to parse MCP response format
+  const parseMCPResponse = (response) => {
+    if (!response || !response.content || !response.content[0]) {
+      return null;
+    }
+    try {
+      // MCP responses have format: {content: [{type: 'text', text: JSON}]}
+      const text = response.content[0].text;
+      // Handle error responses that start with "Error: "
+      if (text.startsWith('Error: ')) {
+        return { error: text.substring(7), success: false };
+      }
+      return JSON.parse(text);
+    } catch (e) {
+      return null;
+    }
+  };
+
   describe('Complete Development Workflow Integration', () => {
     test('should handle full project lifecycle workflow', async () => {
       console.log('🔄 Testing complete project lifecycle workflow...');
