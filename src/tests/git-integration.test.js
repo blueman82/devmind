@@ -403,8 +403,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       );
       
       const contextResponses = await Promise.all(contextPromises);
-      console.log('🔍 DEBUG: Raw contextResponses:', contextResponses);
+      console.log('🔍 DEBUG: Raw contextResponses:', JSON.stringify(contextResponses, null, 2));
       const contextResults = contextResponses.map(parseMCPResponse);
+      console.log('🔍 DEBUG: Parsed contextResults:', contextResults);
       
       // Verify all projects were processed successfully
       contextResults.forEach((result, index) => {
