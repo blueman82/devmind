@@ -66,8 +66,7 @@ export class GitContextHandlers extends GitBaseHandler {
 
       const repository = await this.gitManager.discoverRepository(validatedProjectPath);
       if (!repository) {
-        gitContext.summary.has_git = false;
-        return this.createSuccessResponse(JSON.stringify(gitContext, null, 2));
+        return this.createErrorResponse('Not a git repository');
       }
 
       gitContext.repository = {
