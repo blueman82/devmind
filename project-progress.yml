@@ -63,6 +63,15 @@ test_suite_recovery_2025_09_04_10_10:
       approach: "✅ CORRECT: Fixed ALL instances of each pattern type systematically"
       priority: "Critical for production code quality - COMPLETED"
       
+    mcp_response_parsing_fix:
+      status: "🔧 In Progress - SYSTEMATIC Fix Required"
+      date: "2025-09-04 11:10"
+      issue: "git-integration tests expect parsed responses but receive raw MCP responses"
+      pattern_identified: "All gitToolHandlers.handle* calls need parseMCPResponse() applied"
+      fix_started: "Fixed 1 instance - contextResults.map(parseMCPResponse)"
+      requirement: "MUST find and fix ALL instances systematically in git-integration.test.js"
+      approach: "Search for all handleGetGitContext, handleCreateRestorePoint, etc calls"
+      
   metrics:
     baseline:
       total_tests: 205
