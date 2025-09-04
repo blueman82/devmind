@@ -160,7 +160,7 @@ class ConversationParser {
             try {
               const stringified = JSON.stringify(item.content);
               content = stringified ? stringified.substring(0, 200) + '...' : 'Empty content';
-            } catch (e) {
+            } catch {
               content = 'Unparseable content';
             }
           }
