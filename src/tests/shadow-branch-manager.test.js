@@ -320,6 +320,8 @@ describe('ShadowBranchManager', () => {
             
             await expect(manager.getCurrentBranch('/test/repo'))
                 .rejects.toThrow('Test error');
+            
+            expect(loggerSpy).toHaveBeenCalledWith('Failed to get current branch:', expect.any(Error));
         });
     });
 });
