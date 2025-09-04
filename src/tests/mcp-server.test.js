@@ -44,20 +44,20 @@ describe('MCP Server Integration Tests', () => {
         
         if (text.includes('AI Memory MCP Server running on stdio') && !hasStarted) {
           hasStarted = true;
-          clearTimeout(timeout);
+          clearTimeout(timeoutHandle);
           console.log('✅ MCP Server started successfully');
           resolve();
         }
       });
 
       mcpProcess.on('error', (error) => {
-        clearTimeout(timeout);
+        clearTimeout(timeoutHandle);
         reject(new Error(`MCP Server failed to start: ${error.message}`));
       });
 
       mcpProcess.on('exit', (code) => {
         if (!hasStarted) {
-          clearTimeout(timeout);
+          clearTimeout(timeoutHandle);
           reject(new Error(`MCP Server exited with code ${code}. stderr: ${stderrData}`));
         }
       });
@@ -96,7 +96,7 @@ describe('MCP Server Integration Tests', () => {
           for (const line of lines) {
             const response = JSON.parse(line);
             if (response.id === 1 && response.result) {
-              clearTimeout(timeout);
+              clearTimeout(timeoutHandle);
               mcpProcess.stdout.removeListener('data', dataHandler);
               
               // Verify expected tools are present
