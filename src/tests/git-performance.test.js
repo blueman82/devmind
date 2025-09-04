@@ -370,11 +370,12 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       ];
       
       const timer = measureTime();
-      const results = await Promise.all(concurrentOps);
+      const responses = await Promise.all(concurrentOps);
       const elapsed = timer.end();
       
+      const results = responses.map(response => parseMCPResponse(response));
       results.forEach(result => {
-        expect(result.error).toBeUndefined();
+        expect(result?.error).toBeUndefined();
       });
       
       expect(elapsed).toBeLessThan(10000); // Concurrent ops should complete quickly
@@ -396,10 +397,11 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       }
       
       const timer = measureTime();
-      const results = await Promise.all(bulkOps);
+      const responses = await Promise.all(bulkOps);
       const elapsed = timer.end();
       
-      const successCount = results.filter(r => r.success).length;
+      const results = responses.map(response => parseMCPResponse(response));
+      const successCount = results.filter(r => r && !r.error).length;
       expect(successCount).toBeGreaterThan(opCount * 0.8); // At least 80% success rate
       
       const avgTime = elapsed / opCount;
@@ -414,10 +416,11 @@ describe('Git Performance Testing and Load Benchmarks', () => {
       
       // Perform multiple operations on large repository
       for (let i = 0; i < 10; i++) {
-        await gitToolHandlers.handleGetGitContext({
+        const response = await gitToolHandlers.handleGetGitContext({
           project_path: largeRepoPath,
           limit: 50
         });
+        const result = parseMCPResponse(response);
       }
       
       const finalMemory = process.memoryUsage();
@@ -430,22 +433,24 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     test('should handle repository caching efficiently', async () => {
       // First call (cache miss)
       const timer1 = measureTime();
-      const result1 = await gitToolHandlers.handleGetGitContext({
+      const response1 = await gitToolHandlers.handleGetGitContext({
         project_path: mediumRepoPath,
         limit: 20
       });
+      const result1 = parseMCPResponse(response1);
       const elapsed1 = timer1.end();
       
       // Second call (cache hit)
       const timer2 = measureTime();
-      const result2 = await gitToolHandlers.handleGetGitContext({
+      const response2 = await gitToolHandlers.handleGetGitContext({
         project_path: mediumRepoPath,
         limit: 20
       });
+      const result2 = parseMCPResponse(response2);
       const elapsed2 = timer2.end();
       
-      expect(result1.success).toBe(true);
-      expect(result2.success).toBe(true);
+      expect(result1 && !result1.error).toBe(true);
+      expect(result2 && !result2.error).toBe(true);
       
       // Cache hit should be faster (or at least not significantly slower)
       expect(elapsed2).toBeLessThanOrEqual(elapsed1 * 1.5); // Allow 50% variance
