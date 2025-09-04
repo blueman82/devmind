@@ -99,7 +99,7 @@ export class ConfigValidator {
                 await fs.access(path);
                 results.info.push(`Required path exists: ${path}`);
                 logger.debug('Required path validated', { path });
-            } catch (error) {
+            } catch {
                 results.valid = false;
                 results.errors.push(`Cannot access required path: ${path} - ${error.message}`);
                 logger.error('Required path validation failed', { path, error: error.message });
@@ -112,7 +112,7 @@ export class ConfigValidator {
                 await fs.access(path);
                 results.info.push(`Optional path exists: ${path}`);
                 logger.debug('Optional path found', { path });
-            } catch (error) {
+            } catch {
                 results.warnings.push(`Optional path not found: ${path} (will be created when needed)`);
                 logger.debug('Optional path not found', { path, note: 'will be created when needed' });
             }
