@@ -194,7 +194,7 @@ describe('ShadowBranchManager', () => {
             const result = await manager.syncShadowBranch('/test/repo', 'shadow/main', 'main');
             
             expect(result.synced).toBe(true);
-            expect(result.commitsBehind).toBe(2);
+            expect(result.commits).toBe(2);
         });
         
         it('should not sync if already up to date', async () => {
@@ -203,14 +203,14 @@ describe('ShadowBranchManager', () => {
             const result = await manager.syncShadowBranch('/test/repo', 'shadow/main', 'main');
             
             expect(result.synced).toBe(false);
-            expect(result.commitsBehind).toBe(0);
+            expect(result.commits).toBe(0);
         });
     });
     
     describe('listShadowBranches', () => {
         it('should return list of shadow branches with originals', async () => {
             mockExecAsync.mockResolvedValueOnce({ 
-                stdout: 'shadow/main\\nshadow/feature-test\\nshadow/bugfix\\n', 
+                stdout: '  shadow/main\n  shadow/feature-test\n* shadow/bugfix\n', 
                 stderr: '' 
             });
             
