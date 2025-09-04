@@ -266,9 +266,10 @@ describe('Git Restore Points Management', () => {
         include_auto_generated: false
       });
 
-      expect(result.success).toBe(true);
-      expect(result.restore_points).toHaveLength(2);
-      expect(result.restore_points.every(rp => !rp.auto_generated)).toBe(true);
+      expect(result.error).toBeUndefined();
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(2);
+      expect(result.every(rp => !rp.auto_generated)).toBe(true);
     });
 
     test('should include auto-generated restore points by default', async () => {
