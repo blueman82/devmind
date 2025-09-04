@@ -1,5 +1,4 @@
 import GitManager from '../../git/git-manager.js';
-import GitSchema from '../../database/git-schema.js';
 import { createLogger } from '../../utils/logger.js';
 import pathValidator from '../../utils/path-validator.js';
 import errorSanitizer from '../../utils/error-sanitizer.js';
