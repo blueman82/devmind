@@ -637,7 +637,7 @@ class AIMemoryMCPServer {
   }
 
   async handleFindSimilarSolutions(args) {
-    const { problem_description, exclude_current_project = true, confidence_threshold = 0.6 } = args;
+    const { problem_description, /* exclude_current_project = true, */ confidence_threshold = 0.6 } = args;
     
     try {
       // This is a simplified implementation - in a full version, 
