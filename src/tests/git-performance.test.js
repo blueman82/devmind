@@ -58,6 +58,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
     await gitSchema.initialize();
     
     gitToolHandlers = new GitToolHandlers(dbManager, gitSchema);
+    await gitToolHandlers.initialize();
     
     // Mock path validator to allow test paths
     originalValidate = pathValidator.validateProjectPath;
