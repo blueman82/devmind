@@ -100,7 +100,7 @@ describe('FileWatcher Integration Tests', () => {
       await fs.rm(tempDir, { recursive: true, force: true });
       await fs.unlink(tempDbPath);
       console.log('✅ Test environment cleaned up');
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
       console.log('⚠️  Cleanup completed with warnings');
     }
