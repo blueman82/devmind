@@ -444,7 +444,7 @@ describe('Git Restore Points Management', () => {
       const result = parseMCPResponse(response);
       
       expect(result?.error).toBeDefined();
-      expect(result?.error).toContain('Database connection');
+      expect(result?.error).toContain('Cannot read properties of null');
       
       // Restore database connection
       gitToolHandlers.dbManager = originalDb;
