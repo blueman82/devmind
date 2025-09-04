@@ -717,23 +717,25 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const ciResults = [];
       
       for (const step of ciSteps) {
-        const ciRestore = await gitToolHandlers.handleCreateRestorePoint({
+        const ciRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
           project_path: projectRepoPath,
           label: `ci-${step.label}`,
           description: `CI pipeline - ${step.label} stage`,
           test_status: step.status,
           auto_generated: true
         });
+        const ciRestore = parseMCPResponse(ciRestoreResponse);
         
         expect(ciRestore.success).toBe(true);
         ciResults.push(ciRestore);
       }
       
       // Verify CI restore points are marked as auto-generated
-      const ciRestores = await gitToolHandlers.handleListRestorePoints({
+      const ciRestoresResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: projectRepoPath,
         include_auto_generated: true
       });
+      const ciRestores = parseMCPResponse(ciRestoresResponse);
       
       expect(ciRestores.success).toBe(true);
       
@@ -744,10 +746,11 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       expect(autoCiPoints.length).toBe(ciSteps.length);
       
       // Test excluding auto-generated points (for developer view)
-      const developerView = await gitToolHandlers.handleListRestorePoints({
+      const developerViewResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: projectRepoPath,
         include_auto_generated: false
       });
+      const developerView = parseMCPResponse(developerViewResponse);
       
       expect(developerView.success).toBe(true);
       
@@ -763,11 +766,12 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       console.log('🔄 Testing system recovery after database issues...');
       
       // Create initial state
-      const initialRestore = await gitToolHandlers.handleCreateRestorePoint({
+      const initialRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'before-db-issue',
         description: 'State before simulated database issue'
       });
+      const initialRestore = parseMCPResponse(initialRestoreResponse);
       
       expect(initialRestore.success).toBe(true);
       
@@ -776,11 +780,12 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       gitToolHandlers.dbManager = null;
       
       // Attempt operation during "outage"
-      const duringOutage = await gitToolHandlers.handleCreateRestorePoint({
+      const duringOutageResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'during-outage',
         description: 'Should fail during outage'
       });
+      const duringOutage = parseMCPResponse(duringOutageResponse);
       
       expect(duringOutage.success).toBe(false);
       
