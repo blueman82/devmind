@@ -31,7 +31,12 @@ describe('MCP Server Integration Tests', () => {
       // Capture stdout data
       let stderrData = '';
       let hasStarted = false;
-      const timeoutHandle = setTimeout(() => {\n        if (!hasStarted) {\n          mcpProcess.kill();\n          reject(new Error('MCP Server startup timeout'));\n        }\n      }, 8000);
+      const timeoutHandle = setTimeout(() => {
+        if (!hasStarted) {
+          mcpProcess.kill();
+          reject(new Error('MCP Server startup timeout'));
+        }
+      }, 8000);
 
       mcpProcess.stdout.on('data', (data) => {
         // Process stdout data
@@ -80,7 +85,12 @@ describe('MCP Server Integration Tests', () => {
 
     return new Promise((resolve, reject) => {
       let responseData = '';
-      const timeoutHandle = setTimeout(() => {\n        if (!hasStarted) {\n          mcpProcess.kill();\n          reject(new Error('MCP Server startup timeout'));\n        }\n      }, 8000);
+      const timeoutHandle = setTimeout(() => {
+        if (!hasStarted) {
+          mcpProcess.kill();
+          reject(new Error('MCP Server startup timeout'));
+        }
+      }, 8000);
 
       const dataHandler = (data) => {
         responseData += data.toString();
