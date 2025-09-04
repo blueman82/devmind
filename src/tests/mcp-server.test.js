@@ -28,13 +28,14 @@ describe('MCP Server Integration Tests', () => {
         env: { ...process.env, LOG_LEVEL: 'error' }
       });
 
-      let stdoutData = '';
+      // Capture stdout data
       let stderrData = '';
       let hasStarted = false;
-      const timeout = 5000;
+      let timeoutHandle;
 
       mcpProcess.stdout.on('data', (data) => {
-        stdoutData += data.toString();
+        // Process stdout data
+        data.toString();
       });
 
       mcpProcess.stderr.on('data', (data) => {
@@ -62,7 +63,7 @@ describe('MCP Server Integration Tests', () => {
       });
 
       // Set timeout for server startup
-      timeout = setTimeout(() => {
+      timeoutHandle = setTimeout(() => {
         if (!hasStarted) {
           mcpProcess.kill();
           reject(new Error('MCP Server startup timeout'));
@@ -85,7 +86,7 @@ describe('MCP Server Integration Tests', () => {
 
     return new Promise((resolve, reject) => {
       let responseData = '';
-      const timeout = 5000;
+      let timeoutHandle;
 
       const dataHandler = (data) => {
         responseData += data.toString();
@@ -123,7 +124,7 @@ describe('MCP Server Integration Tests', () => {
       mcpProcess.stdin.write(JSON.stringify(request) + '\n');
 
       // Set timeout
-      timeout = setTimeout(() => {
+      timeoutHandle = setTimeout(() => {
         mcpProcess.stdout.removeListener('data', dataHandler);
         reject(new Error('MCP Server list_tools request timeout'));
       }, 4000);
