@@ -458,7 +458,7 @@ class AIMemoryMCPServer {
             targetFile = { file, conversation };
             break;
           }
-        } catch (error) {
+        } catch {
           continue; // Skip invalid files
         }
       }
@@ -596,7 +596,7 @@ class AIMemoryMCPServer {
           }
           
           conversations.push(conversation);
-        } catch (error) {
+        } catch {
           continue; // Skip invalid files
         }
       }
