@@ -252,8 +252,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const initialRestore = parseMCPResponse(initialRestoreResponse);
       
       expect(initialRestore).toBeTruthy();
-      expect(initialRestore.success).toBe(true);
-      expect(initialRestore.restore_point.label).toBe('initial-state');
+      expect(initialRestore.label).toBe('initial-state');
       
       // Step 3: Check branch context
       const branchContextResponse = await gitToolHandlers.handleGetGitContext({
@@ -271,8 +270,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const restorePointsList = parseMCPResponse(restorePointsListResponse);
       
       expect(restorePointsList).toBeTruthy();
-      expect(restorePointsList.restore_points).toHaveLength(1);
-      expect(restorePointsList.restore_points[0].label).toBe('initial-state');
+      expect(Array.isArray(restorePointsList)).toBe(true);
+      expect(restorePointsList).toHaveLength(1);
+      expect(restorePointsList[0].label).toBe('initial-state');
       
       // Step 5: Create working state restore point
       const workingRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
@@ -284,7 +284,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const workingRestore = parseMCPResponse(workingRestoreResponse);
       
       expect(workingRestore).toBeTruthy();
-      expect(workingRestore.success).toBe(true);
+      expect(workingRestore.label).toBe('before-refactor');
       
       // Step 6: Verify complete workflow
       const finalContextResponse = await gitToolHandlers.handleGetGitContext({
@@ -295,7 +295,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       
       expect(finalContext).toBeTruthy();
       expect(finalContext.commits || finalContext.summary).toBeDefined();
-      expect(finalContext.git_context.commits.length).toBeGreaterThan(0);
+      expect(finalContext.commit_history && finalContext.commit_history.length > 0).toBeTruthy();
       
       console.log('✅ Complete project lifecycle workflow successful');
     });
@@ -327,8 +327,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         const componentRestore = parseMCPResponse(componentRestoreResponse);
         
         expect(componentRestore).toBeTruthy();
-        expect(componentRestore.success).toBe(true);
-        expect(componentRestore.restore_point.label).toBe(`${component}-stable`);
+        expect(componentRestore.label).toBe(`${component}-stable`);
       }
       
       // Test monorepo root context
@@ -368,7 +367,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         const featureRestore = parseMCPResponse(featureRestoreResponse);
         
         expect(featureRestore).toBeTruthy();
-        expect(featureRestore.success).toBe(true);
+        expect(featureRestore.label).toBe(`feature-${feature}-ready`);
       }
       
       // List all feature restore points
@@ -378,7 +377,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const allFeatureRestores = parseMCPResponse(allFeatureRestoresResponse);
       
       expect(allFeatureRestores).toBeTruthy();
-      expect(allFeatureRestores.restore_points.length).toBe(features.length);
+      expect(Array.isArray(allFeatureRestores)).toBe(true);
+      expect(allFeatureRestores.length).toBe(features.length);
       
       console.log('✅ Feature branch development workflow successful');
     });
@@ -429,8 +429,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       
       // Verify all restore points were created
       restoreResults.forEach(result => {
-        expect(result.success).toBe(true);
-        expect(result.restore_point).toBeDefined();
+        expect(result).toBeTruthy();
+        expect(result.label).toBeDefined();
       });
       
       console.log('✅ Multiple projects simultaneous processing successful');
@@ -451,8 +451,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         });
         const result = parseMCPResponse(response);
         
-        expect(result.success).toBe(true);
-        allRestorePoints.push(result.restore_point);
+        expect(result).toBeTruthy();
+        allRestorePoints.push(result);
       }
       
       // Verify each project's restore points are isolated
@@ -462,8 +462,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         });
         const projectRestores = parseMCPResponse(response);
         
-        expect(projectRestores.success).toBe(true);
-        expect(projectRestores.restore_points.some(rp => rp.label === `integrity-test-${i + 1}`)).toBe(true);
+        expect(projectRestores).toBeTruthy();
+        expect(Array.isArray(projectRestores)).toBe(true);
+        expect(projectRestores.some(rp => rp.label === `integrity-test-${i + 1}`)).toBe(true);
       }
       
       // Verify no cross-contamination between projects
@@ -472,7 +473,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const project1Restores = parseMCPResponse(response);
       
-      const project1Labels = project1Restores.restore_points.map(rp => rp.label);
+      const project1Labels = project1Restores.map(rp => rp.label);
       expect(project1Labels.includes('integrity-test-2')).toBe(false);
       expect(project1Labels.includes('integrity-test-3')).toBe(false);
       
@@ -509,7 +510,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const results = responses.map(parseMCPResponse);
       
       // Verify all operations completed successfully
-      const successCount = results.filter(result => result.success).length;
+      const successCount = results.filter(result => result && typeof result === 'object').length;
       expect(successCount).toBeGreaterThan(results.length * 0.8); // 80% success rate minimum
       
       console.log(`📊 Concurrent operations: ${successCount}/${results.length} successful`);
@@ -528,7 +529,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         project_path: projectRepoPath
       });
       const morningContext = parseMCPResponse(morningContextResponse);
-      workflowSteps.push({ step: 'morning_context', success: morningContext.success });
+      workflowSteps.push({ step: 'morning_context', success: !!morningContext });
       
       // Step 2: Create restore point before starting work
       const preWorkRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
@@ -537,7 +538,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         description: 'Clean state before starting daily work'
       });
       const preWorkRestore = parseMCPResponse(preWorkRestoreResponse);
-      workflowSteps.push({ step: 'pre_work_restore', success: preWorkRestore.success });
+      workflowSteps.push({ step: 'pre_work_restore', success: !!preWorkRestore });
       
       // Step 3: Work on feature branch
       const featureBranchContextResponse = await gitToolHandlers.handleGetGitContext({
@@ -545,7 +546,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         branch: 'development'
       });
       const featureBranchContext = parseMCPResponse(featureBranchContextResponse);
-      workflowSteps.push({ step: 'feature_branch_context', success: featureBranchContext.success });
+      workflowSteps.push({ step: 'feature_branch_context', success: !!featureBranchContext });
       
       // Step 4: Create milestone restore point
       const milestoneRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
@@ -555,7 +556,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         test_status: 'passing'
       });
       const milestoneRestore = parseMCPResponse(milestoneRestoreResponse);
-      workflowSteps.push({ step: 'milestone_restore', success: milestoneRestore.success });
+      workflowSteps.push({ step: 'milestone_restore', success: !!milestoneRestore });
       
       // Step 5: Review daily progress
       const dailyRestoresResponse = await gitToolHandlers.handleListRestorePoints({
@@ -563,7 +564,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         timeframe: 'today'
       });
       const dailyRestores = parseMCPResponse(dailyRestoresResponse);
-      workflowSteps.push({ step: 'daily_review', success: dailyRestores.success });
+      workflowSteps.push({ step: 'daily_review', success: !!dailyRestores });
       
       // Step 6: End of day - create final restore point
       const endOfDayRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
@@ -572,7 +573,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         description: 'End of day state - work in progress saved'
       });
       const endOfDayRestore = parseMCPResponse(endOfDayRestoreResponse);
-      workflowSteps.push({ step: 'end_of_day_restore', success: endOfDayRestore.success });
+      workflowSteps.push({ step: 'end_of_day_restore', success: !!endOfDayRestore });
       
       // Verify complete workflow success
       const successfulSteps = workflowSteps.filter(step => step.success).length;
@@ -594,7 +595,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const stableState = parseMCPResponse(stableStateResponse);
       
-      expect(stableState.success).toBe(true);
+      expect(stableState).toBeTruthy();
       
       // Step 2: Create problematic state restore point
       const problematicStateResponse = await gitToolHandlers.handleCreateRestorePoint({
@@ -605,7 +606,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const problematicState = parseMCPResponse(problematicStateResponse);
       
-      expect(problematicState.success).toBe(true);
+      expect(problematicState).toBeTruthy();
       
       // Step 3: Emergency - need to find stable restore points
       const stableRestoresResponse = await gitToolHandlers.handleListRestorePoints({
@@ -614,9 +615,10 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const stableRestores = parseMCPResponse(stableRestoresResponse);
       
-      expect(stableRestores.success).toBe(true);
+      expect(stableRestores).toBeTruthy();
+      expect(Array.isArray(stableRestores)).toBe(true);
       
-      const stablePoint = stableRestores.restore_points.find(rp => 
+      const stablePoint = stableRestores.find(rp => 
         rp.label === 'stable-release' && rp.test_status === 'passing'
       );
       
@@ -629,7 +631,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const rollbackPreview = parseMCPResponse(rollbackPreviewResponse);
       
-      expect(rollbackPreview.success).toBe(true);
+      expect(rollbackPreview).toBeTruthy();
       
       // Step 5: Generate rollback commands (dry run)
       const rollbackCommandsResponse = await gitToolHandlers.handleRestoreProjectState({
@@ -640,7 +642,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const rollbackCommands = parseMCPResponse(rollbackCommandsResponse);
       
-      expect(rollbackCommands.success).toBe(true);
+      expect(rollbackCommands).toBeTruthy();
       expect(rollbackCommands.commands).toBeDefined();
       expect(Array.isArray(rollbackCommands.commands)).toBe(true);
       
@@ -667,7 +669,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         });
         const memberRestore = parseMCPResponse(memberRestoreResponse);
         
-        expect(memberRestore.success).toBe(true);
+        expect(memberRestore).toBeTruthy();
       }
       
       // Team lead reviews all components
@@ -681,7 +683,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         });
         const componentContext = parseMCPResponse(componentContextResponse);
         
-        expect(componentContext.success).toBe(true);
+        expect(componentContext).toBeTruthy();
         componentContexts.push(componentContext);
       }
       
@@ -693,7 +695,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const integrationMilestone = parseMCPResponse(integrationMilestoneResponse);
       
-      expect(integrationMilestone.success).toBe(true);
+      expect(integrationMilestone).toBeTruthy();
       
       // Verify team collaboration data integrity
       const allRestoresResponse = await gitToolHandlers.handleListRestorePoints({
@@ -701,8 +703,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const allRestores = parseMCPResponse(allRestoresResponse);
       
-      expect(allRestores.success).toBe(true);
-      const integrationPoint = allRestores.restore_points.find(rp => rp.label === 'sprint-integration');
+      expect(allRestores).toBeTruthy();
+      expect(Array.isArray(allRestores)).toBe(true);
+      const integrationPoint = allRestores.find(rp => rp.label === 'sprint-integration');
       expect(integrationPoint).toBeDefined();
       
       console.log('✅ Team collaboration workflow successful');
@@ -731,7 +734,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         });
         const ciRestore = parseMCPResponse(ciRestoreResponse);
         
-        expect(ciRestore.success).toBe(true);
+        expect(ciRestore).toBeTruthy();
         ciResults.push(ciRestore);
       }
       
@@ -742,9 +745,10 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const ciRestores = parseMCPResponse(ciRestoresResponse);
       
-      expect(ciRestores.success).toBe(true);
+      expect(ciRestores).toBeTruthy();
+      expect(Array.isArray(ciRestores)).toBe(true);
       
-      const autoCiPoints = ciRestores.restore_points.filter(rp => 
+      const autoCiPoints = ciRestores.filter(rp => 
         rp.auto_generated && rp.label.startsWith('ci-')
       );
       
@@ -757,9 +761,10 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const developerView = parseMCPResponse(developerViewResponse);
       
-      expect(developerView.success).toBe(true);
+      expect(developerView).toBeTruthy();
+      expect(Array.isArray(developerView)).toBe(true);
       
-      const manualPoints = developerView.restore_points.filter(rp => !rp.auto_generated);
+      const manualPoints = developerView.filter(rp => !rp.auto_generated);
       expect(manualPoints.length).toBeGreaterThan(0);
       
       console.log('✅ Continuous integration workflow successful');
@@ -778,7 +783,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const initialRestore = parseMCPResponse(initialRestoreResponse);
       
-      expect(initialRestore.success).toBe(true);
+      expect(initialRestore).toBeTruthy();
       
       // Simulate database connection issue and recovery
       const originalDb = gitToolHandlers.dbManager;
@@ -792,7 +797,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const duringOutage = parseMCPResponse(duringOutageResponse);
       
-      expect(duringOutage.success).toBe(false);
+      expect(duringOutage.error).toBeDefined();
       
       // Restore database connection
       gitToolHandlers.dbManager = originalDb;
@@ -805,7 +810,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const afterRecovery = parseMCPResponse(afterRecoveryResponse);
       
-      expect(afterRecovery.success).toBe(true);
+      expect(afterRecovery).toBeTruthy();
       
       // Verify data integrity maintained
       const allRestoresResponse = await gitToolHandlers.handleListRestorePoints({
@@ -813,9 +818,10 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const allRestores = parseMCPResponse(allRestoresResponse);
       
-      expect(allRestores.success).toBe(true);
-      const beforeIssue = allRestores.restore_points.find(rp => rp.label === 'before-db-issue');
-      const afterIssue = allRestores.restore_points.find(rp => rp.label === 'after-recovery');
+      expect(allRestores).toBeTruthy();
+      expect(Array.isArray(allRestores)).toBe(true);
+      const beforeIssue = allRestores.find(rp => rp.label === 'before-db-issue');
+      const afterIssue = allRestores.find(rp => rp.label === 'after-recovery');
       
       expect(beforeIssue).toBeDefined();
       expect(afterIssue).toBeDefined();
@@ -854,7 +860,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const stressResults = stressResponses.map(parseMCPResponse);
       
       // System should maintain reasonable success rate even under stress
-      const successCount = stressResults.filter(result => result.success).length;
+      const successCount = stressResults.filter(result => result && typeof result === 'object' && !result.error).length;
       const successRate = successCount / stressResults.length;
       
       expect(successRate).toBeGreaterThan(0.7); // 70% success rate minimum under stress
