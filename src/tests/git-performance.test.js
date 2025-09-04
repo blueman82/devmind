@@ -151,7 +151,7 @@ describe('Git Performance Testing and Load Benchmarks', () => {
   }
 
   // Helper function to measure execution time
-  function measureTime(_operation) {
+  function measureTime() {
     const start = process.hrtime.bigint();
     return {
       end: () => {
