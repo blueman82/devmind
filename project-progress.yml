@@ -69,7 +69,7 @@ test_suite_recovery_2025_09_04_10_10:
       failing: 73
       success_rate: "64.4%"
       status: "Active Progress - Path validator fix successful (+2 tests)"
-    improvement: "+7.3%"
+    improvement: "+8.3%" # 64.4% - 56.1% baseline
     target:
       expected_passing: 170
       expected_failing: 35
