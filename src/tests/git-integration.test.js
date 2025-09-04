@@ -419,7 +419,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         })
       );
       
-      const restoreResults = await Promise.all(restorePromises);
+      const restoreResponses = await Promise.all(restorePromises);
+      const restoreResults = restoreResponses.map(parseMCPResponse);
       
       // Verify all restore points were created
       restoreResults.forEach(result => {
@@ -438,11 +439,12 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       
       // Create restore points for each project
       for (let i = 0; i < projects.length; i++) {
-        const result = await gitToolHandlers.handleCreateRestorePoint({
+        const response = await gitToolHandlers.handleCreateRestorePoint({
           project_path: projects[i],
           label: `integrity-test-${i + 1}`,
           description: `Data integrity test ${i + 1}`
         });
+        const result = parseMCPResponse(response);
         
         expect(result.success).toBe(true);
         allRestorePoints.push(result.restore_point);
@@ -450,18 +452,20 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       
       // Verify each project's restore points are isolated
       for (let i = 0; i < projects.length; i++) {
-        const projectRestores = await gitToolHandlers.handleListRestorePoints({
+        const response = await gitToolHandlers.handleListRestorePoints({
           project_path: projects[i]
         });
+        const projectRestores = parseMCPResponse(response);
         
         expect(projectRestores.success).toBe(true);
         expect(projectRestores.restore_points.some(rp => rp.label === `integrity-test-${i + 1}`)).toBe(true);
       }
       
       // Verify no cross-contamination between projects
-      const project1Restores = await gitToolHandlers.handleListRestorePoints({
+      const response = await gitToolHandlers.handleListRestorePoints({
         project_path: projects[0]
       });
+      const project1Restores = parseMCPResponse(response);
       
       const project1Labels = project1Restores.restore_points.map(rp => rp.label);
       expect(project1Labels.includes('integrity-test-2')).toBe(false);
@@ -496,7 +500,8 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         gitToolHandlers.handleListRestorePoints({ project_path: monorepoPath })
       ];
       
-      const results = await Promise.all(concurrentOps);
+      const responses = await Promise.all(concurrentOps);
+      const results = responses.map(parseMCPResponse);
       
       // Verify all operations completed successfully
       const successCount = results.filter(result => result.success).length;
