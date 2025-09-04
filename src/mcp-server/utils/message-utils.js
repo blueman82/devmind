@@ -79,7 +79,7 @@ export class MessageUtils {
       }
 
       // Merge priority messages with filtered results (remove duplicates)
-      const priorityIds = new Set(priorityMsgs.map((msg, i) => messages.indexOf(msg)));
+      const priorityIds = new Set(priorityMsgs.map((msg) => messages.indexOf(msg)));
       const filteredIds = new Set(filtered.map(msg => messages.indexOf(msg)));
       const combinedIds = new Set([...priorityIds, ...filteredIds]);
       
