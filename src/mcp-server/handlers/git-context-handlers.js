@@ -26,10 +26,14 @@ export class GitContextHandlers extends GitBaseHandler {
         include_commit_history = true,
         include_working_status = true,
         commit_limit = 20,
+        limit = commit_limit, // Support both limit and commit_limit parameters
         time_range = null,
         branch = null,
         subdirectory = null
       } = args;
+      
+      // Use limit if provided, otherwise use commit_limit
+      const effectiveLimit = args.limit !== undefined ? args.limit : commit_limit;
 
       const pathValidation = this.validateProjectPath(project_path);
       if (!pathValidation.isValid) {
