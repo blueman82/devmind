@@ -749,7 +749,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       expect(ciRestores).toBeTruthy();
       expect(Array.isArray(ciRestores)).toBe(true);
       
-      const autoCiPoints = ciRestores.filter(rp => 
+      const autoCiPoints = ciRestores.restore_points.filter(rp => 
         rp.auto_generated && rp.label.startsWith('ci-')
       );
       
