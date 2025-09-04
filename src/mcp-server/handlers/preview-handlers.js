@@ -22,7 +22,7 @@ export class PreviewHandlers extends GitBaseHandler {
       project_path, 
       restore_point_id,
       commit_hash,
-      include_file_contents = false,
+      include_file_contents: _include_file_contents = false,
       max_files = 100
     } = args;
 
