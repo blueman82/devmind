@@ -125,11 +125,7 @@ describe('MCP Server Integration Tests', () => {
       // Send request
       mcpProcess.stdin.write(JSON.stringify(request) + '\n');
 
-      // Set timeout
-      requestTimeoutHandle = setTimeout(() => {
-        mcpProcess.stdout.removeListener('data', dataHandler);
-        reject(new Error('MCP Server list_tools request timeout'));
-      }, 4000);
+      // Timeout already set above
     });
   });
 
