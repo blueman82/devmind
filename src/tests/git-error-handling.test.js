@@ -59,7 +59,7 @@ describe('Git Error Handling and Edge Cases', () => {
     originalValidate = pathValidator.validateProjectPath;
     pathValidator.validateProjectPath = (path) => {
       if (path && path.includes('error-handling-test')) {
-        return { isValid: true, sanitizedPath: path };
+        return { isValid: true, normalizedPath: path };
       }
       return originalValidate(path);
     };
