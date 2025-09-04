@@ -126,9 +126,7 @@ describe('Git Restore Points Management', () => {
         label: 'stable-v1',
         description: 'Stable version 1.0'
       });
-      console.log('🔍 DEBUG: Raw response:', JSON.stringify(response, null, 2));
       const result = parseMCPResponse(response);
-      console.log('🔍 DEBUG: Parsed result:', JSON.stringify(result, null, 2));
 
       expect(result).toBeDefined();
       expect(result?.error).toBeUndefined();
