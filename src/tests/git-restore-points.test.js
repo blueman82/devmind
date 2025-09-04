@@ -255,8 +255,9 @@ describe('Git Restore Points Management', () => {
         limit: 2
       });
 
-      expect(result.success).toBe(true);
-      expect(result.restore_points).toHaveLength(2);
+      expect(result.error).toBeUndefined();
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(2);
     });
 
     test('should exclude auto-generated restore points when requested', async () => {
