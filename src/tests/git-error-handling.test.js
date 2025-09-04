@@ -105,7 +105,6 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       expect(result.error).toBeDefined();
-      expect(result.error).toBeDefined();
       expect(result.error).toContain('Invalid project path');
       expect(result.error).toContain('does not exist');
     });
@@ -119,7 +118,6 @@ describe('Git Error Handling and Edge Cases', () => {
       ]);
 
       results.forEach(result => {
-        expect(result.error).toBeDefined();
         expect(result.error).toBeDefined();
         expect(result.error).toContain('project_path');
       });
@@ -139,7 +137,6 @@ describe('Git Error Handling and Edge Cases', () => {
         });
 
         expect(result.error).toBeDefined();
-        expect(result.error).toBeDefined();
       }
     });
 
@@ -156,7 +153,6 @@ describe('Git Error Handling and Edge Cases', () => {
           project_path: restrictedPath
         });
 
-        expect(result.error).toBeDefined();
         expect(result.error).toBeDefined();
         
         // Restore permissions for cleanup
@@ -175,7 +171,6 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       expect(result.error).toBeDefined();
-      expect(result.error).toBeDefined();
       expect(result.error).toContain('repository');
     });
 
@@ -188,7 +183,6 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       expect(result.error).toBeDefined();
-      expect(result.error).toBeDefined();
       expect(result.error).toContain('repository');
     });
 
@@ -200,7 +194,6 @@ describe('Git Error Handling and Edge Cases', () => {
         project_path: nonGitPath
       });
 
-      expect(result.error).toBeDefined();
       expect(result.error).toBeDefined();
     });
   });
@@ -234,7 +227,6 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       expect(result.error).toBeDefined();
-      expect(result.error).toBeDefined();
       expect(result.error).toContain('repository');
     });
   });
@@ -250,7 +242,6 @@ describe('Git Error Handling and Edge Cases', () => {
         label: 'db-error-test'
       });
 
-      expect(result.error).toBeDefined();
       expect(result.error).toBeDefined();
       expect(result.error).toContain('Database');
       
@@ -274,7 +265,6 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       expect(result.error).toBeDefined();
-      expect(result.error).toBeDefined();
       expect(result.error).toContain('already exists');
     });
 
@@ -286,7 +276,6 @@ describe('Git Error Handling and Edge Cases', () => {
         description: 'Transaction failure test'
       });
 
-      expect(result.error).toBeDefined();
       expect(result.error).toBeDefined();
     });
   });
@@ -304,7 +293,6 @@ describe('Git Error Handling and Edge Cases', () => {
         const result = await gitToolHandlers.handleCreateRestorePoint(params);
         
         expect(result.error).toBeDefined();
-        expect(result.error).toBeDefined();
       }
     });
 
@@ -320,7 +308,6 @@ describe('Git Error Handling and Edge Cases', () => {
         const result = await gitToolHandlers.handleListRestorePoints(params);
         
         expect(result.error).toBeDefined();
-        expect(result.error).toBeDefined();
       }
     });
 
@@ -335,7 +322,6 @@ describe('Git Error Handling and Edge Cases', () => {
       for (const params of incompleteParams) {
         const result = await gitToolHandlers.handleCreateRestorePoint(params);
         
-        expect(result.error).toBeDefined();
         expect(result.error).toBeDefined();
         expect(result.error).toContain('required');
       }
