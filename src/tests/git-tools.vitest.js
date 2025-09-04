@@ -478,10 +478,10 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
         
         if (response.success) {
           expect(response.success).toBe(true);
-          expect(response.restore_point.label).toBe('Vitest restore point');
-          expect(response.restore_point.description).toBe('Created by comprehensive Vitest suite');
-          expect(response.restore_point.test_status).toBe('passing');
-          expect(response.restore_point.auto_generated).toBe(false);
+          expect(response.label).toBe('Vitest restore point');
+          expect(response.description).toBe('Created by comprehensive Vitest suite');
+          expect(response.test_status).toBe('passing');
+          expect(response.auto_generated).toBe(false);
         } else {
           console.warn('⚠️ Create restore point failed:', response.error || response.message);
         }
@@ -530,7 +530,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
           const response = JSON.parse(result.content[0].text);
           
           if (response.success) {
-            expect(response.restore_point.test_status).toBe(status);
+            expect(response.test_status).toBe(status);
           }
         }
       } finally {
@@ -560,11 +560,10 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
         expect(result).toHaveProperty('content');
         const response = JSON.parse(result.content[0].text);
         
-        expect(response).toHaveProperty('restore_points');
-        expect(Array.isArray(response.restore_points)).toBe(true);
+        expect(Array.isArray(response)).toBe(true);
         
-        if (response.restore_points.length > 0) {
-          const point = response.restore_points.find(p => p.label === 'List test restore point');
+        if (response.length > 0) {
+          const point = response.find(p => p.label === 'List test restore point');
           if (point) {
             expect(point.description).toBe('For list testing');
           }
@@ -594,7 +593,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
         if (createResponse.success) {
           const previewResult = await gitToolHandlers.handlePreviewRestore({
             project_path: testRepoPath,
-            restore_point_id: createResponse.restore_point.id
+            restore_point_id: createResponse.id
           });
           
           expect(previewResult).toHaveProperty('content');
@@ -632,7 +631,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
         if (createResponse.success) {
           const restoreResult = await gitToolHandlers.handleRestoreProjectState({
             project_path: testRepoPath,
-            restore_point_id: createResponse.restore_point.id,
+            restore_point_id: createResponse.id,
             restore_method: 'safe',
             dry_run: true
           });
@@ -810,7 +809,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
           // Step 3: Preview restore (should show no changes since we're at the same commit)
           const previewResult = await gitToolHandlers.handlePreviewRestore({
             project_path: testRepoPath,
-            restore_point_id: createResponse.restore_point.id
+            restore_point_id: createResponse.id
           });
           
           // Parse and verify preview response
@@ -820,7 +819,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
           // Step 4: Dry run restore
           const restoreResult = await gitToolHandlers.handleRestoreProjectState({
             project_path: testRepoPath,
-            restore_point_id: createResponse.restore_point.id,
+            restore_point_id: createResponse.id,
             dry_run: true,
             restore_method: 'safe'
           });
@@ -835,7 +834,7 @@ describe('Git Tools - Vitest Comprehensive Suite', () => {
           });
           
           const listResponse = JSON.parse(listResult.content[0].text);
-          expect(listResponse.restore_points).toContain(
+          expect(listResponse).toContain(
             expect.objectContaining({
               label: 'Integration test checkpoint'
             })
