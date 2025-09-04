@@ -627,12 +627,13 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       expect(rollbackPreview.success).toBe(true);
       
       // Step 5: Generate rollback commands (dry run)
-      const rollbackCommands = await gitToolHandlers.handleRestoreProjectState({
+      const rollbackCommandsResponse = await gitToolHandlers.handleRestoreProjectState({
         project_path: projectRepoPath,
         restore_point_id: stablePoint.id,
         dry_run: true,
         restore_method: 'safe'
       });
+      const rollbackCommands = parseMCPResponse(rollbackCommandsResponse);
       
       expect(rollbackCommands.success).toBe(true);
       expect(rollbackCommands.commands).toBeDefined();
@@ -653,12 +654,13 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       
       // Each team member creates their own restore points
       for (const member of teamMembers) {
-        const memberRestore = await gitToolHandlers.handleCreateRestorePoint({
+        const memberRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
           project_path: join(monorepoPath, member.component),
           label: `${member.name}-feature-complete`,
           description: `${member.name}'s feature work completed in ${member.component}`,
           test_status: 'passing'
         });
+        const memberRestore = parseMCPResponse(memberRestoreResponse);
         
         expect(memberRestore.success).toBe(true);
       }
@@ -668,28 +670,31 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       const componentContexts = [];
       
       for (const component of allComponents) {
-        const componentContext = await gitToolHandlers.handleGetGitContext({
+        const componentContextResponse = await gitToolHandlers.handleGetGitContext({
           project_path: join(monorepoPath, component),
           subdirectory: component
         });
+        const componentContext = parseMCPResponse(componentContextResponse);
         
         expect(componentContext.success).toBe(true);
         componentContexts.push(componentContext);
       }
       
       // Create integration milestone
-      const integrationMilestone = await gitToolHandlers.handleCreateRestorePoint({
+      const integrationMilestoneResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: monorepoPath,
         label: 'sprint-integration',
         description: 'All team features integrated successfully'
       });
+      const integrationMilestone = parseMCPResponse(integrationMilestoneResponse);
       
       expect(integrationMilestone.success).toBe(true);
       
       // Verify team collaboration data integrity
-      const allRestores = await gitToolHandlers.handleListRestorePoints({
+      const allRestoresResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: monorepoPath
       });
+      const allRestores = parseMCPResponse(allRestoresResponse);
       
       expect(allRestores.success).toBe(true);
       const integrationPoint = allRestores.restore_points.find(rp => rp.label === 'sprint-integration');
