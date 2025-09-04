@@ -192,6 +192,7 @@ export class RestorePointHandlers extends GitBaseHandler {
           project_path: validatedProjectPath
         });
 
+        console.log('DEBUG: validatedProjectPath before discoverRepository:', validatedProjectPath, typeof validatedProjectPath);
         const discoveredRepo = await this.gitManager.discoverRepository(validatedProjectPath);
         if (!discoveredRepo) {
           return this.createSuccessResponse(JSON.stringify({
