@@ -222,7 +222,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         return { error: text.substring(7), success: false };
       }
       return JSON.parse(text);
-    } catch (e) {
+    } catch {
       return null;
     }
   };
