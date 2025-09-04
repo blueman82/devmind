@@ -145,7 +145,7 @@ export class SecureGitExecutor {
         cwd: workingDirectory,
         timeout: 5000 
       });
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -156,7 +156,7 @@ export class SecureGitExecutor {
         cwd: workingDirectory,
         timeout: 5000 
       }) || 'HEAD';
-    } catch (error) {
+    } catch {
       return 'HEAD';
     }
   }
