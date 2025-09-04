@@ -278,7 +278,7 @@ describe('Git Restore Points Management', () => {
       });
 
       expect(result.error).toBeUndefined();
-      expect(result.restore_points.some(rp => rp.auto_generated)).toBe(true);
+      expect(result.some(rp => rp.auto_generated)).toBe(true);
     });
 
     test('should handle timeframe filtering', async () => {
