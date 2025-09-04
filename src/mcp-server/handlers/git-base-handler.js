@@ -52,6 +52,8 @@ export class GitBaseHandler {
     }
 
     const pathValidation = pathValidator.validateProjectPath(projectPath);
+    console.log('DEBUG GitBaseHandler pathValidator result:', JSON.stringify(pathValidation, null, 2));
+    
     if (!pathValidation.isValid) {
       this.logger.error('Path validation failed', {
         originalPath: projectPath,
@@ -60,7 +62,9 @@ export class GitBaseHandler {
       return { isValid: false, error: `Invalid project path - ${pathValidation.error}` };
     }
 
-    return { isValid: true, normalizedPath: pathValidation.normalizedPath };
+    const result = { isValid: true, normalizedPath: pathValidation.normalizedPath };
+    console.log('DEBUG GitBaseHandler returning:', JSON.stringify(result, null, 2));
+    return result;
   }
 
   /**
