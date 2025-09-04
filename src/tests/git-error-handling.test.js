@@ -295,7 +295,7 @@ describe('Git Error Handling and Edge Cases', () => {
       const result = parseMCPResponse(response);
 
       expect(result?.error).toBeDefined();
-      expect(result?.error).toContain('already exists');
+      expect(result?.error).toContain('Duplicate label');
     });
 
     test('should handle database transaction failures', async () => {
