@@ -204,7 +204,7 @@ export default class GitManager {
         const latestCommitOutput = secureGitExecutor.getCommitHistory(workingDirectory, { limit: 1 });
         
         if (latestCommitOutput) {
-          const [hash, date, authorName, authorEmail, message] = latestCommitOutput.split('|');
+          const [hash, date, authorName, , message] = latestCommitOutput.split('|');
           repository.latestCommit = {
             hash,
             date: new Date(date),
