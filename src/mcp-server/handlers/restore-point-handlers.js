@@ -157,15 +157,18 @@ export class RestorePointHandlers extends GitBaseHandler {
     const { 
       project_path, 
       label, 
-      description = '', 
+      description = null, 
       auto_generated = false,
       test_status = 'unknown'
     } = args;
 
     try {
       // Validate required parameters
-      if (!project_path || !label) {
-        return this.createErrorResponse('project_path and label are required');
+      if (!project_path) {
+        return this.createErrorResponse('project_path is required');
+      }
+      if (!label) {
+        return this.createErrorResponse('label is required');
       }
 
       const pathValidation = this.validateProjectPath(project_path);
