@@ -480,7 +480,7 @@ export class ToolHandlers {
    * Find similar solutions tool handler - Uses SQLite FTS5 for better matching
    */
   async handleFindSimilarSolutions(args) {
-    const { problem_description, exclude_current_project: _exclude_current_project = true, confidence_threshold = 0.6 } = args;
+    const { problem_description, exclude_current_project = true, confidence_threshold = 0.6 } = args;
 
     try {
       await this.initializeDatabase();
