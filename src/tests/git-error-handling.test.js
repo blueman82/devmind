@@ -336,9 +336,10 @@ describe('Git Error Handling and Edge Cases', () => {
       ];
 
       for (const params of invalidParams) {
-        const result = await gitToolHandlers.handleListRestorePoints(params);
+        const response = await gitToolHandlers.handleListRestorePoints(params);
+        const result = parseMCPResponse(response);
         
-        expect(result.error).toBeDefined();
+        expect(result?.error).toBeDefined();
       }
     });
 
@@ -351,10 +352,11 @@ describe('Git Error Handling and Edge Cases', () => {
       ];
 
       for (const params of incompleteParams) {
-        const result = await gitToolHandlers.handleCreateRestorePoint(params);
+        const response = await gitToolHandlers.handleCreateRestorePoint(params);
+        const result = parseMCPResponse(response);
         
-        expect(result.error).toBeDefined();
-        expect(result.error).toContain('required');
+        expect(result?.error).toBeDefined();
+        expect(result?.error).toContain('required');
       }
     });
   });
@@ -362,15 +364,16 @@ describe('Git Error Handling and Edge Cases', () => {
   describe('Git Command Execution Errors', () => {
     test('should handle git command failures gracefully', async () => {
       // Test with corrupted repository that might cause git commands to fail
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: corruptedRepoPath
       });
+      const result = parseMCPResponse(response);
 
       // Should handle git command failures without crashing
-      if (result.error) {
-        expect(result.error).toBeDefined();
-        expect(result.error).not.toContain('undefined');
-        expect(result.error).not.toContain('null');
+      if (result?.error) {
+        expect(result?.error).toBeDefined();
+        expect(result?.error).not.toContain('undefined');
+        expect(result?.error).not.toContain('null');
       }
     });
 
@@ -379,17 +382,18 @@ describe('Git Error Handling and Edge Cases', () => {
       // For now, we'll test that the timeout mechanism exists and works
       
       const startTime = Date.now();
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: testRepoPath,
         limit: 1000 // Large number that might take time
       });
+      const result = parseMCPResponse(response);
       const endTime = Date.now();
 
       // Should complete in reasonable time (less than 30 seconds for test)
       expect(endTime - startTime).toBeLessThan(30000);
       
-      if (result.error) {
-        expect(result.error).toBeDefined();
+      if (result?.error) {
+        expect(result?.error).toBeDefined();
       } else {
         expect(result.project_path).toBeDefined();
         expect(result.repository).toBeDefined();
@@ -398,15 +402,16 @@ describe('Git Error Handling and Edge Cases', () => {
 
     test('should sanitize error messages for security', async () => {
       // Test with path that might reveal system information in error messages
-      const sensitivePathResult = await gitToolHandlers.handleGetGitContext({
+      const sensitivePathResponse = await gitToolHandlers.handleGetGitContext({
         project_path: '/etc/passwd/nonexistent'
       });
+      const sensitivePathResult = parseMCPResponse(sensitivePathResponse);
 
-      expect(sensitivePathResult.error).toBeDefined();
-      expect(sensitivePathResult.error).toBeDefined();
+      expect(sensitivePathResult?.error).toBeDefined();
+      expect(sensitivePathResult?.error).toBeDefined();
       // Error message should not contain sensitive system paths
-      expect(sensitivePathResult.error).not.toContain('/etc');
-      expect(sensitivePathResult.error).not.toContain('passwd');
+      expect(sensitivePathResult?.error).not.toContain('/etc');
+      expect(sensitivePathResult?.error).not.toContain('passwd');
     });
   });
 
@@ -420,15 +425,16 @@ describe('Git Error Handling and Edge Cases', () => {
         })
       );
 
-      const results = await Promise.all(concurrentOps);
+      const responses = await Promise.all(concurrentOps);
+      const results = responses.map(parseMCPResponse);
       
       // All should either succeed or fail gracefully (no crashes)
       results.forEach(result => {
         expect(result).toBeDefined();
-        if (result.error) {
-          expect(result.error).toBeDefined();
+        if (result?.error) {
+          expect(result?.error).toBeDefined();
         } else {
-          expect(result.label).toBeDefined();
+          expect(result?.label).toBeDefined();
         }
       });
     });
@@ -445,19 +451,22 @@ describe('Git Error Handling and Edge Cases', () => {
         label: 'concurrent-state-test'
       });
 
-      const [gitResult, restoreResult] = await Promise.all([
+      const [gitResponse, restoreResponse] = await Promise.all([
         gitContextPromise,
         restorePointPromise
       ]);
+      
+      const gitResult = parseMCPResponse(gitResponse);
+      const restoreResult = parseMCPResponse(restoreResponse);
 
       // Both operations should complete without crashing
       expect(gitResult).toBeDefined();
       expect(restoreResult).toBeDefined();
-      if (!gitResult.error) {
-        expect(gitResult.project_path).toBeDefined();
+      if (!gitResult?.error) {
+        expect(gitResult?.project_path).toBeDefined();
       }
-      if (!restoreResult.error) {
-        expect(restoreResult.label).toBeDefined();
+      if (!restoreResult?.error) {
+        expect(restoreResult?.label).toBeDefined();
       }
     });
   });
@@ -471,16 +480,17 @@ describe('Git Error Handling and Edge Cases', () => {
         execSync(`git commit -m "Commit ${i}"`, { cwd: testRepoPath });
       }
 
-      const result = await gitToolHandlers.handleGetGitContext({
+      const response = await gitToolHandlers.handleGetGitContext({
         project_path: testRepoPath,
         limit: 100 // Request many commits
       });
+      const result = parseMCPResponse(response);
 
       // Should handle large result sets without memory issues
-      if (result.error) {
-        expect(result.error).toBeDefined();
-        expect(result.error).not.toContain('heap');
-        expect(result.error).not.toContain('memory');
+      if (result?.error) {
+        expect(result?.error).toBeDefined();
+        expect(result?.error).not.toContain('heap');
+        expect(result?.error).not.toContain('memory');
       } else {
         expect(result.project_path).toBeDefined();
         expect(result.repository).toBeDefined();
@@ -500,16 +510,17 @@ describe('Git Error Handling and Edge Cases', () => {
         })
       );
 
-      const results = await Promise.all(manyRestorePoints);
+      const responses = await Promise.all(manyRestorePoints);
+      const results = responses.map(parseMCPResponse);
       
       // Should handle resource limits gracefully
       results.forEach(result => {
         expect(result).toBeDefined();
-        if (result.error) {
-          expect(result.error).toBeDefined();
-          expect(result.error).not.toContain('ENOSPC'); // Should handle disk space errors
+        if (result?.error) {
+          expect(result?.error).toBeDefined();
+          expect(result?.error).not.toContain('ENOSPC'); // Should handle disk space errors
         } else {
-          expect(result.label).toBeDefined();
+          expect(result?.label).toBeDefined();
         }
       });
     });
@@ -519,18 +530,19 @@ describe('Git Error Handling and Edge Cases', () => {
     test('should handle extremely long parameters', async () => {
       const veryLongString = 'a'.repeat(10000);
       
-      const result = await gitToolHandlers.handleCreateRestorePoint({
+      const response = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'edge-case-test',
         description: veryLongString
       });
+      const result = parseMCPResponse(response);
 
       // Should either accept long descriptions or reject gracefully
-      if (result.error) {
-        expect(result.error).toBeDefined();
-        expect(result.error).toContain('too long');
+      if (result?.error) {
+        expect(result?.error).toBeDefined();
+        expect(result?.error).toContain('too long');
       } else {
-        expect(result.label).toBeDefined();
+        expect(result?.label).toBeDefined();
       }
     });
 
