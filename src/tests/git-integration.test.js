@@ -59,7 +59,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       if (path && path.includes('integration-test')) {
         return { isValid: true, normalizedPath: path, originalPath: path };
       }
-      return originalValidate(path);
+      return originalValidate.call(pathValidator, path);
     };
     
     console.log('✅ Git Integration test environment ready');
