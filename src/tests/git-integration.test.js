@@ -561,11 +561,12 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       workflowSteps.push({ step: 'daily_review', success: dailyRestores.success });
       
       // Step 6: End of day - create final restore point
-      const endOfDayRestore = await gitToolHandlers.handleCreateRestorePoint({
+      const endOfDayRestoreResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'end-of-day',
         description: 'End of day state - work in progress saved'
       });
+      const endOfDayRestore = parseMCPResponse(endOfDayRestoreResponse);
       workflowSteps.push({ step: 'end_of_day_restore', success: endOfDayRestore.success });
       
       // Verify complete workflow success
@@ -580,30 +581,33 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       console.log('🔄 Testing emergency rollback scenario...');
       
       // Step 1: Create stable state restore point
-      const stableState = await gitToolHandlers.handleCreateRestorePoint({
+      const stableStateResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'stable-release',
         description: 'Stable release before risky changes',
         test_status: 'passing'
       });
+      const stableState = parseMCPResponse(stableStateResponse);
       
       expect(stableState.success).toBe(true);
       
       // Step 2: Create problematic state restore point
-      const problematicState = await gitToolHandlers.handleCreateRestorePoint({
+      const problematicStateResponse = await gitToolHandlers.handleCreateRestorePoint({
         project_path: projectRepoPath,
         label: 'risky-experiment',
         description: 'Experimental changes that might fail',
         test_status: 'failing'
       });
+      const problematicState = parseMCPResponse(problematicStateResponse);
       
       expect(problematicState.success).toBe(true);
       
       // Step 3: Emergency - need to find stable restore points
-      const stableRestores = await gitToolHandlers.handleListRestorePoints({
+      const stableRestoresResponse = await gitToolHandlers.handleListRestorePoints({
         project_path: projectRepoPath,
         limit: 10
       });
+      const stableRestores = parseMCPResponse(stableRestoresResponse);
       
       expect(stableRestores.success).toBe(true);
       
@@ -614,10 +618,11 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       expect(stablePoint).toBeDefined();
       
       // Step 4: Preview what rollback would change
-      const rollbackPreview = await gitToolHandlers.handlePreviewRestore({
+      const rollbackPreviewResponse = await gitToolHandlers.handlePreviewRestore({
         project_path: projectRepoPath,
         restore_point_id: stablePoint.id
       });
+      const rollbackPreview = parseMCPResponse(rollbackPreviewResponse);
       
       expect(rollbackPreview.success).toBe(true);
       
