@@ -232,7 +232,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       console.log('🔄 Testing complete project lifecycle workflow...');
       
       // Step 1: Initialize project context
-      const initialContext = await gitToolHandlers.handleGetGitContext({
+      const initialContextResponse = await gitToolHandlers.handleGetGitContext({
         project_path: projectRepoPath
       });
       
