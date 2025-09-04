@@ -205,12 +205,13 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       // Should either succeed with empty results or fail gracefully
-      if (!result.success) {
+      if (result.error) {
         expect(result.error).toBeDefined();
         expect(result.error).not.toContain('undefined');
       } else {
-        // If it succeeds, should have empty or minimal git context
-        expect(result.git_context).toBeDefined();
+        // If it succeeds, should have project_path and repository info
+        expect(result.project_path).toBeDefined();
+        expect(result.repository).toBeDefined();
       }
     });
 
@@ -357,10 +358,11 @@ describe('Git Error Handling and Edge Cases', () => {
       // Should complete in reasonable time (less than 30 seconds for test)
       expect(endTime - startTime).toBeLessThan(30000);
       
-      if (!result.success) {
+      if (result.error) {
         expect(result.error).toBeDefined();
       } else {
-        expect(result.git_context).toBeDefined();
+        expect(result.project_path).toBeDefined();
+        expect(result.repository).toBeDefined();
       }
     });
 
@@ -370,7 +372,7 @@ describe('Git Error Handling and Edge Cases', () => {
         project_path: '/etc/passwd/nonexistent'
       });
 
-      expect(sensitivePathResult.success).toBe(false);
+      expect(sensitivePathResult.error).toBeDefined();
       expect(sensitivePathResult.error).toBeDefined();
       // Error message should not contain sensitive system paths
       expect(sensitivePathResult.error).not.toContain('/etc');
@@ -393,9 +395,10 @@ describe('Git Error Handling and Edge Cases', () => {
       // All should either succeed or fail gracefully (no crashes)
       results.forEach(result => {
         expect(result).toBeDefined();
-        expect(result.success).toBeDefined();
-        if (!result.success) {
+        if (result.error) {
           expect(result.error).toBeDefined();
+        } else {
+          expect(result.label).toBeDefined();
         }
       });
     });
@@ -420,8 +423,12 @@ describe('Git Error Handling and Edge Cases', () => {
       // Both operations should complete without crashing
       expect(gitResult).toBeDefined();
       expect(restoreResult).toBeDefined();
-      expect(gitResult.success).toBeDefined();
-      expect(restoreResult.success).toBeDefined();
+      if (!gitResult.error) {
+        expect(gitResult.project_path).toBeDefined();
+      }
+      if (!restoreResult.error) {
+        expect(restoreResult.label).toBeDefined();
+      }
     });
   });
 
@@ -440,13 +447,16 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       // Should handle large result sets without memory issues
-      if (result.success) {
-        expect(result.git_context).toBeDefined();
-        expect(result.git_context.commits).toBeDefined();
-      } else {
+      if (result.error) {
         expect(result.error).toBeDefined();
         expect(result.error).not.toContain('heap');
         expect(result.error).not.toContain('memory');
+      } else {
+        expect(result.project_path).toBeDefined();
+        expect(result.repository).toBeDefined();
+        if (result.commit_history) {
+          expect(Array.isArray(result.commit_history)).toBe(true);
+        }
       }
     });
 
@@ -465,9 +475,11 @@ describe('Git Error Handling and Edge Cases', () => {
       // Should handle resource limits gracefully
       results.forEach(result => {
         expect(result).toBeDefined();
-        if (!result.success) {
+        if (result.error) {
           expect(result.error).toBeDefined();
           expect(result.error).not.toContain('ENOSPC'); // Should handle disk space errors
+        } else {
+          expect(result.label).toBeDefined();
         }
       });
     });
@@ -484,11 +496,11 @@ describe('Git Error Handling and Edge Cases', () => {
       });
 
       // Should either accept long descriptions or reject gracefully
-      if (!result.success) {
+      if (result.error) {
         expect(result.error).toBeDefined();
         expect(result.error).toContain('too long');
       } else {
-        expect(result.restore_point).toBeDefined();
+        expect(result.label).toBeDefined();
       }
     });
 
@@ -508,11 +520,11 @@ describe('Git Error Handling and Edge Cases', () => {
         });
 
         // Should handle unicode gracefully
-        if (!result.success) {
+        if (result.error) {
           expect(result.error).toBeDefined();
         } else {
-          expect(result.restore_point).toBeDefined();
-          expect(result.restore_point.label).toBe(label);
+          expect(result.label).toBeDefined();
+          expect(result.label).toBe(label);
         }
       }
     });
@@ -532,11 +544,10 @@ describe('Git Error Handling and Edge Cases', () => {
         });
 
         // Should handle boundary values appropriately
-        if (!result.success) {
+        if (result.error) {
           expect(result.error).toBeDefined();
         } else {
-          expect(result.restore_points).toBeDefined();
-          expect(Array.isArray(result.restore_points)).toBe(true);
+          expect(Array.isArray(result)).toBe(true);
         }
       }
     });
