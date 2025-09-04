@@ -242,27 +242,30 @@ describe('Git Restore Points Management', () => {
   describe('List Restore Points', () => {
     beforeEach(async () => {
       // Create test restore points
-      await gitToolHandlers.handleCreateRestorePoint({
+      const response1 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'v1.0.0',
         description: 'Release version 1.0.0',
         test_status: 'passing'
       });
+      parseMCPResponse(response1);
       
-      await gitToolHandlers.handleCreateRestorePoint({
+      const response2 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'before-refactor',
         description: 'Before major refactoring',
         test_status: 'unknown'
       });
+      parseMCPResponse(response2);
       
-      await gitToolHandlers.handleCreateRestorePoint({
+      const response3 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
         label: 'auto-backup',
         description: 'Automatic backup',
         test_status: 'failing',
         auto_generated: true
       });
+      parseMCPResponse(response3);
     });
 
     test('should list all restore points for project', async () => {
