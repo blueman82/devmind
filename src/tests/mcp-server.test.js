@@ -28,13 +28,13 @@ describe('MCP Server Integration Tests', () => {
         env: { ...process.env, LOG_LEVEL: 'error' }
       });
 
-      let stdoutData = '';
+      let _stdoutData = '';
       let stderrData = '';
       let hasStarted = false;
       let timeout;
 
       mcpProcess.stdout.on('data', (data) => {
-        stdoutData += data.toString();
+        _stdoutData += data.toString();
       });
 
       mcpProcess.stderr.on('data', (data) => {
