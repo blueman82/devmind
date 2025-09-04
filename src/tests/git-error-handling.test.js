@@ -312,19 +312,19 @@ describe('Git Error Handling and Edge Cases', () => {
   });
 
   describe('Parameter Validation Error Handling', () => {
-    test('should handle edge case parameters accepted by handlers', async () => {
-      const edgeCaseParams = [
-        { project_path: testRepoPath, label: '' }, // Empty label - actually accepted by handler
-        { project_path: testRepoPath, label: '   ' }, // Whitespace only - actually accepted by handler  
+    test('should correctly reject invalid parameters', async () => {
+      const invalidParams = [
+        { project_path: testRepoPath, label: '' }, // Empty label - correctly rejected
+        { project_path: testRepoPath, label: '   ' }, // Whitespace only - correctly rejected  
       ];
 
-      for (const params of edgeCaseParams) {
+      for (const params of invalidParams) {
         const response = await gitToolHandlers.handleCreateRestorePoint(params);
         const result = parseMCPResponse(response);
         
-        // Based on logs, handlers accept these parameters and create restore points successfully
-        expect(result?.error).toBeUndefined();
-        expect(result?.restore_point?.label).toBeDefined();
+        // Handlers correctly reject empty/whitespace labels  
+        expect(result?.error).toBeDefined();
+        expect(result?.error).toContain('required');
       }
     });
 
