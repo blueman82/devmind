@@ -546,11 +546,19 @@ export class GitToolHandlers {
 
     try {
       // Validate required parameters
-      if (!project_path || !label) {
+      if (!project_path) {
         return {
           content: [{
             type: 'text',
-            text: 'Error: project_path and label are required'
+            text: 'Error: project_path is required'
+          }]
+        };
+      }
+      if (!label) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Error: label is required'
           }]
         };
       }
