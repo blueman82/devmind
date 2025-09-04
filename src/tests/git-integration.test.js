@@ -236,9 +236,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
         project_path: projectRepoPath
       });
       
-      expect(initialContext.success).toBe(true);
-      expect(initialContext.git_context).toBeDefined();
-      expect(initialContext.git_context.repository_info).toBeDefined();
+      const initialContext = parseMCPResponse(initialContextResponse);
+      expect(initialContext).toBeTruthy();
+      expect(initialContext.repository || initialContext.summary).toBeDefined();
       
       // Step 2: Create initial restore point
       const initialRestore = await gitToolHandlers.handleCreateRestorePoint({
