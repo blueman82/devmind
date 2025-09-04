@@ -32,7 +32,8 @@ export class PathValidator {
         /^\/home\/[^/]+\/[^/]/,               // Linux user directories  
         /^[A-Za-z]:\\Users\\[^\\]+\\[^\\]/,   // Windows user directories
         /^\/tmp\/[^/]/,                       // Temporary directories
-        /^\/var\/tmp\/[^/]/                   // System temp directories
+        /^\/var\/tmp\/[^/]/,                  // System temp directories
+        /^\/var\/folders\/[^/]+\/[^/]+\/T/    // macOS system temp directories (tmpdir)
       ];
 
       const isAllowedPath = allowedPatterns.some(pattern => pattern.test(normalizedPath));
