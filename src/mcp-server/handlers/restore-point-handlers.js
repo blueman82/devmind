@@ -174,9 +174,9 @@ export class RestorePointHandlers extends GitBaseHandler {
         return this.createErrorResponse('label is required');
       }
       
-      // Validate label format - reject long labels, spaces, and special characters
-      // eslint-disable-next-line no-control-regex
-      if (label.length > 255 || /[<>:"/\\|?*\x00-\x1f !@#$%^&*()+={}\]|;':".,<>?]/.test(label)) {
+      // Validate label format - only reject very long labels and dangerous special chars
+      // eslint-disable-next-line no-control-regex  
+      if (label.length > 255 || /[!@#$%^&*()+={}\]|;:".,<>?]/.test(label)) {
         return this.createErrorResponse('label is required');
       }
 
