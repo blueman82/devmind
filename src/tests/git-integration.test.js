@@ -725,6 +725,15 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
     test('should handle continuous integration workflow', async () => {
       console.log('🔄 Testing continuous integration workflow...');
       
+      // Create initial manual restore point before CI workflow
+      const manualBaselineResponse = await gitToolHandlers.handleCreateRestorePoint({
+        project_path: projectRepoPath,
+        label: 'pre-ci-baseline',
+        description: 'Manual baseline before CI workflow'
+      });
+      const manualBaseline = parseMCPResponse(manualBaselineResponse);
+      expect(manualBaseline).toBeTruthy();
+      
       const ciSteps = [
         { label: 'pre-build', status: 'unknown' },
         { label: 'build-complete', status: 'passing' },
