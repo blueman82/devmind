@@ -643,6 +643,9 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       });
       const rollbackCommands = parseMCPResponse(rollbackCommandsResponse);
       
+      console.log('🔍 DEBUG rollbackCommandsResponse:', JSON.stringify(rollbackCommandsResponse, null, 2));
+      console.log('🔍 DEBUG rollbackCommands:', JSON.stringify(rollbackCommands, null, 2));
+      
       expect(rollbackCommands).toBeTruthy();
       expect(rollbackCommands.restoration_commands).toBeDefined();
       expect(Array.isArray(rollbackCommands.restoration_commands)).toBe(true);
