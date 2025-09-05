@@ -171,8 +171,8 @@ export class RestorePointHandlers extends GitBaseHandler {
         return this.createErrorResponse('label is required');
       }
       
-      // Validate label format
-      if (label.includes(' ') || !/^[a-zA-Z0-9_-]+$/.test(label) || label.length > 255) {
+      // Validate label format - only reject very long labels and special chars that could break things
+      if (label.length > 255 || /[<>:"/\\|?*\x00-\x1f]/.test(label)) {
         return this.createErrorResponse('label is required');
       }
 
