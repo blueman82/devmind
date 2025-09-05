@@ -53,13 +53,14 @@ describe('Git Tools Tests', () => {
   });
 
   test('Database and GitSchema initialize', async () => {
-    // Initialize DatabaseManager first (creates main tables and git schema)
+    // Initialize DatabaseManager first (creates main tables)
     dbManager = new DatabaseManager(tempDbPath);
     await dbManager.initialize();
     
-    // Get the db instance and git schema that were already initialized
+    // Now get the db instance and initialize git schema
     db = dbManager.db;
-    gitSchema = dbManager.gitSchema;
+    gitSchema = new GitSchema(db);
+    await gitSchema.initialize();
     
     // Check tables exist
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
