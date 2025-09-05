@@ -485,7 +485,7 @@ describe('Git Tools Tests', () => {
       
       const noDescResponse = JSON.parse(noDescResult.content[0].text);
       if (noDescResponse.success) {
-        expect(noDescResponse.restore_point.description).toBe(''); // Should default to empty string when description omitted
+        expect(noDescResponse.restore_point.description).toBeNull(); // Should default to null when description omitted
         console.log('✅ Omitted description handled correctly');
       }
       
