@@ -80,6 +80,7 @@ class ShadowBranchManager {
                 this.logger.warn('Repository in detached HEAD state', { repoPath });
                 return null;
             }
+            this.logger.warn('Failed to get current branch:', error);
             throw error;
         }
     }
