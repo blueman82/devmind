@@ -157,10 +157,13 @@ export class RestorePointHandlers extends GitBaseHandler {
     const { 
       project_path, 
       label, 
-      description = null, 
+      description, 
       auto_generated = false,
       test_status = 'unknown'
     } = args;
+    
+    // Handle description properly - preserve empty string if explicitly passed, default to null if omitted
+    const finalDescription = description !== undefined ? description : null;
 
     try {
       // Validate required parameters
