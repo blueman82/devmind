@@ -63,8 +63,8 @@ describe('FileWatcher Integration Tests', () => {
     await fs.writeFile(conversationFile, testConversation);
 
     // Force manual processing if FileWatcher has a method for it
-    if (typeof fileWatcher.processFile === 'function') {
-      await fileWatcher.processFile(conversationFile);
+    if (typeof fileWatcher.indexFile === 'function') {
+      await fileWatcher.indexFile(conversationFile);
     } else {
       // Wait for FileWatcher to detect and process the file
       await new Promise(resolve => setTimeout(resolve, 2000));
