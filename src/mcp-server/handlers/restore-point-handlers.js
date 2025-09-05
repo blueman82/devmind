@@ -272,7 +272,7 @@ export class RestorePointHandlers extends GitBaseHandler {
         repository.id,
         currentCommit,
         label,
-        description,
+        finalDescription,
         auto_generated ? 1 : 0,
         test_status
       );
