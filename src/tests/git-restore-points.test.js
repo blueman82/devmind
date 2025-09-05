@@ -466,7 +466,7 @@ describe('Git Restore Points Management', () => {
         const result = parseMCPResponse(response);
         
         expect(result?.error).toBeDefined();
-        expect(result?.error).toContain('Invalid label');
+        expect(result?.error).toContain('label is required');
       }
     });
 
