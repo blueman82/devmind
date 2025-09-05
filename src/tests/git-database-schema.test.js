@@ -18,7 +18,8 @@ describe('Git Database Schema Operations', () => {
 
   beforeEach(async () => {
     // Create fresh database for each test
-    dbManager = new DatabaseManager(tempDbPath);
+    const uniqueDbPath = join(tmpdir(), `git-schema-test-${Date.now()}-${Math.random()}.db`);
+    dbManager = new DatabaseManager(uniqueDbPath);
     await dbManager.initialize();
     
     db = dbManager.db;
