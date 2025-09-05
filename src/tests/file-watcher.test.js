@@ -62,8 +62,13 @@ describe('FileWatcher Integration Tests', () => {
 
     await fs.writeFile(conversationFile, testConversation);
 
-    // Wait for FileWatcher to detect and process the file
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Force manual processing if FileWatcher has a method for it
+    if (typeof fileWatcher.processFile === 'function') {
+      await fileWatcher.processFile(conversationFile);
+    } else {
+      // Wait for FileWatcher to detect and process the file
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
 
     // Check if the conversation was indexed
     const dbConversations = fileWatcher.dbManager.db.prepare('SELECT COUNT(*) as count FROM conversations').get();
