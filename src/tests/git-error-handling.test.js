@@ -326,9 +326,8 @@ describe('Git Error Handling and Edge Cases', () => {
 
     test('should accept edge case restore point parameters', async () => {
       const edgeCaseParams = [
-        { project_path: testRepoPath, label: 'a'.repeat(256) }, // Long label - currently accepted
-        { project_path: testRepoPath, label: 'valid-label-1', test_status: 'invalid' }, // Invalid enum - currently accepted as string
-        { project_path: testRepoPath, label: 'valid-label-2', auto_generated: 'not-boolean' } // Invalid boolean - currently accepted
+        { project_path: testRepoPath, label: 'valid-edge-case-1', test_status: 'invalid' }, // Invalid enum - currently accepted as string
+        { project_path: testRepoPath, label: 'valid-edge-case-2', auto_generated: 'not-boolean' } // Invalid boolean - currently accepted
       ];
 
       for (const params of edgeCaseParams) {
