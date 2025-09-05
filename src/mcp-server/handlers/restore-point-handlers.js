@@ -170,6 +170,11 @@ export class RestorePointHandlers extends GitBaseHandler {
       if (!label || !label.trim()) {
         return this.createErrorResponse('label is required');
       }
+      
+      // Validate label format
+      if (label.includes(' ') || !/^[a-zA-Z0-9_-]+$/.test(label) || label.length > 255) {
+        return this.createErrorResponse('label is required');
+      }
 
       const pathValidation = this.validateProjectPath(project_path);
       if (!pathValidation.isValid) {
