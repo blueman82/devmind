@@ -820,7 +820,7 @@ describe('Git Integration and End-to-End Workflow Testing', () => {
       expect(duringOutage.error).toBeDefined();
       
       // Restore database connection
-      gitToolHandlers.dbManager = originalDb;
+      gitToolHandlers.restorePointHandlers.dbManager = originalDb;
       
       // Verify system recovery
       const afterRecoveryResponse = await gitToolHandlers.handleCreateRestorePoint({
