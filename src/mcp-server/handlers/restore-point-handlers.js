@@ -167,7 +167,7 @@ export class RestorePointHandlers extends GitBaseHandler {
       if (!project_path) {
         return this.createErrorResponse('project_path is required');
       }
-      if (!label) {
+      if (!label || !label.trim()) {
         return this.createErrorResponse('label is required');
       }
 
