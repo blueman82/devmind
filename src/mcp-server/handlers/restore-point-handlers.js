@@ -175,7 +175,6 @@ export class RestorePointHandlers extends GitBaseHandler {
       }
       
       // Validate label format - only reject very long labels and dangerous special chars
-      // eslint-disable-next-line no-control-regex  
       if (label.length > 255 || /[!@#$%^&*()+={}\]|;:".,<>?]/.test(label)) {
         return this.createErrorResponse('label is required');
       }
