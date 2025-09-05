@@ -447,7 +447,7 @@ describe('Git Restore Points Management', () => {
       expect(result?.error).toContain('Cannot read properties of null');
       
       // Restore database connection
-      gitToolHandlers.dbManager = originalDb;
+      gitToolHandlers.restorePointHandlers.dbManager = originalDb;
     });
 
     test('should validate restore point label format', async () => {
