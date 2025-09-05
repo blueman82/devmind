@@ -162,8 +162,8 @@ export class RestorePointHandlers extends GitBaseHandler {
       test_status = 'unknown'
     } = args;
     
-    // Handle description properly - preserve empty string if explicitly passed, default to empty string if omitted
-    const finalDescription = description !== undefined ? description : '';
+    // Handle description properly - preserve empty string if explicitly passed, default to null if omitted
+    const finalDescription = description !== undefined ? description : null;
 
     try {
       // Validate required parameters
