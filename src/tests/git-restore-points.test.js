@@ -249,7 +249,11 @@ describe('Git Restore Points Management', () => {
         description: 'Release version 1.0.0',
         test_status: 'passing'
       });
-      parseMCPResponse(response1);
+      const result1 = parseMCPResponse(response1);
+      if (result1?.error) {
+        console.log('❌ Failed to create v1.0.0 restore point:', result1.error);
+        throw new Error(`Failed to create v1.0.0 restore point: ${result1.error}`);
+      }
       
       const response2 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
@@ -257,7 +261,11 @@ describe('Git Restore Points Management', () => {
         description: 'Before major refactoring',
         test_status: 'unknown'
       });
-      parseMCPResponse(response2);
+      const result2 = parseMCPResponse(response2);
+      if (result2?.error) {
+        console.log('❌ Failed to create before-refactor restore point:', result2.error);
+        throw new Error(`Failed to create before-refactor restore point: ${result2.error}`);
+      }
       
       const response3 = await gitToolHandlers.handleCreateRestorePoint({
         project_path: testRepoPath,
@@ -266,7 +274,11 @@ describe('Git Restore Points Management', () => {
         test_status: 'failing',
         auto_generated: true
       });
-      parseMCPResponse(response3);
+      const result3 = parseMCPResponse(response3);
+      if (result3?.error) {
+        console.log('❌ Failed to create auto-backup restore point:', result3.error);
+        throw new Error(`Failed to create auto-backup restore point: ${result3.error}`);
+      }
     });
 
     test('should list all restore points for project', async () => {
