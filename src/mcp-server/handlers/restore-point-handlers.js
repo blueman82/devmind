@@ -157,7 +157,7 @@ export class RestorePointHandlers extends GitBaseHandler {
     const { 
       project_path, 
       label, 
-      description = '', 
+      description = null, 
       auto_generated = false,
       test_status = 'unknown'
     } = args;
